@@ -2,8 +2,15 @@
 <html lang="hu">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>GitLife</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#16232e">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ReLife">
+<title>ReLife</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
@@ -20,15 +27,14 @@
   </header>
   <section id="bars"></section>
   <main id="view"></main>
-  <footer>
-    <nav id="tabs">
-      <button data-t="log">Napló</button>
-      <button data-t="act">Teendők</button>
-      <button data-t="rel">Emberek</button>
-      <button data-t="job">Munka</button>
-    </nav>
-    <button id="up">+1 év</button>
+  <footer id="dock">
+    <button data-s="job"><i>💼</i><span>Munka</span></button>
+    <button data-s="assets"><i>🏠</i><span>Vagyon</span></button>
+    <button id="up"><b>+1</b><span>év</span></button>
+    <button data-s="rel"><i>👥</i><span>Emberek</span></button>
+    <button data-s="act"><i>🎯</i><span>Teendők</span></button>
   </footer>
+  <div id="sheet" class="ov sheet" hidden><div class="panel"><div class="grab"><b id="stt"></b><button id="cls" aria-label="Bezár">✕</button></div><div id="sbody"></div></div></div>
   <div id="modal" class="ov" hidden><div class="box"><h2 id="mt"></h2><p id="md"></p><div id="mb"></div></div></div>
   <div id="end" class="ov" hidden><div class="box"><h2>Vége az életednek</h2><p id="es"></p><button id="again">Új élet kezdése</button></div></div>
 </div>
