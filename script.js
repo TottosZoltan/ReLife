@@ -15,7 +15,7 @@ const exl = role => p.rel.filter(r => r.alive && r.role == role && r.age >= 18);
 const mkNpc = o => { const g = P(['f', 'm']); return { n: `${P(SN)} ${P(g == 'f' ? NF : NM)}`, role: o.role, age: o.a ? R(o.a[0], o.a[1]) : Math.max(3, p.age + R(o.r[0], o.r[1])), bond: 40, alive: true }; };
 const NF = ['Anna', 'Hanna', 'Lili', 'Zsófia', 'Emma', 'Nóra', 'Boglárka', 'Dóra', 'Réka', 'Vivien', 'Luca', 'Eszter', 'Panna', 'Kinga', 'Fanni', 'Bianka'];
 const NM = ['Bence', 'Máté', 'Levente', 'Dániel', 'Marcell', 'Ádám', 'Zalán', 'Patrik', 'Balázs', 'Gergő', 'Olivér', 'Kristóf', 'Milán', 'Tamás', 'Noel', 'Barnabás'];
-const SN = ['Kovács', 'Tóth', 'Szabó', 'Németh', 'Farkas', 'Horváth', 'Varga', 'Kiss', 'Töttös', 'Molnár', 'Balogh', 'Papp', 'Takács', 'Juhász', 'Lakatos', 'Mészáros', 'Simon'];
+const SN = ['Kovács', 'Tóth', 'Szabó', 'Németh', 'Farkas', 'Horváth', 'Varga', 'Kiss', 'Molnár', 'Balogh', 'Papp', 'Takács', 'Juhász', 'Lakatos', 'Mészáros', 'Simon'];
 const ST = { hap: ['😊', ['Boldog', 'Happy']], hea: ['❤️', ['Egészség', 'Health']], sma: ['🧠', ['Okos', 'Smart']], loo: ['✨', ['Kinézet', 'Looks']] };
 const fmt = n => { const a = Math.abs(n), en = LANG == 'en'; return (n < 0 ? '−' : '') + (a >= 1e6 ? (a / 1e6).toFixed(1).replace('.', en ? '.' : ',') + ' M Ft' : Math.round(a / 1e3) + (en ? ' k Ft' : ' e Ft')); };
 const EDU = [['Általános', 'Primary'], ['Érettségi', 'High school'], ['Diploma', 'Degree']];
@@ -150,7 +150,6 @@ const RN = [
   [12, 25, 'Nagyon pattanásos lett az arcod.', { loo: -10 }],
   [14, 80, 'Találtál az utcán 10 000 Ft-ot!', { money: 1e4 }],
   [18, 80, 'Elkaptad a súlyos influenzát.', { hea: -15 }],
-  [10, 100, 'Ettél egy nagyon finom édesburgonyás csirkét DM Pestóval.', { hap: 12 }],
   [40, 90, 'Fájni kezdett a hátad a sok üléstől.', { hea: -10 }],
   [5, 16, 'Nyertél a sulis versenyen!', { hap: 10, sma: 3 }],
   [16, 60, 'Fodrásznál jártál, jól sikerült a hajad.', { loo: 6, hap: 4, money: -15000 }],
@@ -183,6 +182,7 @@ function newLife(o = {}) {
   p = { g, skin, trait, name: `${sn} ${fn}`, age: 0, money: 0, hap: R(75, 95), hea: R(80, 100), sma: R(25, 75), loo: R(20, 85),
     edu: 0, uni: false, job: null, pay: 0, yrs: 0, pension: 0, fam: [1, 2, 3].includes(+o.fam) ? +o.fam : R(1, 3), dead: false, done: {}, logs: [], rel: [], assets: [], crim: 0, prison: 0, sick: null, city };
   p[gk] = cl(p[gk] + 15);
+  p.look = { g, sk: skin, hs: pk(o.hs, () => P(g == 'f' ? [1, 2, 0, 4] : [0, 3, 4, 0])), hc: pk(o.hc, () => R(0, 4)), oc: pk(o.oc, () => R(0, 7)) };
   const m = { ...person('Anya', R(22, 38), R(60, 90), 'f'), par: 1 }, f = { ...person('Apa', R(23, 42), R(55, 90), 'm'), par: 1 };
   m.n = `${sn} ${P(NF)}`; f.n = `${sn} ${P(NM)}`;
   p.rel.push(m, f);
@@ -386,7 +386,8 @@ function panel(t) {
       if (r.role == 'Párod' && a >= 18) b += `<button class="alt" ${p.done['p' + i] ? 'disabled' : ''} onclick="propose(${i})">Házassági ajánlat</button>`;
       if (r.role == 'Házastárs' && a <= 45) b += `<button class="alt" ${p.done['b' + i] ? 'disabled' : ''} onclick="baby(${i})">Gyerek vállalása</button>`;
       if (pr) b += `<button class="alt" onclick="split(${i})">Szakítás</button>`;
-      return `<div class="card"><div class="top"><b>${dn(r.n)}</b><small>${rl(r.role)}, ${r.age}${T([' éves', ' y/o'])}</small></div><div class="tr"><i style="width:${r.bond}%"></i></div><div class="btns">${b}</div></div>`;
+      const ib = RI.filter(x => a >= (x.m || 0) && (!x.role || x.role == r.role)).map(x => `<button class="alt" ${p.done['i' + x.k + i] ? 'disabled' : ''} onclick="rint(${i},'${x.k}')">${T(x.l)}</button>`).join('');
+      return `<div class="card"><div class="rwrap"><div class="rav">${avSvg(lk(r), r.age)}</div><div class="rbody"><div class="top"><b>${dn(r.n)}</b><small>${rl(r.role)}, ${r.age}${T([' éves', ' y/o'])}</small></div><div class="tr"><i style="width:${r.bond}%"></i></div><small class="dsc">${desc(lk(r))}</small><div class="btns">${b}${ib}</div></div></div></div>`;
     }).join('') || '<p class="empty">Nincs senki körülötted.</p>';
   }
   let h = row('Végzettség', T(EDU[p.edu]) + (p.uni ? ' (egyetemista)' : ''), '') + (p.crim ? row('Büntetett előélet', p.crim + ' ügy', '') : '');
@@ -423,6 +424,41 @@ function confetti(n = 70) {
 
 // ----- megjelenítés -----
 const SKIN = ['', '\u{1F3FB}', '\u{1F3FC}', '\u{1F3FD}', '\u{1F3FE}', '\u{1F3FF}'], SKINC = ['', '#f8dcc6', '#e9bd96', '#c98f62', '#9a6240', '#5e3a24'];
+
+const HC = ['#24180f', '#6b4226', '#e0b24a', '#b5381f', '#8a8f9a', '#d96a9f'], OC = ['#e4572e', '#1f8a83', '#3a6fd8', '#f0b429', '#7a5cc7', '#3b3b46', '#e86a9a', '#4a9d4a'], SW = { skin: SKINC, hc: HC, oc: OC };
+const HSN = [['rövid', 'short'], ['hosszú', 'long'], ['feltűzött', 'tied-up'], ['nagyon rövid', 'buzzed'], ['göndör', 'curly']];
+const HCN = [['fekete', 'black'], ['barna', 'brown'], ['szőke', 'blond'], ['vörös', 'red'], ['ősz', 'gray'], ['rózsaszín', 'pink']];
+const OCN = [['piros', 'red'], ['kékeszöld', 'teal'], ['kék', 'blue'], ['sárga', 'yellow'], ['lila', 'purple'], ['sötét', 'dark'], ['rózsaszín', 'pink'], ['zöld', 'green']];
+const pk = (v, f) => v != null && v !== 'r' ? +v : f();
+const mkLook = (g, sk) => ({ g, sk: sk || R(1, 5), hs: P(g == 'f' ? [1, 2, 0, 4] : [0, 3, 4, 0]), hc: R(0, 4), oc: R(0, 7) });
+const lk = r => r.look || (r.look = mkLook(NF.includes(r.n.split(' ')[1]) || r.role == 'Anya' ? 'f' : 'm'));
+const desc = l => T([`${T(HCN[l.hc])} ${T(HSN[l.hs])} haj, ${T(OCN[l.oc])} felső`, `${T(HCN[l.hc])} ${T(HSN[l.hs])} hair, ${T(OCN[l.oc])} top`]);
+function avSvg(l, a, dead) {
+  if (dead) return '🪦';
+  const sk = SKINC[l.sk] || SKINC[3], hc = a >= 65 ? '#cfd3da' : HC[l.hc], oc = OC[l.oc], f = l.g == 'f', k = 'stroke="#24180f" stroke-width="2.4" stroke-linejoin="round"', sc = a >= 18 ? 1 : .55 + .45 * a / 18, hs = l.hs;
+  const front = `<path d="M18 30Q16 13 32 13Q48 13 46 30Q40 21 32 21Q24 21 18 30Z" fill="${hc}" ${k}/>`;
+  const back = hs == 1 ? `<path d="M17 30Q13 11 32 11Q51 11 47 30L50 54H14Z" fill="${hc}" ${k}/>` : hs == 2 ? `<circle cx="32" cy="9" r="6.5" fill="${hc}" ${k}/>` : hs == 4 ? `<ellipse cx="32" cy="24" rx="19" ry="16" fill="${hc}" ${k}/>` : '';
+  const fr = hs == 3 ? `<path d="M19 27Q20 16 32 16Q44 16 45 27Q38 20 32 20Q26 20 19 27Z" fill="${hc}" opacity=".55"/>` : front;
+  const lower = f ? `<path d="M20 44H44L49 73H15Z" fill="${oc}" ${k}/><rect x="23" y="72" width="6" height="6" rx="2" fill="${sk}" ${k}/><rect x="35" y="72" width="6" height="6" rx="2" fill="${sk}" ${k}/>`
+    : `<rect x="20" y="55" width="10" height="22" rx="3" fill="#3b4a63" ${k}/><rect x="34" y="55" width="10" height="22" rx="3" fill="#3b4a63" ${k}/><path d="M18 58V50Q18 44 25 44H39Q46 44 46 50V58Z" fill="${oc}" ${k}/>`;
+  return `<svg viewBox="0 0 64 80" xmlns="http://www.w3.org/2000/svg"><g transform="translate(32 79) scale(${sc}) translate(-32 -79)">${back}<rect x="11" y="45" width="8" height="17" rx="4" fill="${oc}" ${k}/><rect x="45" y="45" width="8" height="17" rx="4" fill="${oc}" ${k}/>${lower}<path d="M18 44H46" stroke="#000" opacity=".12"/><rect x="28" y="40" width="8" height="7" fill="${sk}" ${k}/><circle cx="19" cy="32" r="3" fill="${sk}" ${k}/><circle cx="45" cy="32" r="3" fill="${sk}" ${k}/><ellipse cx="32" cy="30" rx="13" ry="14" fill="${sk}" ${k}/><path d="M32 16A13 14 0 0 1 32 44Z" fill="#000" opacity=".1"/>${fr}<ellipse cx="26" cy="32" rx="2.3" ry="3.1" fill="#24180f"/><ellipse cx="38" cy="32" rx="2.3" ry="3.1" fill="#24180f"/><circle cx="26.8" cy="30.8" r=".9" fill="#fff"/><circle cx="38.8" cy="30.8" r=".9" fill="#fff"/><ellipse cx="22.5" cy="37" rx="2.6" ry="1.6" fill="#ff6b81" opacity=".35"/><ellipse cx="41.5" cy="37" rx="2.6" ry="1.6" fill="#ff6b81" opacity=".35"/><path d="M29 39Q32 42 35 39" fill="none" stroke="#24180f" stroke-width="1.8" stroke-linecap="round"/></g></svg>`;
+}
+const RI = [
+  { k: 'hang', l: ['Közös program', 'Hang out'], ok: [9, 4, 'Együtt töltöttetek egy délutánt: ', 'You spent an afternoon with: '] },
+  { k: 'joke', l: ['Vicc', 'Joke'], w: .7, ok: [5, 4, 'Jót nevettetek együtt: ', 'You shared a good laugh with: '], no: [-2, -1, 'Rosszul sült el a poénod: ', 'Your joke fell flat with: '] },
+  { k: 'compl', l: ['Bók', 'Compliment'], w: .75, ok: [5, 3, 'Megdicsérted: ', 'You complimented: '], no: [-3, -2, 'Kínosra sikerült a bók: ', 'Your compliment got awkward with: '] },
+  { k: 'adv', l: ['Tanácsot kérek', 'Ask advice'], m: 8, ok: [4, 2, 'Jó tanácsot kaptál tőle: ', 'You got good advice from: '] },
+  { k: 'cook', l: ['Közös főzés', 'Cook together'], m: 10, ok: [8, 5, 'Együtt főztetek: ', 'You cooked together with: '] },
+  { k: 'prank', l: ['Csíny', 'Prank'], m: 8, w: .5, ok: [8, 5, 'A csínytevésed sikerült, jót nevettetek: ', 'Your prank worked, you laughed with: '], no: [-10, -3, 'A csínytevésed rosszul sült el: ', 'Your prank backfired on: '] },
+  { k: 'arg', l: ['Veszekedés', 'Argue'], m: 6, ok: [-12, -4, 'Összevesztetek: ', 'You had a fight with: '] },
+  { k: 'peace', l: ['Kibékülés', 'Make peace'], role: 'Riválisod', w: .6, ok: [30, 6, 'Kibékültetek: ', 'You made peace with: '], no: [-5, -3, 'Nem sikerült kibékülni: ', 'Making peace failed with: '] }
+];
+function rint(i, k) {
+  const r = p.rel[i], x = RI.find(q => q.k == k), id = 'i' + k + i; if (p.done[id]) return; p.done[id] = 1;
+  const b = Math.random() < (x.w || 1) ? x.ok : x.no; r.bond = cl(r.bond + b[0]);
+  if (k == 'peace' && b == x.ok) r.role = 'Barát';
+  fxlog(T([b[2], b[3]]) + dn(r.n) + '.', { hap: b[1] }); render();
+}
 const avatar = (g, a, skin, dead) => dead ? '🪦' : (a < 2 ? '👶' : a < 20 ? (g == 'f' ? '👧' : '👦') : a < 65 ? (g == 'f' ? '👩' : '👨') : (g == 'f' ? '👵' : '👴')) + (SKIN[skin] || '');
 
 function render() {
@@ -434,7 +470,7 @@ function render() {
   if (prev && p.money != prev.money) { const m = $('#mo'); m.classList.remove('upm', 'dnm'); void m.offsetWidth; m.classList.add(p.money > prev.money ? 'upm' : 'dnm'); }
   const ag = $('#ag'), av = $('#av');
   if (ag.textContent != a) { ag.textContent = a; [ag, av].forEach(x => { x.classList.remove('pop'); void x.offsetWidth; x.classList.add('pop'); }); }
-  av.textContent = avatar(p.g, a, p.skin || 3, p.dead);
+  av.innerHTML = avSvg(p.look || (p.look = mkLook(p.g, p.skin || 3)), a, p.dead);
   for (const k in ST) {
     const v = Math.round(p[k]); $('#v' + k).textContent = v;
     const i = $('#b' + k); i.style.width = v + '%'; i.style.background = v < 25 ? '#c23b3b' : v < 50 ? '#f0b429' : '';
@@ -465,6 +501,9 @@ function showTitle() { $('#tcont').hidden = !(p && !p.dead); show('title'); }
 const cfg = () => [
   { k: 'g', l: T(['Nem', 'Gender']), o: [['f', T(['Lány', 'Girl'])], ['m', T(['Fiú', 'Boy'])], ['r', '🎲']] },
   { k: 'skin', l: T(['Bőrszín', 'Skin tone']), o: [[1, ''], [2, ''], [3, ''], [4, ''], [5, ''], ['r', '🎲']] },
+  { k: 'hs', l: T(['Haj', 'Hair']), o: [[0, T(['Rövid', 'Short'])], [1, T(['Hosszú', 'Long'])], [2, T(['Feltűzött', 'Tied-up'])], [3, T(['Kopasz', 'Buzzed'])], [4, T(['Göndör', 'Curly'])], ['r', '🎲']] },
+  { k: 'hc', l: T(['Hajszín', 'Hair color']), o: [[0, ''], [1, ''], [2, ''], [3, ''], [4, ''], [5, ''], ['r', '🎲']] },
+  { k: 'oc', l: T(['Ruha', 'Outfit']), o: [[0, ''], [1, ''], [2, ''], [3, ''], [4, ''], [5, ''], [6, ''], [7, ''], ['r', '🎲']] },
   { k: 'city', l: T(['Szülőváros', 'Hometown']), o: CITY.map(c => [c[0], c[0]]).concat([['r', '🎲']]) },
   { k: 'fam', l: T(['Család', 'Family']), o: [[1, T(['Szerény', 'Modest'])], [2, T(['Átlagos', 'Average'])], [3, T(['Tehetős', 'Wealthy'])], ['r', '🎲']] },
   { k: 'gift', l: T(['Tehetség (+15)', 'Talent (+15)']), o: [['hap', '😊 ' + T(['Vidám', 'Cheerful'])], ['hea', '❤️ ' + T(['Egészséges', 'Healthy'])], ['sma', '🧠 ' + T(['Okos', 'Smart'])], ['loo', '✨ ' + T(['Szép', 'Attractive'])], ['r', '🎲']] },
@@ -473,11 +512,10 @@ const cfg = () => [
 let cc = {};
 function drawC() {
   $('#copts').innerHTML = cfg().map(c => `<div class="cg"><small>${c.l}</small><div class="chips">${c.o.map(([v, t]) =>
-    `<button class="chip${cc[c.k] == v ? ' on' : ''}" data-k="${c.k}" data-v="${v}">${c.k == 'skin' && v != 'r' ? `<i class="sw" style="background:${SKINC[v]}"></i>` : t}</button>`).join('')}</div></div>`).join('');
-  const em = cc.g == 'r' ? '🧑' : cc.g == 'f' ? '👩' : '👨';
-  $('#cav').textContent = em + (cc.skin == 'r' ? '' : SKIN[cc.skin]);
+    `<button class="chip${cc[c.k] == v ? ' on' : ''}" data-k="${c.k}" data-v="${v}">${SW[c.k] && v != 'r' ? `<i class="sw" style="background:${SW[c.k][v]}"></i>` : t}</button>`).join('')}</div></div>`).join('');
+  $('#cav').innerHTML = avSvg({ g: cc.g == 'f' ? 'f' : 'm', sk: cc.skin == 'r' ? 3 : +cc.skin, hs: cc.hs == 'r' ? (cc.g == 'f' ? 1 : 0) : +cc.hs, hc: cc.hc == 'r' ? 1 : +cc.hc, oc: cc.oc == 'r' ? 0 : +cc.oc }, 20);
 }
-function openCreate() { cc = { g: 'r', skin: 'r', city: 'r', fam: 'r', gift: 'r', trait: 'r' }; $('#cfn').value = $('#cln').value = ''; drawC(); show('create'); }
+function openCreate() { cc = { g: 'r', skin: 'r', hs: 'r', hc: 'r', oc: 'r', city: 'r', fam: 'r', gift: 'r', trait: 'r' }; $('#cfn').value = $('#cln').value = ''; drawC(); show('create'); }
 function startLife(rand) {
   newLife(rand ? {} : { ...cc, fn: clean($('#cfn').value), ln: clean($('#cln').value) });
   seen = 0; prev = null; tab = null; lastTab = null; clearTimeout(endT); endT = 0;

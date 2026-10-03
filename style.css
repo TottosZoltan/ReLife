@@ -163,3 +163,11 @@ header{gap:12px}
 #bars.names #lbl{transform:translateX(-50%) rotate(180deg)}
 .lang{position:relative;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:6px;color:#9fb3c0;animation:fadeUp 1s 1.8s both}
 .lang .chip{min-height:34px;padding:6px 14px;font-size:13px}
+
+#av,#cav{display:flex;align-items:flex-end;justify-content:center}
+#av svg{height:100%!important;width:auto!important;max-height:58px}
+#cav svg{height:140px;width:auto}
+.rwrap{display:flex;gap:10px;align-items:flex-start}
+.rav svg{width:48px;height:60px;display:block}
+.rbody{flex:1;min-width:0}
+.dsc{display:block;opacity:.7;font-size:11px;margin-bottom:4px}
