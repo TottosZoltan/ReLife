@@ -182,7 +182,7 @@ function newLife(o = {}) {
   p = { g, skin, trait, name: `${sn} ${fn}`, age: 0, money: 0, hap: R(75, 95), hea: R(80, 100), sma: R(25, 75), loo: R(20, 85),
     edu: 0, uni: false, job: null, pay: 0, yrs: 0, pension: 0, fam: [1, 2, 3].includes(+o.fam) ? +o.fam : R(1, 3), dead: false, done: {}, logs: [], rel: [], assets: [], crim: 0, prison: 0, sick: null, city };
   p[gk] = cl(p[gk] + 15);
-  p.look = { g, sk: skin, hs: pk(o.hs, () => rndHs(g)), hc: pk(o.hc, () => R(0, 4)), oc: pk(o.oc, () => R(0, 7)), bd: pk(o.bd, rndBd) };
+  p.look = { g, sk: skin, hs: pk(o.hs, () => rndHs(g)), hc: pk(o.hc, () => R(0, 4)), oc: pk(o.oc, () => R(0, 7)), bd: pk(o.bd, rndBd), ot: pk(o.ot, rndOt), ht: pk(o.ht, rndHt), ea: pk(o.ea, rndEa), gl: pk(o.gl, rndGl), nc: pk(o.nc, rndNc), xc: pk(o.xc, () => R(0, 7)) };
   const m = { ...person('Anya', R(22, 38), R(60, 90), 'f'), par: 1 }, f = { ...person('Apa', R(23, 42), R(55, 90), 'm'), par: 1 };
   m.n = `${sn} ${P(NF)}`; f.n = `${sn} ${P(NM)}`;
   p.rel.push(m, f);
@@ -425,17 +425,29 @@ function confetti(n = 70) {
 // ----- megjelenítés -----
 const SKIN = ['', '\u{1F3FB}', '\u{1F3FC}', '\u{1F3FD}', '\u{1F3FE}', '\u{1F3FF}'], SKINC = ['', '#f8dcc6', '#e9bd96', '#c98f62', '#9a6240', '#5e3a24'];
 
-const HC = ['#24180f', '#6b4226', '#e0b24a', '#b5381f', '#8a8f9a', '#d96a9f'], OC = ['#e4572e', '#1f8a83', '#3a6fd8', '#f0b429', '#7a5cc7', '#3b3b46', '#e86a9a', '#4a9d4a'], SW = { skin: SKINC, hc: HC, oc: OC };
-const HSN = [['rövid', 'short'], ['hosszú', 'long'], ['feltűzött', 'tied-up'], ['nagyon rövid', 'buzzed'], ['göndör', 'curly'], ['félhosszú', 'bob'], ['lófarkas', 'ponytail'], ['tüskés', 'spiky'], ['copfos', 'pigtail'], ['kopasz', 'bald']];
+const HC = ['#24180f', '#6b4226', '#e0b24a', '#b5381f', '#8a8f9a', '#d96a9f'], OC = ['#e4572e', '#1f8a83', '#3a6fd8', '#f0b429', '#7a5cc7', '#3b3b46', '#e86a9a', '#4a9d4a'], XC = ['#e4572e', '#1f8a83', '#3a6fd8', '#f0b429', '#7a5cc7', '#3b3b46', '#e86a9a', '#f4f4f4'], SW = { skin: SKINC, hc: HC, oc: OC, xc: XC };
+const HSN = [['rövid', 'short'], ['hosszú', 'long'], ['feltűzött', 'tied-up'], ['nagyon rövid', 'buzzed'], ['göndör', 'curly'], ['félhosszú', 'bob'], ['lófarkas', 'ponytail'], ['tüskés', 'spiky'], ['copfos', 'pigtail'], ['kopasz', 'bald'],
+  ['afro', 'afro'], ['frufrus bubi', 'bob with bangs'], ['oldalra fésült', 'side-swept'], ['feltupírozott', 'quiff'], ['magas konty', 'top bun'], ['két konty', 'space buns'], ['magas lófarok', 'high ponytail'], ['két fonat', 'twin braids'], ['oldalfonat', 'side braid'], ['hullámos hosszú', 'long wavy'], ['hosszú frufruval', 'long with bangs'], ['tarajos', 'mohawk'], ['kopaszodó', 'receding'], ['középen elválasztott', 'curtains'], ['pixie', 'pixie']];
+const TALL = [2, 4, 7, 10, 13, 14, 15, 16, 21], FULLHAT = [1, 2, 3, 4, 5, 9];
 const BDN = [['átlagos', 'average'], ['karcsú', 'slim'], ['nyurga', 'lanky'], ['izmos', 'muscular'], ['atletikus', 'athletic'], ['telt', 'curvy'], ['nagydarab', 'heavyset'], ['zömök', 'stocky'], ['körte formájú', 'pear-shaped'], ['apró', 'petite']];
 const HCN = [['fekete', 'black'], ['barna', 'brown'], ['szőke', 'blond'], ['vörös', 'red'], ['ősz', 'gray'], ['rózsaszín', 'pink']];
 const OCN = [['piros', 'red'], ['kékeszöld', 'teal'], ['kék', 'blue'], ['sárga', 'yellow'], ['lila', 'purple'], ['sötét', 'dark'], ['rózsaszín', 'pink'], ['zöld', 'green']];
+const OTN = [['póló', 't-shirt'], ['pulcsi', 'sweater'], ['kapucnis pulcsi', 'hoodie'], ['márkás polo', 'branded polo'], ['garbó', 'turtleneck'], ['kardigán', 'cardigan'], ['trikó', 'tank top'], ['csíkos póló', 'striped tee'], ['ing', 'shirt'], ['blézer', 'blazer'], ['melegítőfelső', 'track jacket'], ['sportmez', 'jersey'], ['kantáros nadrág', 'dungarees'], ['farmerdzseki', 'denim jacket'], ['bőrdzseki', 'leather jacket'], ['mellény', 'puffer vest']];
+const HTN = [['nincs', 'none'], ['baseball sapka', 'cap'], ['kötött sapka', 'beanie'], ['halászsapka', 'bucket hat'], ['kalap', 'fedora'], ['szalmakalap', 'straw hat'], ['fejpánt', 'headband'], ['masni', 'hair bow'], ['virágkoszorú', 'flower crown'], ['bandana', 'bandana'], ['macskafül', 'cat ears'], ['korona', 'crown']];
+const EAN = [['nincs', 'none'], ['fejhallgató', 'headphones'], ['fülhallgató', 'earbuds'], ['headset', 'headset'], ['fülbevaló', 'earrings']];
+const GLN = [['nincs', 'none'], ['kerek szemüveg', 'round glasses'], ['szögletes szemüveg', 'square glasses'], ['napszemüveg', 'sunglasses']];
+const NCN = [['nincs', 'none'], ['nyaklánc', 'necklace'], ['sál', 'scarf'], ['nyakkendő', 'tie'], ['csokornyakkendő', 'bow tie']];
 const pk = (v, f) => v != null && v !== 'r' ? +v : f();
-const rndHs = g => P(g == 'f' ? [1, 2, 0, 4, 5, 6, 8, 5, 6] : [0, 3, 4, 7, 0, 3, 7, 9]);
+const chance = (p, n) => () => Math.random() < p ? R(1, n) : 0;
+const rndHs = g => P(g == 'f' ? [1, 2, 0, 4, 5, 6, 8, 5, 6, 10, 11, 14, 15, 16, 17, 18, 19, 20, 23, 24, 11, 19] : [0, 3, 4, 7, 0, 3, 7, 9, 10, 12, 13, 21, 22, 23, 12, 13]);
 const rndBd = () => P([0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
-const mkLook = (g, sk) => ({ g, sk: sk || R(1, 5), hs: rndHs(g), hc: R(0, 4), oc: R(0, 7), bd: rndBd() });
+const rndOt = () => P([0, 0, 0, 1, 1, 2, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]);
+const rndHt = chance(.22, 11), rndEa = chance(.15, 4), rndGl = chance(.2, 3), rndNc = chance(.18, 4);
+const mkLook = (g, sk) => ({ g, sk: sk || R(1, 5), hs: rndHs(g), hc: R(0, 4), oc: R(0, 7), bd: rndBd(), ot: rndOt(), ht: rndHt(), ea: rndEa(), gl: rndGl(), nc: rndNc(), xc: R(0, 7) });
 const lk = r => r.look || (r.look = mkLook(NF.includes(r.n.split(' ')[1]) || r.role == 'Anya' ? 'f' : 'm'));
-const desc = l => { const h = l.hs == 9 ? T(HSN[9]) : `${T(HCN[l.hc])} ${T(HSN[l.hs])} ${T(['haj', 'hair'])}`; return `${h}, ${T(OCN[l.oc])} ${T(['felső', 'top'])}, ${T(BDN[l.bd || 0])} ${T(['alkat', 'build'])}`; };
+const desc = l => { const h = l.hs == 9 ? T(HSN[9]) : `${T(HCN[l.hc])} ${T(HSN[l.hs])} ${T(['haj', 'hair'])}`, ot = +l.ot || 0;
+  const x = [[HTN, l.ht], [EAN, l.ea], [GLN, l.gl], [NCN, l.nc]].filter(([, v]) => +v > 0).map(([A, v]) => T(A[+v]));
+  return `${h}, ${ot == 13 ? '' : T(OCN[l.oc]) + ' '}${T(OTN[ot])}, ${T(BDN[l.bd || 0])} ${T(['alkat', 'build'])}${x.length ? ', ' + x.join(', ') : ''}`; };
 let UID = 0;
 const BG = ['#fde2d8', '#d3efeb', '#d6e2fb', '#fdf0c4', '#e3d9f6', '#dcdce4', '#fbd8e6', '#d9eed5'];
 // szín sötétítés (f<0) / világosítás (f>0)
@@ -456,33 +468,125 @@ const BODY = [
 function avSvg(l, a, dead, vb) {
   if (dead) return '🪦';
   const id = 'g' + (++UID), sk = SKINC[l.sk] || SKINC[3], f = l.g == 'f', baby = a < 3, kid = a < 13, bd = BODY[+l.bd || 0] || BODY[0];
-  const hc = a >= 65 ? '#d5d8de' : HC[l.hc] || HC[0], oc = OC[l.oc] || OC[0], hs = baby ? 10 : +l.hs || 0;
-  const OL = '#2b1d17', kw = w => `stroke="${OL}" stroke-width="${w}" stroke-linejoin="round" stroke-linecap="round"`, k = kw(2), th = (w = 1.7) => `fill="none" stroke="${OL}" stroke-width="${w}" stroke-linecap="round"`;
+  const hc = a >= 65 ? '#d5d8de' : HC[l.hc] || HC[0], oc = OC[l.oc] || OC[0];
+  const ot = +l.ot || 0, ht = +l.ht || 0, ea = +l.ea || 0, gl = l.gl == null ? -1 : +l.gl || 0, nc = +l.nc || 0, xc = XC[l.xc == null ? 5 : +l.xc] || XC[5];
+  let hs = +l.hs || 0; if (FULLHAT.includes(ht) && TALL.includes(hs)) hs = 0;
+  const OL = '#2b1d17', kw = w => `stroke="${OL}" stroke-width="${w}" stroke-linejoin="round" stroke-linecap="round"`, k = kw(2), th = (w = 1.7, c = OL) => `fill="none" stroke="${c}" stroke-width="${w}" stroke-linecap="round"`;
   const skD = shade(sk, -.18), hb = shade(hc, -.4), hl = `<path d="M37 24Q50 17 63 25" fill="none" stroke="#fff" opacity=".35" stroke-width="3" stroke-linecap="round"/>`;
   // ---- test ----
   const g = f ? .91 : 1, sx = bd.sx * g, bx = bd.bx * g, sy = bd.sy, nw = bd.nw, y0 = sy - 5;
-  const SL = 50 - sx, SR = 50 + sx, BL = 50 - bx, BR = 50 + bx;
+  const SL = 50 - sx, SR = 50 + sx, BL = 50 - bx, BR = 50 + bx, nwl = 50 - nw, nwr = 50 + nw;
   const pL = `M${BL} 112L${SL} ${sy + 8}C${SL} ${sy - 2} ${50 - nw - 10} ${sy - 4} ${50 - nw} ${y0}`, pR = `M${50 + nw} ${y0}C${50 + nw + 10} ${sy - 4} ${SR} ${sy - 2} ${SR} ${sy + 8}L${BR} 112`;
   const torso = `${pL}L${50 + nw} ${y0}${pR.slice(pR.indexOf('C'))}Z`;
-  const vneck = l.oc % 2, nk = vneck ? `M${50 - nw - 1} ${y0 - 1}L${50 + nw + 1} ${y0 - 1}L50 ${y0 + 13}Z` : `M${50 - nw - 1} ${y0 - 1}L${50 + nw + 1} ${y0 - 1}Q50 ${y0 + 10} ${50 - nw - 1} ${y0 - 1}Z`;
-  const nkS = vneck ? `M${50 - nw - 1} ${y0 - 1}L50 ${y0 + 13}L${50 + nw + 1} ${y0 - 1}` : `M${50 - nw - 1} ${y0 - 1}Q50 ${y0 + 10} ${50 + nw + 1} ${y0 - 1}`;
-  const ax = sx * .66, musc = +l.bd == 3 || +l.bd == 4 ? `<path d="M${50 - 15} ${sy + 15}Q${50 - 7} ${sy + 20} 50 ${sy + 15}Q${50 + 7} ${sy + 20} ${50 + 15} ${sy + 15}" ${th(1.5)} opacity=".22"/>` : '';
+  const ax = sx * .66, tw = Math.max(nw + 11, ax * .72), X = (s, d) => 50 + s * d;
+  // ---- ruha ----
+  const oD = shade(oc, -.25), oL = shade(oc, .35), den = '#4a76ad', denD = shade(den, -.22), cream = '#f6f1e6';
+  const btn = (x, y, c) => `<circle cx="${x}" cy="${y}" r="1.5" fill="${c || '#fff'}" stroke="${OL}" stroke-width=".7"/>`;
+  const sleeves = c => [-1, 1].map(s => `<path d="M${s < 0 ? -10 : 110} ${sy - 8}L${X(s, nw + 11)} ${sy - 8}L${X(s, nw + 11)} ${sy - 3}Q${X(s, tw + 1)} ${sy + 6} ${X(s, tw)} ${sy + 26}L${X(s, tw)} 125L${s < 0 ? -10 : 110} 125Z" fill="${c}"/><path d="M${X(s, nw + 11)} ${sy - 3}Q${X(s, tw + 1)} ${sy + 6} ${X(s, tw)} ${sy + 26}V125" ${th(1.6)}/>`).join('');
+  const flaps = (c, d) => [-1, 1].map(s => `<path d="M${X(s, nw + 1)} ${y0 - 5}L${X(s, nw + 9)} ${y0 + 3}L${X(s, .8)} ${y0 + d}L${X(s, nw - 1)} ${y0 + 1}Z" fill="${c}" ${kw(1.4)}/>`).join('');
+  const stand = (c, h) => `<path d="M${nwl - 2} ${y0 - 13}H${nwr + 2}V${y0 + h}Q50 ${y0 + h + 6} ${nwl - 2} ${y0 + h}Z" fill="${c}" ${kw(1.6)}/><path d="M${nwl + 2} ${y0 - 9}V${y0 + h}M${nwl + 6} ${y0 - 9}V${y0 + h + 1}M${nwl + 10} ${y0 - 9}V${y0 + h + 3}M${nwr - 2} ${y0 - 9}V${y0 + h}M${nwr - 6} ${y0 - 9}V${y0 + h + 1}M${nwr - 10} ${y0 - 9}V${y0 + h + 3}" ${th(1)} opacity=".22"/>`;
+  const O = { fill: oc, pre: '', post: '', nk: ot == 0 && l.oc % 2 ? 'v' : 'crew', vd: 13 };
+  switch (ot) {
+    case 1: { // pulcsi
+      let ln = ''; for (let x = SL + 4; x < SR - 3; x += 5) ln += `M${x} ${sy + 9}V114`;
+      O.pre = `<path d="${ln}" ${th(1, oD)} opacity=".5"/><path d="M50 ${sy + 8}q-5 5 0 10t0 10t0 10t0 10" ${th(2, oL)} opacity=".8"/><path d="M${BL - 2} 103H${BR + 2}" ${th(2.2, oD)} opacity=".7"/>`;
+      O.post = `<path d="M${nwl - 1} ${y0 - 1}Q50 ${y0 + 10} ${nwr + 1} ${y0 - 1}" ${th(5.4, OL)}/><path d="M${nwl - 1} ${y0 - 1}Q50 ${y0 + 10} ${nwr + 1} ${y0 - 1}" ${th(3.8, oD)}/>`; break; }
+    case 2: { // kapucnis pulcsi
+      const hood = `M${nwl - 7} ${y0 - 14}C${nwl - 8} ${y0 + 2} ${nwl + 2} ${y0 + 9} 50 ${y0 + 9}C${nwr - 2} ${y0 + 9} ${nwr + 8} ${y0 + 2} ${nwr + 7} ${y0 - 14}`;
+      O.pre = `<path d="M${50 - 22} 114L${50 - 19} 99Q50 92 ${50 + 19} 99L${50 + 22} 114Z" fill="${oD}" opacity=".55"/><path d="M${50 - 19} 99Q50 92 ${50 + 19} 99" ${th(1.4)} opacity=".5"/>`;
+      O.post = `<path d="${hood}" ${th(11.5)}/><path d="${hood}" ${th(8.6, shade(oc, -.12))}/><path d="${hood}" ${th(1.4, oD)} transform="translate(0 -1.2)" opacity=".6"/>`
+        + `<path d="M${50 - 5} ${y0 + 9}V${y0 + 25}M${50 + 5} ${y0 + 9}V${y0 + 22}" ${th(1.8, "#fff")}/><circle cx="${50 - 5}" cy="${y0 + 26}" r="1.6" fill="#fff" ${kw(.8)}/><circle cx="${50 + 5}" cy="${y0 + 23}" r="1.6" fill="#fff" ${kw(.8)}/>`; O.nk = 'none'; break; }
+    case 3: { // márkás polo
+      O.nk = 'v'; O.vd = 9;
+      O.pre = `<path d="M${50 + 14} ${sy + 11}h7v5.5q-3.5 3.2 -7 0Z" fill="#fff" ${kw(1)}/><path d="M${50 + 15.4} ${sy + 13}h4.2" ${th(1, oc)}/>`;
+      O.post = `<path d="M50 ${y0 + 9}V${y0 + 36}" ${th(1.4)}/><path d="M${48.2} ${y0 + 9}h3.6v26h-3.6Z" fill="${oL}" opacity=".5"/>${flaps(oL, 11)}${btn(50, y0 + 17)}${btn(50, y0 + 27)}`; break; }
+    case 4: // garbó
+      O.nk = 'none'; O.post = stand(oc, 2); break;
+    case 5: { // kardigán
+      O.pre = `<path d="M${50 - 13} ${y0 - 3}L${50 + 13} ${y0 - 3}L${50 + 9} 114H${50 - 9}Z" fill="${cream}"/><path d="M${50 - 13} ${y0 - 3}L${50 - 9} 114M${50 + 13} ${y0 - 3}L${50 + 9} 114" ${th(1.8)}/><path d="M${50 - 13} ${y0 - 3}L${50 - 9} 114M${50 + 13} ${y0 - 3}L${50 + 9} 114" ${th(4.6, oD)} opacity=".35" transform="translate(${-3.4} 0)"/>`
+        + `<path d="M${50 + 9.5} ${y0 - 3}L${50 + 6} 114" ${th(4.6, oD)} opacity=".35" transform="translate(3.4 0)"/><path d="M${50 - 26} ${sy + 22}h10v9h-10zM${50 + 16} ${sy + 22}h10v9h-10z" ${th(1.2)} opacity=".35"/>`; break; }
+    case 6: // trikó
+      O.nk = 'scoop'; O.pre = sleeves(sk); break;
+    case 7: { // csíkos póló
+      let st = ''; for (let y = y0 + 5; y < 114; y += 9) st += `<rect x="0" y="${y}" width="100" height="4.4" fill="#fff" opacity=".88"/>`; O.pre = st; break; }
+    case 8: // ing
+      O.nk = 'v'; O.vd = 9; O.post = `<path d="M50 ${y0 + 9}V114" ${th(1.4)}/>${flaps('#fff', 11).replace(/fill="#fff"/g, `fill="${oL}"`)}${btn(50, y0 + 17)}${btn(50, y0 + 27)}${btn(50, y0 + 37)}<path d="M${50 + 8} ${sy + 11}h10v10h-10z" ${th(1.2)} opacity=".5"/>`; break;
+    case 9: { // blézer
+      O.nk = 'v'; O.vd = 9;
+      O.pre = `<path d="M${nwl - 1} ${y0 - 3}L50 ${y0 + 28}L${nwr + 1} ${y0 - 3}Z" fill="#f6f6f2"/>`;
+      const lap = s => `<path d="M${X(s, nw + 9)} ${y0 - 2}L${X(s, nw)} ${y0 - 1}L${X(s, 1)} ${y0 + 26}L${X(s, 7)} ${y0 + 31}L${X(s, 15)} ${y0 + 20}L${X(s, 11)} ${y0 + 15}L${X(s, nw + 14)} ${y0 + 7}Z" fill="${oD}" ${kw(1.4)}/>`;
+      O.post = lap(-1) + lap(1) + btn(50, y0 + 33, oL) + `<path d="M${50 + 12} ${sy + 12}l7 -1" ${th(1.4, "#fff")}/>`; break; }
+    case 10: { // melegítőfelső
+      O.pre = `<path d="M${50 - ax - 4} ${sy + 10}L${50 - ax - 5} 114M${50 + ax + 4} ${sy + 10}L${50 + ax + 5} 114" ${th(2.6, "#fff")} opacity=".9"/>`;
+      O.nk = 'none'; O.post = stand(oD, 1) + `<path d="M50 ${y0 - 12}V114" ${th(1.4)}/><path d="M50 ${y0 - 6}V114" ${th(1, "#fff")} stroke-dasharray="1.2 1.4" opacity=".7"/><circle cx="50" cy="${y0 + 7}" r="1.9" fill="#fff" ${kw(.9)}/>`; break; }
+    case 11: { // sportmez
+      O.nk = 'v'; O.vd = 9;
+      O.pre = `<path d="M${50 - sx + 3} ${sy + 4}L${50 - sx + 2} ${sy + 30}M${50 + sx - 3} ${sy + 4}L${50 + sx - 2} ${sy + 30}" ${th(3, "#fff")} opacity=".9"/><text x="50" y="${y0 + 33}" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="19" font-weight="900" fill="#fff" stroke="${OL}" stroke-width=".9" paint-order="stroke">10</text>`;
+      O.post = `<path d="M${nwl - 1} ${y0 - 1}L50 ${y0 + 9}L${nwr + 1} ${y0 - 1}" ${th(3.6, "#fff")}/>`; break; }
+    case 12: // kantáros nadrág
+      O.post = `<path d="M${50 - 15} ${sy + 8}H${50 + 15}V114H${50 - 15}Z" fill="${den}" ${kw(1.5)}/><path d="M${nwl - 8} ${y0 - 3}L${nwl - 1} ${y0 - 1}L${50 - 9} ${sy + 8}H${50 - 15}Z" fill="${den}" ${kw(1.4)}/><path d="M${nwr + 8} ${y0 - 3}L${nwr + 1} ${y0 - 1}L${50 + 9} ${sy + 8}H${50 + 15}Z" fill="${den}" ${kw(1.4)}/><path d="M${50 - 7} ${sy + 16}h14v9h-14z" ${th(1.2, denD)}/><path d="M${50 - 13} ${sy + 11}H${50 + 13}" ${th(1, denD)} stroke-dasharray="1.5 1.2"/>${btn(50 - 12, sy + 6.5, '#e6b84a')}${btn(50 + 12, sy + 6.5, '#e6b84a')}`; break;
+    case 13: { // farmerdzseki
+      O.fill = den;
+      O.pre = `<path d="M${nwl - 1} ${y0 - 3}L50 ${y0 + 23}L${nwr + 1} ${y0 - 3}Z" fill="${oc}"/><path d="M50 ${y0 + 23}V114" ${th(1.4, denD)}/><path d="M${50 - 25} ${sy + 12}h13v11h-13zM${50 + 12} ${sy + 12}h13v11h-13z" fill="${den}" stroke="${denD}" stroke-width="1.4"/><path d="M${50 - 25} ${sy + 16}h13M${50 + 12} ${sy + 16}h13" ${th(1, denD)}/>`;
+      O.nk = 'v'; O.vd = 8;
+      O.post = flaps(denD, 17) + btn(50, y0 + 29, '#d8b04a') + btn(50, y0 + 39, '#d8b04a') + btn(50 - 19, sy + 18.5, '#d8b04a') + btn(50 + 19, sy + 18.5, '#d8b04a'); break; }
+    case 14: { // bőrdzseki
+      const lc = shade(oc, -.62); O.fill = lc;
+      O.pre = `<path d="M${nwl - 1} ${y0 - 3}L50 ${y0 + 16}L${nwr + 1} ${y0 - 3}Z" fill="${oc}"/><path d="M${SL + 6} ${sy + 3}Q${SL + 10} ${sy + 12} ${SL + 7} ${sy + 20}" ${th(2.4, "#fff")} opacity=".22"/>`;
+      O.nk = 'v'; O.vd = 8;
+      const lap = s => `<path d="M${X(s, nw + 10)} ${y0 - 3}L${X(s, nw)} ${y0}L${X(s, 4)} ${y0 + 19}L${X(s, 15)} ${y0 + 26}L${X(s, 17)} ${y0 + 12}Z" fill="${shade(lc, .12)}" ${kw(1.4)}/>`;
+      O.post = lap(-1) + lap(1) + `<path d="M${50 - 1} ${y0 + 17}L${50 + 16} 114" ${th(1.6, "#cfd6dc")}/><path d="M${50 - 1} ${y0 + 17}L${50 + 16} 114" ${th(1, OL)} stroke-dasharray="1 1.4"/>${btn(50 - 14, y0 + 15, '#cfd6dc')}${btn(50 + 15, y0 + 22, '#cfd6dc')}`; break; }
+    case 15: { // mellény
+      const vc = shade(oc, -.55); O.fill = vc;
+      O.pre = sleeves(oc) + `<path d="M${50 - tw} ${sy + 8}Q50 ${sy + 12} ${50 + tw} ${sy + 8}M${50 - tw} ${sy + 19}Q50 ${sy + 23} ${50 + tw} ${sy + 19}M${50 - tw} ${sy + 30}Q50 ${sy + 34} ${50 + tw} ${sy + 30}" ${th(1.3)} opacity=".4"/><path d="M50 ${y0 + 6}V114" ${th(1.5)}/>`;
+      O.nk = 'none'; O.post = stand(vc, 1) + `<path d="M50 ${y0 - 12}V${y0 + 7}" ${th(1.4)}/>`; break; }
+  }
+  const nkP = {
+    crew: [`M${nwl - 1} ${y0 - 1}L${nwr + 1} ${y0 - 1}Q50 ${y0 + 10} ${nwl - 1} ${y0 - 1}Z`, `M${nwl - 1} ${y0 - 1}Q50 ${y0 + 10} ${nwr + 1} ${y0 - 1}`],
+    v: [`M${nwl - 1} ${y0 - 1}L${nwr + 1} ${y0 - 1}L50 ${y0 + O.vd}Z`, `M${nwl - 1} ${y0 - 1}L50 ${y0 + O.vd}L${nwr + 1} ${y0 - 1}`],
+    scoop: [`M${nwl - 5} ${y0 - 2}L${nwr + 5} ${y0 - 2}Q50 ${y0 + 22} ${nwl - 5} ${y0 - 2}Z`, `M${nwl - 5} ${y0 - 2}Q50 ${y0 + 22} ${nwr + 5} ${y0 - 2}`],
+    none: ['', '']
+  }[O.nk];
+  const musc = +l.bd == 3 || +l.bd == 4 ? `<path d="M${50 - 15} ${sy + 15}Q${50 - 7} ${sy + 20} 50 ${sy + 15}Q${50 + 7} ${sy + 20} ${50 + 15} ${sy + 15}" ${th(1.5)} opacity=".22"/>` : '';
   const bodyG = `<path d="M${50 - nw} 58H${50 + nw}V${y0 + 3}H${50 - nw}Z" fill="${sk}"/><path d="M${50 - nw} 62V${y0}M${50 + nw} 62V${y0}" ${th()}/>`
     + `<path d="M${50 - nw} 62H${50 + nw}V74Q50 80 ${50 - nw} 74Z" fill="#000" opacity=".14"/>`
-    + `<clipPath id="${id}t"><path d="${torso}"/></clipPath><path d="${torso}" fill="${oc}"/><rect x="50" y="60" width="60" height="60" fill="#000" opacity=".1" clip-path="url(#${id}t)"/>`
+    + `<clipPath id="${id}t"><path d="${torso}"/></clipPath><path d="${torso}" fill="${O.fill}"/><g clip-path="url(#${id}t)">${O.pre}<rect x="50" y="60" width="60" height="60" fill="#000" opacity=".1"/></g>`
     + `<path d="${pL}" ${k} fill="none"/><path d="${pR}" ${k} fill="none"/>`
-    + `<path d="M${50 - ax} ${sy + 12}Q${50 - ax - 1.5} ${sy + 24} ${50 - ax} 112M${50 + ax} ${sy + 12}Q${50 + ax + 1.5} ${sy + 24} ${50 + ax} 112" ${th()} opacity=".22"/>${musc}`
-    + `<path d="${nk}" fill="${sk}"/><path d="${nkS}" ${th(1.7)}/>`;
+    + `<path d="M${50 - ax} ${sy + 12}Q${50 - ax - 1.5} ${sy + 24} ${50 - ax} 112M${50 + ax} ${sy + 12}Q${50 + ax + 1.5} ${sy + 24} ${50 + ax} 112" ${th()} opacity="${ot == 6 || ot == 15 ? 0 : .22}"/>${ot == 0 || ot == 1 || ot == 7 ? musc : ''}`
+    + (nkP[0] ? `<path d="${nkP[0]}" fill="${sk}"/><path d="${nkP[1]}" ${th(1.7)}/>` : '') + O.post;
+  // ---- nyakra ----
+  const neck = [
+    '',
+    `<path d="M${nwl - 2} ${y0 - 5}Q50 ${y0 + 23} ${nwr + 2} ${y0 - 5}" ${th(1.7, "#e6b84a")}/><circle cx="50" cy="${y0 + 11}" r="2.8" fill="${xc}" ${kw(1)}/>`,
+    `<path d="M${50 + 4} ${y0 + 6}L${50 + 17} ${y0 + 3}L${50 + 21} ${y0 + 40}L${50 + 8} ${y0 + 42}Z" fill="${xc}" ${kw(1.6)}/><path d="M${50 + 6} ${y0 + 20}L${50 + 19} ${y0 + 18}M${50 + 7} ${y0 + 30}L${50 + 20} ${y0 + 28}" ${th(1.4, shade(xc, -.35))} opacity=".7"/><path d="M${nwl - 6} ${y0 - 8}Q50 ${y0 + 13} ${nwr + 6} ${y0 - 8}" ${th(12)}/><path d="M${nwl - 6} ${y0 - 8}Q50 ${y0 + 13} ${nwr + 6} ${y0 - 8}" ${th(9.2, xc)}/><path d="M${nwl + 1} ${y0 - 2}l-2 6M${nwl + 8} ${y0 + 3}l-1 6M${nwr - 1} ${y0 - 2}l2 6M${nwr - 8} ${y0 + 3}l1 6" ${th(1.4, shade(xc, -.35))} opacity=".7"/>`,
+    `<path d="M${50 - 3} ${y0 + 10}L${50 - 6.5} ${y0 + 31}L50 ${y0 + 37}L${50 + 6.5} ${y0 + 31}L${50 + 3} ${y0 + 10}Z" fill="${xc}" ${kw(1.5)}/><path d="M${50 - 5} ${y0 + 3}H${50 + 5}L${50 + 3} ${y0 + 11}H${50 - 3}Z" fill="${shade(xc, -.15)}" ${kw(1.5)}/><path d="M${50 - 4} ${y0 + 20}L${50 + 4} ${y0 + 17}M${50 - 5} ${y0 + 27}L${50 + 5} ${y0 + 24}" ${th(1.2, "#fff")} opacity=".5"/>`,
+    `<path d="M50 ${y0 + 4}L${50 - 12} ${y0 - 2}V${y0 + 10}ZM50 ${y0 + 4}L${50 + 12} ${y0 - 2}V${y0 + 10}Z" fill="${xc}" ${kw(1.5)}/><rect x="${50 - 3}" y="${y0 + 1}" width="6" height="7" rx="2" fill="${shade(xc, -.15)}" ${kw(1.4)}/>`
+  ][nc] || '';
   // ---- haj ----
+  const blob = cs => cs.map(c => `<circle cx="${c[0]}" cy="${c[1]}" r="${c[2]}" fill="${hc}" ${k}/>`).join('') + cs.map(c => `<circle cx="${c[0]}" cy="${c[1]}" r="${c[2] - 1}" fill="${hc}"/>`).join('');
   const circ = [[30, 30], [38, 20], [50, 15], [62, 20], [70, 30], [25, 46], [75, 46], [27, 38], [73, 38]].map(c => `<circle cx="${c[0]}" cy="${c[1]}" r="11" fill="${hc}" ${k}/>`).join('');
   const tie = (x, y, c) => `<circle cx="${x}" cy="${y}" r="3.4" fill="${c || shade(oc, -.1)}" ${kw(1.4)}/>`;
+  const braid = (s, y, bx2) => Array.from({ length: 6 }, (_, i) => `<ellipse cx="${(50 + s * (bx2 + (i % 2 ? -2.2 : 1.6))).toFixed(1)}" cy="${y + i * 8}" rx="6" ry="5.6" fill="${hc}" ${kw(1.6)}/>`).join('') + `<circle cx="${50 + s * (bx2 - .6)}" cy="${y + 47}" r="3" fill="${shade(oc, -.1)}" ${kw(1.2)}/>`;
+  const lLong = `<path d="M26 54Q19 84 26 102Q38 96 38 70Z" fill="${hc}" ${k}/><path d="M74 54Q81 84 74 102Q62 96 62 70Z" fill="${hc}" ${k}/>`;
   const back = [
     '', `<path d="M24 48Q17 8 50 9Q83 8 76 48L81 98Q50 106 19 98Z" fill="${hc}" ${k}/>`,
     `<circle cx="50" cy="11" r="10" fill="${hc}" ${k}/><path d="M44 8Q50 4 56 8" fill="none" stroke="#fff" opacity=".4" stroke-width="2.4" stroke-linecap="round"/>`, '', circ,
     `<path d="M23 50Q16 8 50 9Q84 8 77 50L79 74Q66 80 61 70L39 70Q34 80 21 74Z" fill="${hc}" ${k}/>`,
     `<path d="M68 26Q93 22 91 56Q89 76 77 84Q82 62 73 46Z" fill="${hc}" ${k}/>`, '',
-    `<path d="M29 32Q7 34 7 62Q7 78 18 82Q15 62 29 50Z" fill="${hc}" ${k}/><path d="M71 32Q93 34 93 62Q93 78 82 82Q85 62 71 50Z" fill="${hc}" ${k}/>`, ''][hs] || '';
-  const locks = hs == 1 ? `<path d="M26 54Q19 84 26 102Q38 96 38 70Z" fill="${hc}" ${k}/><path d="M74 54Q81 84 74 102Q62 96 62 70Z" fill="${hc}" ${k}/>` : '';
+    `<path d="M29 32Q7 34 7 62Q7 78 18 82Q15 62 29 50Z" fill="${hc}" ${k}/><path d="M71 32Q93 34 93 62Q93 78 82 82Q85 62 71 50Z" fill="${hc}" ${k}/>`, '',
+    blob([[50, 21, 17], [32, 26, 14], [68, 26, 14], [22, 40, 12], [78, 40, 12], [24, 54, 8], [76, 54, 8], [39, 15, 12], [61, 15, 12]]),
+    `<path d="M22 58Q14 6 50 8Q86 6 78 58L77 80Q50 87 23 80Z" fill="${hc}" ${k}/>`,
+    '', '',
+    `<circle cx="50" cy="11" r="10.5" fill="${hc}" ${k}/><path d="M43 8Q50 3 57 8M45 15Q50 11 55 15" fill="none" stroke="#fff" opacity=".35" stroke-width="2" stroke-linecap="round"/>`,
+    `<circle cx="27" cy="15" r="11" fill="${hc}" ${k}/><circle cx="73" cy="15" r="11" fill="${hc}" ${k}/>`,
+    `<path d="M50 7Q88 -3 91 36Q93 62 79 80Q83 54 75 38Q67 22 50 22Z" fill="${hc}" ${k}/>`,
+    `<path d="M24 48Q18 8 50 9Q82 8 76 48Z" fill="${hc}" ${k}/>`, `<path d="M24 48Q18 8 50 9Q82 8 76 48Z" fill="${hc}" ${k}/>`,
+    `<path d="M24 48Q16 6 50 8Q84 6 76 48Q85 62 80 76Q87 90 78 101Q64 105 50 100Q36 105 22 101Q13 90 20 76Q15 62 24 48Z" fill="${hc}" ${k}/>`,
+    `<path d="M24 48Q17 8 50 9Q83 8 76 48L81 98Q50 106 19 98Z" fill="${hc}" ${k}/>`,
+    '', '',
+    `<path d="M23 50Q15 8 50 9Q85 8 77 50L80 82Q66 88 60 72L40 72Q34 88 20 82Z" fill="${hc}" ${k}/>`, ''][hs] || '';
+  const locks = [1, 20].includes(hs) ? lLong : hs == 17 ? braid(-1, 58, 23) + braid(1, 58, 23) : hs == 18 ? braid(1, 58, 22) : hs == 19 ? `<path d="M26 54Q19 70 25 82Q19 94 27 104L38 100Q35 84 38 72Q37 64 36 58Z" fill="${hc}" ${k}/><path d="M74 54Q81 70 75 82Q81 94 73 104L62 100Q65 84 62 72Q63 64 64 58Z" fill="${hc}" ${k}/>` : '';
+  const babyTuft = `<path d="M44 21Q41 7 52 10Q61 13 55 21Z" fill="${hc}" ${k}/>`;
   const front = [
     `<path d="M25 46Q21 11 50 11Q79 11 75 46Q73 34 66 29Q52 36 38 28Q29 34 25 46Z" fill="${hc}" ${k}/>${hl}`,
     `<path d="M25 48Q20 11 50 11Q80 11 75 48Q68 33 50 24Q32 33 25 48Z" fill="${hc}" ${k}/>${hl}`,
@@ -494,7 +598,22 @@ function avSvg(l, a, dead, vb) {
     `<path d="M25 46L23 26L32 21L35 6L44 18L50 3L57 18L65 6L68 21L77 26L75 46Q72 33 64 30Q52 36 38 29Q28 34 25 46Z" fill="${hc}" ${k}/>`,
     `<path d="M25 48Q20 11 50 11Q80 11 75 48Q68 32 50 24Q32 32 25 48Z" fill="${hc}" ${k}/>${hl}${tie(27, 38, '#e86a9a')}${tie(73, 38, '#e86a9a')}`,
     `<path d="M38 25Q50 19 62 25" fill="none" stroke="#fff" opacity=".55" stroke-width="3" stroke-linecap="round"/>`,
-    `<path d="M44 21Q41 7 52 10Q61 13 55 21Z" fill="${hc}" ${k}/>`][hs] || '';
+    `<path d="M26 44Q22 20 50 18Q78 20 74 44Q70 30 50 29Q30 30 26 44Z" fill="${hc}" ${k}/>${hl}`,                                   // 10 afro
+    `<path d="M25 47Q20 10 50 10Q80 10 75 47L74 36Q50 29 26 36Z" fill="${hc}" ${k}/>${hl}`,                                          // 11 frufrus bubi
+    `<path d="M25 46Q19 12 46 10Q82 8 76 46Q73 36 64 29Q46 27 36 34Q30 38 25 46Z" fill="${hc}" ${k}/><path d="M42 12Q44 22 37 31" ${th(1.3)} opacity=".5"/>${hl}`, // 12 oldalra fésült
+    `<path d="M25 46Q21 22 32 14Q38 -2 56 3Q72 4 70 16Q79 24 75 46Q73 34 66 29Q52 33 38 29Q29 34 25 46Z" fill="${hc}" ${k}/><path d="M40 12Q50 6 60 10" fill="none" stroke="#fff" opacity=".4" stroke-width="2.6" stroke-linecap="round"/>`, // 13 quiff
+    `<path d="M25 46Q21 12 50 13Q79 12 75 46Q71 30 50 25Q29 30 25 46Z" fill="${hc}" ${k}/>${hl}${tie(50, 13, shade(oc, -.1))}`,    // 14 magas konty
+    `<path d="M25 46Q21 13 50 13Q79 13 75 46Q71 30 50 24Q29 30 25 46Z" fill="${hc}" ${k}/><path d="M50 14V24" ${th(1.2)} opacity=".45"/>${tie(30, 17, '#e86a9a')}${tie(70, 17, '#e86a9a')}`, // 15 két konty
+    `<path d="M25 46Q21 11 50 11Q79 11 75 46Q72 31 62 25Q50 21 38 25Q28 31 25 46Z" fill="${hc}" ${k}/>${hl}${tie(54, 12, '#e86a9a')}`, // 16 magas lófarok
+    `<path d="M25 46Q21 11 50 11Q79 11 75 46Q70 30 50 24Q30 30 25 46Z" fill="${hc}" ${k}/><path d="M50 12V24" ${th(1.2)} opacity=".45"/>${hl}`, // 17 két fonat
+    `<path d="M25 46Q20 11 50 11Q80 11 75 46Q72 32 64 28Q48 26 36 33Q29 37 25 46Z" fill="${hc}" ${k}/>${hl}`,                       // 18 oldalfonat
+    `<path d="M25 48Q20 10 50 10Q80 10 75 48Q70 32 58 28Q50 24 42 28Q30 32 25 48Z" fill="${hc}" ${k}/>${hl}`,                       // 19 hullámos hosszú
+    `<path d="M25 48Q20 10 50 10Q80 10 75 48L74 38Q62 31 50 34Q38 31 26 38Z" fill="${hc}" ${k}/><path d="M38 14Q36 24 38 32M50 12V30M62 14Q64 24 62 32" ${th(1)} opacity=".25"/>`, // 20 hosszú frufruval
+    `<path d="M28 42Q27 24 50 22Q73 24 72 42Q64 29 50 28Q36 29 28 42Z" fill="${hc}" opacity=".45"/><path d="M42 25Q40 12 44 6L47 12L50 0L53 12L56 6Q60 12 58 25Q50 20 42 25Z" fill="${hc}" ${k}/>`, // 21 tarajos
+    `<path d="M25 50Q20 26 32 19Q29 33 33 45Z" fill="${hc}" ${k}/><path d="M75 50Q80 26 68 19Q71 33 67 45Z" fill="${hc}" ${k}/><path d="M43 24Q50 19 57 24" ${th(1.2, hc)} opacity=".7"/><path d="M38 25Q50 18 62 25" fill="none" stroke="#fff" opacity=".5" stroke-width="3" stroke-linecap="round"/>`, // 22 kopaszodó
+    `<path d="M25 50Q19 11 50 11L48 22Q34 27 33 46Z" fill="${hc}" ${k}/><path d="M75 50Q81 11 50 11L52 22Q66 27 67 46Z" fill="${hc}" ${k}/>${hl}`, // 23 középen elválasztott
+    `<path d="M25 46Q19 12 52 10Q82 11 76 46Q72 34 66 29Q60 27 52 29Q38 36 31 43Q27 50 25 46Z" fill="${hc}" ${k}/>${hl}`          // 24 pixie
+  ][hs] || '';
   // ---- arc ----
   const face = f ? 'M27 42Q27 19 50 19Q73 19 73 42Q73 57 63 65Q50 72 37 65Q27 57 27 42Z' : 'M27 40Q27 19 50 19Q73 19 73 40L73 51Q73 68 50 69Q27 68 27 51Z';
   const eye = x => `<ellipse cx="${x}" cy="47" rx="${kid ? 3.2 : 2.8}" ry="${kid ? 3.8 : 3.4}" fill="${OL}"/>`;
@@ -504,15 +623,45 @@ function avSvg(l, a, dead, vb) {
   const nose = `<path d="M50 50.5Q52.4 54 49.6 54.6" fill="none" stroke="${skD}" stroke-width="1.6" stroke-linecap="round"/>`;
   const chin = +l.bd == 5 || +l.bd == 6 ? `<path d="M41 66Q50 70 59 66" ${th(1.4)} opacity=".28"/>` : '';
   const old = a >= 50 ? `<path d="M32 54q2 2.4 4 1.2M68 54q-2 2.4 -4 1.2M40 33q10 -2.4 20 0" ${th(1.1)} opacity=".3"/>` : '';
-  const glasses = a >= 55 && (l.sk + l.hc + l.hs) % 2 == 0 ? `<g fill="#fff" fill-opacity=".22" stroke="${OL}" stroke-width="1.5"><circle cx="39" cy="47" r="6.6"/><circle cx="61" cy="47" r="6.6"/></g><path d="M45.6 46Q50 44 54.4 46M32.4 46L28 45M67.6 46L72 45" ${th(1.5)}/>` : '';
-  const hz = (kid ? (baby ? 1.28 : 1.1) : 1) * bd.hz, hd = `translate(50 52) scale(${(hz * bd.fw).toFixed(3)} ${hz}) translate(-50 -52)`;
+  const fr = shade(xc, -.3), lens = 'fill="#fff" fill-opacity=".22"';
+  const glasses = (gl == -1 ? (a >= 55 && (l.sk + l.hc + l.hs) % 2 == 0 ? 1 : 0) : gl) ? [0,
+    `<g ${lens} stroke="${gl == -1 ? OL : fr}" stroke-width="1.6"><circle cx="39" cy="47" r="6.6"/><circle cx="61" cy="47" r="6.6"/></g><path d="M45.6 46Q50 44 54.4 46M32.4 46L28 45M67.6 46L72 45" ${th(1.5, gl == -1 ? OL : fr)}/>`,
+    `<g ${lens} stroke="${fr}" stroke-width="1.7" stroke-linejoin="round"><rect x="31.5" y="41.5" width="14" height="11" rx="3"/><rect x="54.5" y="41.5" width="14" height="11" rx="3"/></g><path d="M45.5 45H54.5M31.5 44L27 43M68.5 44L73 43" ${th(1.5, fr)}/>`,
+    `<g fill="#1d2230" fill-opacity=".9" stroke="${fr}" stroke-width="1.7" stroke-linejoin="round"><path d="M31.5 42H46L45 51Q44 54 40 54H35Q31 54 31 50Z"/><path d="M54 42H68.5L69 50Q69 54 65 54H60Q56 54 55 51Z"/></g><path d="M46 44.5H54M31.5 43.5L27 42.5M68.5 43.5L73 42.5M34 44l4 -.5" ${th(1.5, fr)}/><path d="M35 45l5 -.4" stroke="#fff" opacity=".5" stroke-width="1.2" stroke-linecap="round"/>`
+  ][gl == -1 ? 1 : gl] : '';
+  // ---- fejfedő ----
+  const hD = shade(xc, -.25), hL = shade(xc, .3);
+  const hat = [
+    '',
+    `<path d="M25 31Q22 7 50 6Q78 7 75 31Z" fill="${xc}" ${k}/><path d="M50 7V28" ${th(1)} opacity=".35"/><circle cx="50" cy="6.5" r="2" fill="${hD}" ${kw(1)}/><path d="M24 30Q50 25 76 30Q80 39 50 42Q20 39 24 30Z" fill="${hD}" ${k}/>`,
+    `<path d="M24 33Q19 4 50 5Q81 4 76 33Z" fill="${xc}" ${k}/><path d="M23 26Q50 21 77 26V34Q50 39 23 34Z" fill="${hL}" ${k}/><path d="M30 24V36M37 23V37M44 22V38M51 22V38M58 22V38M65 23V37M72 24V36" ${th(1)} opacity=".25"/><circle cx="50" cy="4.5" r="6" fill="${hL}" ${k}/>`,
+    `<path d="M30 28Q28 7 50 7Q72 7 70 28Z" fill="${xc}" ${k}/><path d="M30 24Q50 30 70 24" ${th(2.4, hD)}/><path d="M13 30Q50 17 87 30Q91 38 50 40Q9 38 13 30Z" fill="${hL}" ${k}/>`,
+    `<path d="M30 25Q28 5 40 5Q50 10 60 5Q72 5 70 25Z" fill="${xc}" ${k}/><path d="M30 24Q50 30 70 24V19Q50 25 30 19Z" fill="${hD}" ${kw(1.2)}/><path d="M11 27Q50 15 89 27Q93 34 50 36Q7 34 11 27Z" fill="${xc}" ${k}/>`,
+    `<path d="M31 25Q29 8 50 8Q71 8 69 25Z" fill="#ecd08a" ${k}/><path d="M31 23Q50 29 69 23V18Q50 24 31 18Z" fill="${xc}" ${kw(1.2)}/><path d="M9 27Q50 14 91 27Q95 35 50 37Q5 35 9 27Z" fill="#f2dc9c" ${k}/><path d="M18 29Q50 34 82 29M24 32Q50 36 76 32" ${th(1)} opacity=".25"/>`,
+    `<path d="M26 34Q50 17 74 34" ${th(8.2)}/><path d="M26 34Q50 17 74 34" ${th(5.8, xc)}/><path d="M33 29Q50 20 67 29" ${th(1.2, "#fff")} opacity=".5"/>`,
+    `<path d="M64 19L50 11V27ZM64 19L78 11V27Z" fill="${xc}" ${k}/><circle cx="64" cy="19" r="4" fill="${hD}" ${k}/>`,
+    '<path d="M31 20Q27 28 32 33M44 14Q50 12 56 14M69 20Q73 28 68 33" fill="none" stroke="#3f9a52" stroke-width="2.6" stroke-linecap="round"/>' + [[29, 33, '#ff7aa8'], [34, 24, '#ffd24d'], [42, 18, '#fff'], [50, 16, '#ff7aa8'], [58, 18, '#8fd3ff'], [66, 24, '#fff'], [71, 33, '#ffd24d']].map(c => `<circle cx="${c[0]}" cy="${c[1]}" r="4.3" fill="${c[2]}" ${kw(1.3)}/><circle cx="${c[0]}" cy="${c[1]}" r="1.4" fill="${c[2] == '#ffd24d' ? '#ff7aa8' : '#ffd24d'}"/>`).join(''),
+    `<path d="M25 37Q22 9 50 8Q78 9 75 37Q50 29 25 37Z" fill="${xc}" ${k}/><g fill="#fff" opacity=".8"><circle cx="36" cy="22" r="1.6"/><circle cx="50" cy="17" r="1.6"/><circle cx="64" cy="22" r="1.6"/><circle cx="43" cy="28" r="1.4"/><circle cx="57" cy="28" r="1.4"/></g><path d="M74 31L87 25L85 34L90 41L76 38Z" fill="${hD}" ${k}/>`,
+    `<path d="M29 28L30 5L45 17Z" fill="${xc}" ${k}/><path d="M71 28L70 5L55 17Z" fill="${xc}" ${k}/><path d="M32 22L32.4 11L40 17Z" fill="#ffb3c8"/><path d="M68 22L67.6 11L60 17Z" fill="#ffb3c8"/><path d="M27 32Q50 15 73 32" ${th(6.4)}/><path d="M27 32Q50 15 73 32" ${th(4.2, xc)}/>`,
+    `<path d="M30 30L27 8L39 18L50 4L61 18L73 8L70 30Z" fill="#f5c542" ${k}/><path d="M30 25H70" ${th(1.2)} opacity=".4"/><circle cx="27" cy="8" r="2.6" fill="${xc}" ${kw(1)}/><circle cx="50" cy="4.5" r="2.8" fill="${xc}" ${kw(1)}/><circle cx="73" cy="8" r="2.6" fill="${xc}" ${kw(1)}/>`
+  ][ht] || '';
+  // ---- fül ----
+  const cups = `<rect x="16" y="38" width="13" height="21" rx="5.5" fill="${xc}" ${k}/><rect x="71" y="38" width="13" height="21" rx="5.5" fill="${xc}" ${k}/><rect x="20" y="42" width="5" height="13" rx="2.5" fill="${hD}" opacity=".6"/><rect x="75" y="42" width="5" height="13" rx="2.5" fill="${hD}" opacity=".6"/>`;
+  const band = `<path d="M23.5 44C17 -9 83 -9 76.5 44" ${th(6.2)}/><path d="M23.5 44C17 -9 83 -9 76.5 44" ${th(4, xc)}/>`;
+  const ear = [
+    '', band + cups,
+    `<circle cx="27" cy="54" r="3.2" fill="${xc}" ${kw(1.2)}/><circle cx="73" cy="54" r="3.2" fill="${xc}" ${kw(1.2)}/><path d="M27 57Q23 80 40 104M73 57Q77 80 60 104" ${th(1.2)} opacity=".85"/>`,
+    band + cups + `<path d="M19 57Q17 72 34 68" ${th(2.6)}/><circle cx="35" cy="68" r="3.4" fill="${xc}" ${kw(1.2)}/>`,
+    `<circle cx="27" cy="58" r="3" fill="none" stroke="#e6b84a" stroke-width="1.7"/><circle cx="73" cy="58" r="3" fill="none" stroke="#e6b84a" stroke-width="1.7"/><circle cx="27" cy="63.5" r="2.2" fill="${xc}" ${kw(.9)}/><circle cx="73" cy="63.5" r="2.2" fill="${xc}" ${kw(.9)}/>`
+  ][ea] || '';
+  const hd = `translate(50 52) scale(${(((kid ? (baby ? 1.28 : 1.1) : 1) * bd.hz) * bd.fw).toFixed(3)} ${((kid ? (baby ? 1.28 : 1.1) : 1) * bd.hz)}) translate(-50 -52)`;
   const tb = kid ? `translate(50 112) scale(${baby ? '.7 .8' : '.84 .92'}) translate(-50 -112)` : '';
   const hasBrows = !baby;
   return `<svg viewBox="${vb || '0 0 100 110'}" xmlns="http://www.w3.org/2000/svg"><clipPath id="${id}c"><rect width="100" height="110" rx="16"/></clipPath><g clip-path="url(#${id}c)"><rect width="100" height="110" fill="${BG[l.oc] || BG[0]}"/><circle cx="50" cy="50" r="44" fill="#fff" opacity=".4"/>`
-    + `<g transform="${hd}">${back}</g><g transform="${tb}">${bodyG}${locks}</g>`
+    + `<g transform="${hd}">${baby ? '' : back}</g><g transform="${tb}">${bodyG}${baby ? '' : locks}${neck}</g>`
     + `<g transform="${hd}"><ellipse cx="27" cy="49" rx="3.8" ry="5.2" fill="${sk}" ${k}/><ellipse cx="73" cy="49" rx="3.8" ry="5.2" fill="${sk}" ${k}/>`
     + `<clipPath id="${id}f"><path d="${face}"/></clipPath><path d="${face}" fill="${sk}" ${k}/><rect x="52" y="14" width="30" height="62" fill="#000" opacity=".08" clip-path="url(#${id}f)"/>`
-    + `${eye(39)}${eye(61)}${lash(39, -1)}${lash(61, 1)}${hasBrows ? brow(33, 44.5) + brow(67, 55.5) : ''}${nose}${mouth}${chin}${old}${glasses}${front}</g></g></svg>`;
+    + `${eye(39)}${eye(61)}${lash(39, -1)}${lash(61, 1)}${hasBrows ? brow(33, 44.5) + brow(67, 55.5) : ''}${nose}${mouth}${chin}${old}${glasses}${baby ? babyTuft : front}${hat}${ear}</g></g></svg>`;
 }
 const RI = [
   { k: 'hang', l: ['Közös program', 'Hang out'], ok: [9, 4, 'Együtt töltöttetek egy délutánt: ', 'You spent an afternoon with: '] },
@@ -575,26 +724,34 @@ const cfg = () => [
   { ap: 1, k: 'hs', pv: 'hair', l: T(['Frizura', 'Hairstyle']), o: [...HSN.keys()].map(i => [i, T(HSN[i])]).concat([['r', '🎲']]) },
   { ap: 1, k: 'bd', pv: 'body', l: T(['Testalkat', 'Body shape']), o: [...BDN.keys()].map(i => [i, T(BDN[i])]).concat([['r', '🎲']]) },
   { ap: 1, k: 'hc', l: T(['Hajszín', 'Hair color']), o: [[0, ''], [1, ''], [2, ''], [3, ''], [4, ''], [5, ''], ['r', '🎲']] },
-  { ap: 1, k: 'oc', l: T(['Ruha', 'Outfit']), o: [[0, ''], [1, ''], [2, ''], [3, ''], [4, ''], [5, ''], [6, ''], [7, ''], ['r', '🎲']] },
+  { ap: 1, k: 'ot', pv: 'body', l: T(['Ruha típusa', 'Outfit']), o: [...OTN.keys()].map(i => [i, T(OTN[i])]).concat([['r', '🎲']]) },
+  { ap: 1, k: 'oc', l: T(['Ruha színe', 'Outfit color']), o: [[0, ''], [1, ''], [2, ''], [3, ''], [4, ''], [5, ''], [6, ''], [7, ''], ['r', '🎲']] },
+  { ap: 1, k: 'ht', pv: 'hair', nv: 1, l: T(['Fejfedő', 'Headwear']), o: [...HTN.keys()].map(i => [i, T(HTN[i])]).concat([['r', '🎲']]) },
+  { ap: 1, k: 'ea', pv: 'hair', nv: 1, l: T(['Fejhallgató, fülhallgató', 'Headphones & earbuds']), o: [...EAN.keys()].map(i => [i, T(EAN[i])]).concat([['r', '🎲']]) },
+  { ap: 1, k: 'gl', pv: 'hair', nv: 1, l: T(['Szemüveg', 'Glasses']), o: [...GLN.keys()].map(i => [i, T(GLN[i])]).concat([['r', '🎲']]) },
+  { ap: 1, k: 'nc', pv: 'neck', nv: 1, l: T(['Nyakra', 'Neckwear']), o: [...NCN.keys()].map(i => [i, T(NCN[i])]).concat([['r', '🎲']]) },
+  { ap: 1, k: 'xc', l: T(['Kiegészítők színe', 'Accessory color']), o: [[0, ''], [1, ''], [2, ''], [3, ''], [4, ''], [5, ''], [6, ''], [7, ''], ['r', '🎲']] },
   { k: 'city', l: T(['Szülőváros', 'Hometown']), o: CITY.map(c => [c[0], c[0]]).concat([['r', '🎲']]) },
   { k: 'fam', l: T(['Család', 'Family']), o: [[1, T(['Szerény', 'Modest'])], [2, T(['Átlagos', 'Average'])], [3, T(['Tehetős', 'Wealthy'])], ['r', '🎲']] },
   { k: 'gift', l: T(['Tehetség (+15)', 'Talent (+15)']), o: [['hap', '😊 ' + T(['Vidám', 'Cheerful'])], ['hea', '❤️ ' + T(['Egészséges', 'Healthy'])], ['sma', '🧠 ' + T(['Okos', 'Smart'])], ['loo', '✨ ' + T(['Szép', 'Attractive'])], ['r', '🎲']] },
   { k: 'trait', l: T(['Jellem', 'Trait']), o: Object.entries(TRAITS).map(([k, v]) => [k, T(v)]).concat([['r', '🎲']]) }
 ];
 let cc = {};
+const VB = { hair: '4 0 92 84', body: '0 0 100 110', neck: '8 40 84 70' };
 let apOpen = false;
 const ccLook = (o = {}) => { const g = cc.g == 'f' ? 'f' : 'm', n = (k, d) => o[k] != null ? o[k] : cc[k] == 'r' || cc[k] == null ? d : +cc[k];
-  return { g, sk: n('skin', 3), hs: n('hs', g == 'f' ? 1 : 0), hc: n('hc', 1), oc: n('oc', 0), bd: n('bd', 0) }; };
+  return { g, sk: n('skin', 3), hs: n('hs', g == 'f' ? 1 : 0), hc: n('hc', 1), oc: n('oc', 0), bd: n('bd', 0), ot: n('ot', 0), ht: n('ht', 0), ea: n('ea', 0), gl: n('gl', 0), nc: n('nc', 0), xc: n('xc', 5) }; };
 function drawC() {
   const grp = c => `<div class="cg"><small>${c.l}</small><div class="chips">${c.o.map(([v, t]) => {
     const on = cc[c.k] == v ? ' on' : '', at = `data-k="${c.k}" data-v="${v}"`;
-    if (c.pv && v != 'r') return `<button class="chip pv${on}" ${at} title="${t}" aria-label="${t}">${avSvg(ccLook({ [c.k]: v }), 20, false, c.pv == 'hair' ? '4 0 92 84' : '0 0 100 110')}</button>`;
+    if (c.nv && v == 0) return `<button class="chip${on}" ${at}>${t}</button>`;
+    if (c.pv && v != 'r') return `<button class="chip pv${on}" ${at} title="${t}" aria-label="${t}">${avSvg(ccLook({ [c.k]: v }), 20, false, VB[c.pv])}</button>`;
     return `<button class="chip${on}" ${at}>${SW[c.k] && v != 'r' ? `<i class="sw" style="background:${SW[c.k][v]}"></i>` : t}</button>`;
   }).join('')}</div></div>`;
   const A = cfg(); $('#copts').innerHTML = A.filter(c => !c.ap).map(grp).join('') + `<details class="ap" ${apOpen ? 'open' : ''}><summary>${T(['Kinézet testreszabása (opcionális)', 'Customize appearance (optional)'])}</summary>${A.filter(c => c.ap).map(grp).join('')}</details>`;
   $('#cav').innerHTML = avSvg(ccLook(), 20);
 }
-function openCreate() { cc = { g: 'r', skin: 'r', hs: 'r', hc: 'r', oc: 'r', bd: 'r', city: 'r', fam: 'r', gift: 'r', trait: 'r' }; $('#cfn').value = $('#cln').value = ''; drawC(); show('create'); }
+function openCreate() { cc = { g: 'r', skin: 'r', hs: 'r', hc: 'r', oc: 'r', bd: 'r', ot: 'r', ht: 'r', ea: 'r', gl: 'r', nc: 'r', xc: 'r', city: 'r', fam: 'r', gift: 'r', trait: 'r' }; $('#cfn').value = $('#cln').value = ''; drawC(); show('create'); }
 function startLife(rand) {
   newLife(rand ? {} : { ...cc, fn: clean($('#cfn').value), ln: clean($('#cln').value) });
   seen = 0; prev = null; tab = null; lastTab = null; clearTimeout(endT); endT = 0;
