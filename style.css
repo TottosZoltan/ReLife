@@ -166,8 +166,10 @@ header{gap:12px}
 
 #av,#cav{display:flex;align-items:flex-end;justify-content:center}
 #av svg{height:100%!important;width:auto!important;max-height:58px}
-#cav svg{height:140px;width:auto}
+#cav svg{height:150px;width:auto}
 .rwrap{display:flex;gap:10px;align-items:flex-start}
-.rav svg{width:48px;height:60px;display:block}
+.rav svg{width:54px;height:59px;display:block}
 .rbody{flex:1;min-width:0}
 .dsc{display:block;opacity:.7;font-size:11px;margin-bottom:4px}
+
+.ap{margin-top:6px}.ap summary{color:#9fb3c0;font-size:14px;padding:10px 0;cursor:pointer}

@@ -433,15 +433,30 @@ const pk = (v, f) => v != null && v !== 'r' ? +v : f();
 const mkLook = (g, sk) => ({ g, sk: sk || R(1, 5), hs: P(g == 'f' ? [1, 2, 0, 4] : [0, 3, 4, 0]), hc: R(0, 4), oc: R(0, 7) });
 const lk = r => r.look || (r.look = mkLook(NF.includes(r.n.split(' ')[1]) || r.role == 'Anya' ? 'f' : 'm'));
 const desc = l => T([`${T(HCN[l.hc])} ${T(HSN[l.hs])} haj, ${T(OCN[l.oc])} felső`, `${T(HCN[l.hc])} ${T(HSN[l.hs])} hair, ${T(OCN[l.oc])} top`]);
+let UID = 0;
+const BG = ['#fde2d8', '#d3efeb', '#d6e2fb', '#fdf0c4', '#e3d9f6', '#dcdce4', '#fbd8e6', '#d9eed5'];
 function avSvg(l, a, dead) {
   if (dead) return '🪦';
-  const sk = SKINC[l.sk] || SKINC[3], hc = a >= 65 ? '#cfd3da' : HC[l.hc], oc = OC[l.oc], f = l.g == 'f', k = 'stroke="#24180f" stroke-width="2.4" stroke-linejoin="round"', sc = a >= 18 ? 1 : .55 + .45 * a / 18, hs = l.hs;
-  const front = `<path d="M18 30Q16 13 32 13Q48 13 46 30Q40 21 32 21Q24 21 18 30Z" fill="${hc}" ${k}/>`;
-  const back = hs == 1 ? `<path d="M17 30Q13 11 32 11Q51 11 47 30L50 54H14Z" fill="${hc}" ${k}/>` : hs == 2 ? `<circle cx="32" cy="9" r="6.5" fill="${hc}" ${k}/>` : hs == 4 ? `<ellipse cx="32" cy="24" rx="19" ry="16" fill="${hc}" ${k}/>` : '';
-  const fr = hs == 3 ? `<path d="M19 27Q20 16 32 16Q44 16 45 27Q38 20 32 20Q26 20 19 27Z" fill="${hc}" opacity=".55"/>` : front;
-  const lower = f ? `<path d="M20 44H44L49 73H15Z" fill="${oc}" ${k}/><rect x="23" y="72" width="6" height="6" rx="2" fill="${sk}" ${k}/><rect x="35" y="72" width="6" height="6" rx="2" fill="${sk}" ${k}/>`
-    : `<rect x="20" y="55" width="10" height="22" rx="3" fill="#3b4a63" ${k}/><rect x="34" y="55" width="10" height="22" rx="3" fill="#3b4a63" ${k}/><path d="M18 58V50Q18 44 25 44H39Q46 44 46 50V58Z" fill="${oc}" ${k}/>`;
-  return `<svg viewBox="0 0 64 80" xmlns="http://www.w3.org/2000/svg"><g transform="translate(32 79) scale(${sc}) translate(-32 -79)">${back}<rect x="11" y="45" width="8" height="17" rx="4" fill="${oc}" ${k}/><rect x="45" y="45" width="8" height="17" rx="4" fill="${oc}" ${k}/>${lower}<path d="M18 44H46" stroke="#000" opacity=".12"/><rect x="28" y="40" width="8" height="7" fill="${sk}" ${k}/><circle cx="19" cy="32" r="3" fill="${sk}" ${k}/><circle cx="45" cy="32" r="3" fill="${sk}" ${k}/><ellipse cx="32" cy="30" rx="13" ry="14" fill="${sk}" ${k}/><path d="M32 16A13 14 0 0 1 32 44Z" fill="#000" opacity=".1"/>${fr}<ellipse cx="26" cy="32" rx="2.3" ry="3.1" fill="#24180f"/><ellipse cx="38" cy="32" rx="2.3" ry="3.1" fill="#24180f"/><circle cx="26.8" cy="30.8" r=".9" fill="#fff"/><circle cx="38.8" cy="30.8" r=".9" fill="#fff"/><ellipse cx="22.5" cy="37" rx="2.6" ry="1.6" fill="#ff6b81" opacity=".35"/><ellipse cx="41.5" cy="37" rx="2.6" ry="1.6" fill="#ff6b81" opacity=".35"/><path d="M29 39Q32 42 35 39" fill="none" stroke="#24180f" stroke-width="1.8" stroke-linecap="round"/></g></svg>`;
+  const id = 'g' + (++UID), sk = SKINC[l.sk] || SKINC[3], hc = a >= 65 ? '#d5d8de' : HC[l.hc], oc = OC[l.oc], f = l.g == 'f', hs = l.hs, bust = f && a >= 18, kid = a < 13;
+  const k = 'stroke="#2a1a14" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"', th = 'fill="none" stroke="#2a1a14" stroke-width="1.5" stroke-linecap="round"';
+  const ec = ['#5a3a22', '#2f6fb5', '#3b8f5a', '#7a5a9e', '#3a3a3a'][(l.sk + l.oc + l.hc) % 5];
+  const body = f && a >= 13 ? 'M14 110Q15 82 37 76L63 76Q85 82 86 110Z' : 'M6 110Q8 82 34 76L66 76Q92 82 94 110Z';
+  const face = f ? 'M30 44Q29 24 50 23Q71 24 70 44Q70 58 61 66Q50 74 39 66Q30 58 30 44Z' : 'M30 44Q29 24 50 23Q71 24 70 44Q71 60 61 68Q50 73 39 68Q29 60 30 44Z';
+  const bang = 'M29 46Q25 18 50 16Q75 18 71 46Q68 33 59 30Q54 40 44 33Q33 33 29 46Z';
+  const hl = `<path d="M36 25Q50 17 64 26" fill="none" stroke="#fff" opacity=".4" stroke-width="3" stroke-linecap="round"/>`;
+  const circ = [[30, 30], [38, 20], [50, 16], [62, 20], [70, 30], [26, 46], [74, 46]].map(c => `<circle cx="${c[0]}" cy="${c[1]}" r="11" fill="${hc}" ${k}/>`).join('');
+  const back = hs == 1 ? `<path d="M26 48Q21 14 50 13Q79 14 74 48L79 98Q50 106 21 98Z" fill="${hc}" ${k}/>` : hs == 2 ? `<circle cx="50" cy="11" r="9" fill="${hc}" ${k}/><path d="M44 8Q50 4 56 8" fill="none" stroke="#fff" opacity=".4" stroke-width="2.4" stroke-linecap="round"/>` : hs == 4 ? circ : '';
+  const front = hs == 3 ? `<path d="M30 40Q31 22 50 21Q69 22 70 40Q60 27 50 27Q40 27 30 40Z" fill="${hc}" opacity=".6"/>`
+    : hs == 4 ? [[40, 29], [50, 25], [60, 29]].map(c => `<circle cx="${c[0]}" cy="${c[1]}" r="8" fill="${hc}"/>`).join('') + hl : `<path d="${bang}" fill="${hc}" ${k}/>${hl}<path d="M44 33Q47 26 52 22" ${th} opacity=".35"/>`;
+  const locks = hs == 1 ? `<path d="M27 56Q21 84 29 102Q38 92 36 64Z" fill="${hc}" ${k}/><path d="M73 56Q79 84 71 102Q62 92 64 64Z" fill="${hc}" ${k}/>` : '';
+  const eye = (x, s) => `<ellipse cx="${x}" cy="50" rx="6" ry="6.6" fill="#fff"/><ellipse cx="${x}" cy="51" rx="4.4" ry="5.4" fill="${ec}"/><ellipse cx="${x}" cy="53" rx="4.4" ry="3" fill="#000" opacity=".2"/><circle cx="${x}" cy="51" r="2.2" fill="#1a1010"/><circle cx="${x - 1.6}" cy="48.8" r="1.7" fill="#fff"/><circle cx="${x + 1.8}" cy="53" r=".8" fill="#fff"/><path d="M${x - 7} 47Q${x} 42.5 ${x + 7} 47" fill="none" stroke="#2a1a14" stroke-width="${f ? 2.8 : 2.2}" stroke-linecap="round"/>` + (f && a >= 13 ? `<path d="M${x + s * 7} 47l${s * 3} -2" stroke="#2a1a14" stroke-width="1.6" stroke-linecap="round"/>` : '') + `<path d="M${x - 6} 40.5Q${x} 37.5 ${x + 6} 40" fill="none" stroke="${hc}" stroke-width="${f ? 2.2 : 3.2}" stroke-linecap="round"/>`;
+  const neckline = (l.oc % 2 ? 'M39 75.5L50 92L61 75.5Z' : 'M38 75.5Q50 91 62 75.5Z');
+  const bs = bust ? `<path d="M30 94Q38 108 49 98M51 98Q62 108 70 94" ${th} stroke-width="1.9"/><path d="M33 99Q40 107 48 101Q41 102 33 99ZM67 99Q60 107 52 101Q59 102 67 99Z" fill="#000" opacity=".13"/><path d="M34 91Q41 97 47 92M53 92Q59 97 66 91" fill="none" stroke="#fff" opacity=".4" stroke-width="2.6" stroke-linecap="round"/>` : '';
+  const old = a >= 50 ? `<path d="M31 55q2 2 4 1M69 55q-2 2 -4 1M40 38q10 -2 20 0" ${th} opacity=".3" stroke-width="1"/>` : '';
+  const mouth = f ? `<path d="M43.5 65Q50 70 56.5 65Q50 67.5 43.5 65Z" fill="#d9667a" stroke="#2a1a14" stroke-width="1.3" stroke-linejoin="round"/>` : `<path d="M44 65.5Q50 69.5 56 65.5" ${th} stroke-width="1.9"/>`;
+  const bodyG = `<clipPath id="${id}t"><path d="${body}"/></clipPath><path d="${body}" fill="${oc}" ${k}/><rect x="50" y="70" width="50" height="45" fill="#000" opacity=".13" clip-path="url(#${id}t)"/><path d="M26 82Q23 98 25 110M74 82Q77 98 75 110" ${th} opacity=".3"/>${bs}`;
+  const hd = kid ? 'translate(50 52) scale(1.1) translate(-50 -52)' : '', tb = kid ? 'translate(50 110) scale(.82 .92) translate(-50 -110)' : '';
+  return `<svg viewBox="0 0 100 110" xmlns="http://www.w3.org/2000/svg"><clipPath id="${id}c"><rect width="100" height="110" rx="16"/></clipPath><g clip-path="url(#${id}c)"><rect width="100" height="110" fill="${BG[l.oc]}"/><circle cx="50" cy="48" r="42" fill="#fff" opacity=".35"/><g transform="${hd}">${back}</g><g transform="${tb}"><path d="M42 60V80Q50 86 58 80V60Z" fill="${sk}" ${k}/>${bodyG}<path d="${neckline}" fill="${sk}"/><path d="${neckline.replace('Z', '')}" ${th} stroke-width="1.8"/><path d="M35 76Q50 97 65 76" fill="none" stroke="#000" opacity=".18" stroke-width="2.5"/>${locks}</g><g transform="${hd}"><ellipse cx="50" cy="73" rx="8" ry="4" fill="#000" opacity=".16"/><ellipse cx="29.5" cy="50" rx="4" ry="6" fill="${sk}" ${k}/><ellipse cx="70.5" cy="50" rx="4" ry="6" fill="${sk}" ${k}/><clipPath id="${id}f"><path d="${face}"/></clipPath><path d="${face}" fill="${sk}" ${k}/><rect x="50" y="20" width="30" height="56" fill="#000" opacity=".1" clip-path="url(#${id}f)"/><ellipse cx="50" cy="31" rx="24" ry="8" fill="#000" opacity=".1" clip-path="url(#${id}f)"/><ellipse cx="36" cy="60" rx="4.5" ry="2.6" fill="#ff6b81" opacity=".3"/><ellipse cx="64" cy="60" rx="4.5" ry="2.6" fill="#ff6b81" opacity=".3"/>${eye(39, -1)}${eye(61, 1)}<path d="M50 57Q52.2 59.8 49.5 60.2" fill="none" stroke="#7a4a30" stroke-width="1.3" stroke-linecap="round" opacity=".7"/>${mouth}${old}${front}</g></g></svg>`;
 }
 const RI = [
   { k: 'hang', l: ['Közös program', 'Hang out'], ok: [9, 4, 'Együtt töltöttetek egy délutánt: ', 'You spent an afternoon with: '] },
@@ -500,19 +515,21 @@ const clean = s => s.replace(/[<>&"'`\\]/g, '').trim().slice(0, 16);
 function showTitle() { $('#tcont').hidden = !(p && !p.dead); show('title'); }
 const cfg = () => [
   { k: 'g', l: T(['Nem', 'Gender']), o: [['f', T(['Lány', 'Girl'])], ['m', T(['Fiú', 'Boy'])], ['r', '🎲']] },
-  { k: 'skin', l: T(['Bőrszín', 'Skin tone']), o: [[1, ''], [2, ''], [3, ''], [4, ''], [5, ''], ['r', '🎲']] },
-  { k: 'hs', l: T(['Haj', 'Hair']), o: [[0, T(['Rövid', 'Short'])], [1, T(['Hosszú', 'Long'])], [2, T(['Feltűzött', 'Tied-up'])], [3, T(['Kopasz', 'Buzzed'])], [4, T(['Göndör', 'Curly'])], ['r', '🎲']] },
-  { k: 'hc', l: T(['Hajszín', 'Hair color']), o: [[0, ''], [1, ''], [2, ''], [3, ''], [4, ''], [5, ''], ['r', '🎲']] },
-  { k: 'oc', l: T(['Ruha', 'Outfit']), o: [[0, ''], [1, ''], [2, ''], [3, ''], [4, ''], [5, ''], [6, ''], [7, ''], ['r', '🎲']] },
+  { ap: 1, k: 'skin', l: T(['Bőrszín', 'Skin tone']), o: [[1, ''], [2, ''], [3, ''], [4, ''], [5, ''], ['r', '🎲']] },
+  { ap: 1, k: 'hs', l: T(['Haj', 'Hair']), o: [[0, T(['Rövid', 'Short'])], [1, T(['Hosszú', 'Long'])], [2, T(['Feltűzött', 'Tied-up'])], [3, T(['Kopasz', 'Buzzed'])], [4, T(['Göndör', 'Curly'])], ['r', '🎲']] },
+  { ap: 1, k: 'hc', l: T(['Hajszín', 'Hair color']), o: [[0, ''], [1, ''], [2, ''], [3, ''], [4, ''], [5, ''], ['r', '🎲']] },
+  { ap: 1, k: 'oc', l: T(['Ruha', 'Outfit']), o: [[0, ''], [1, ''], [2, ''], [3, ''], [4, ''], [5, ''], [6, ''], [7, ''], ['r', '🎲']] },
   { k: 'city', l: T(['Szülőváros', 'Hometown']), o: CITY.map(c => [c[0], c[0]]).concat([['r', '🎲']]) },
   { k: 'fam', l: T(['Család', 'Family']), o: [[1, T(['Szerény', 'Modest'])], [2, T(['Átlagos', 'Average'])], [3, T(['Tehetős', 'Wealthy'])], ['r', '🎲']] },
   { k: 'gift', l: T(['Tehetség (+15)', 'Talent (+15)']), o: [['hap', '😊 ' + T(['Vidám', 'Cheerful'])], ['hea', '❤️ ' + T(['Egészséges', 'Healthy'])], ['sma', '🧠 ' + T(['Okos', 'Smart'])], ['loo', '✨ ' + T(['Szép', 'Attractive'])], ['r', '🎲']] },
   { k: 'trait', l: T(['Jellem', 'Trait']), o: Object.entries(TRAITS).map(([k, v]) => [k, T(v)]).concat([['r', '🎲']]) }
 ];
 let cc = {};
+let apOpen = false;
 function drawC() {
-  $('#copts').innerHTML = cfg().map(c => `<div class="cg"><small>${c.l}</small><div class="chips">${c.o.map(([v, t]) =>
-    `<button class="chip${cc[c.k] == v ? ' on' : ''}" data-k="${c.k}" data-v="${v}">${SW[c.k] && v != 'r' ? `<i class="sw" style="background:${SW[c.k][v]}"></i>` : t}</button>`).join('')}</div></div>`).join('');
+  const grp = c => `<div class="cg"><small>${c.l}</small><div class="chips">${c.o.map(([v, t]) =>
+    `<button class="chip${cc[c.k] == v ? ' on' : ''}" data-k="${c.k}" data-v="${v}">${SW[c.k] && v != 'r' ? `<i class="sw" style="background:${SW[c.k][v]}"></i>` : t}</button>`).join('')}</div></div>`;
+  const A = cfg(); $('#copts').innerHTML = A.filter(c => !c.ap).map(grp).join('') + `<details class="ap" ${apOpen ? 'open' : ''}><summary>${T(['Kinézet testreszabása (opcionális)', 'Customize appearance (optional)'])}</summary>${A.filter(c => c.ap).map(grp).join('')}</details>`;
   $('#cav').innerHTML = avSvg({ g: cc.g == 'f' ? 'f' : 'm', sk: cc.skin == 'r' ? 3 : +cc.skin, hs: cc.hs == 'r' ? (cc.g == 'f' ? 1 : 0) : +cc.hs, hc: cc.hc == 'r' ? 1 : +cc.hc, oc: cc.oc == 'r' ? 0 : +cc.oc }, 20);
 }
 function openCreate() { cc = { g: 'r', skin: 'r', hs: 'r', hc: 'r', oc: 'r', city: 'r', fam: 'r', gift: 'r', trait: 'r' }; $('#cfn').value = $('#cln').value = ''; drawC(); show('create'); }
@@ -554,6 +571,7 @@ $('#again').onclick = () => { $('#end').hidden = true; openCreate(); };
 $('#crand').onclick = () => startLife(true);
 $('#cgo').onclick = () => startLife(false);
 $('#dice').onclick = () => { const g = cc.g == 'r' ? P(['f', 'm']) : cc.g; $('#cln').value = P(SN); $('#cfn').value = P(g == 'f' ? NF : NM); };
+$('#copts').addEventListener('toggle', e => { apOpen = e.target.open; }, true);
 $('#copts').onclick = e => { const b = e.target.closest('.chip'); if (b) { cc[b.dataset.k] = b.dataset.v; drawC(); } };
 $('#cls').onclick = () => { tab = null; render(); };
 $('#sheet').onclick = e => { if (e.target.id == 'sheet') { tab = null; render(); } };
