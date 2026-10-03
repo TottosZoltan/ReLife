@@ -467,14 +467,17 @@ const BODY = [
 ];
 function avSvg(l, a, dead, vb) {
   if (dead) return '🪦';
-  const id = 'g' + (++UID), sk = SKINC[l.sk] || SKINC[3], f = l.g == 'f', baby = a < 3, kid = a < 13, bd = BODY[+l.bd || 0] || BODY[0];
+  const id = 'g' + (++UID), sk = SKINC[l.sk] || SKINC[3], f = l.g == 'f', baby = a < 3, bd = BODY[+l.bd || 0] || BODY[0];
+  const c01 = v => Math.max(0, Math.min(1, v)), gr = c01((a - 3) / 13), mat = c01((a - 12) / 6), adultF = f && a >= 18;
   const hc = a >= 65 ? '#d5d8de' : HC[l.hc] || HC[0], oc = OC[l.oc] || OC[0];
-  const ot = +l.ot || 0, ht = +l.ht || 0, ea = +l.ea || 0, gl = l.gl == null ? -1 : +l.gl || 0, nc = +l.nc || 0, xc = XC[l.xc == null ? 5 : +l.xc] || XC[5];
+  const ot = +l.ot || 0, ht = +l.ht || 0, ea = +l.ea || 0, gl = baby ? 0 : l.gl == null ? -1 : +l.gl || 0, nc = baby ? 0 : +l.nc || 0, xc = XC[l.xc == null ? 5 : +l.xc] || XC[5];
   let hs = +l.hs || 0; if (FULLHAT.includes(ht) && TALL.includes(hs)) hs = 0;
+  if (a < 6 && ![0, 3, 9, 12, 22, 24].includes(hs)) hs = 0; // kisgyereknek még nincs hosszú haja
+  if (hs == 22 && a < 30) hs = 0;
   const OL = '#2b1d17', kw = w => `stroke="${OL}" stroke-width="${w}" stroke-linejoin="round" stroke-linecap="round"`, k = kw(2), th = (w = 1.7, c = OL) => `fill="none" stroke="${c}" stroke-width="${w}" stroke-linecap="round"`;
   const skD = shade(sk, -.18), hb = shade(hc, -.4), hl = `<path d="M37 24Q50 17 63 25" fill="none" stroke="#fff" opacity=".35" stroke-width="3" stroke-linecap="round"/>`;
   // ---- test ----
-  const g = f ? .91 : 1, sx = bd.sx * g, bx = bd.bx * g, sy = bd.sy, nw = bd.nw, y0 = sy - 5;
+  const g = (f ? .91 : 1) * (.9 + .1 * mat), sx = bd.sx * g, bx = bd.bx * g, sy = bd.sy, nw = bd.nw, y0 = sy - 5;
   const SL = 50 - sx, SR = 50 + sx, BL = 50 - bx, BR = 50 + bx, nwl = 50 - nw, nwr = 50 + nw;
   const pL = `M${BL} 112L${SL} ${sy + 8}C${SL} ${sy - 2} ${50 - nw - 10} ${sy - 4} ${50 - nw} ${y0}`, pR = `M${50 + nw} ${y0}C${50 + nw + 10} ${sy - 4} ${SR} ${sy - 2} ${SR} ${sy + 8}L${BR} 112`;
   const torso = `${pL}L${50 + nw} ${y0}${pR.slice(pR.indexOf('C'))}Z`;
@@ -548,12 +551,21 @@ function avSvg(l, a, dead, vb) {
     none: ['', '']
   }[O.nk];
   const musc = +l.bd == 3 || +l.bd == 4 ? `<path d="M${50 - 15} ${sy + 15}Q${50 - 7} ${sy + 20} 50 ${sy + 15}Q${50 + 7} ${sy + 20} ${50 + 15} ${sy + 15}" ${th(1.5)} opacity=".22"/>` : '';
+  const bust = `<g fill="none" stroke="${OL}" stroke-width="1.5" stroke-linecap="round" opacity=".4"><path d="M${50 - 2.5} ${sy + 18}Q${50 - 11} ${sy + 25} ${50 - 19.5} ${sy + 14}"/><path d="M${50 + 2.5} ${sy + 18}Q${50 + 11} ${sy + 25} ${50 + 19.5} ${sy + 14}"/><path d="M50 ${sy + 9}Q${50 - 1} ${sy + 14} 50 ${sy + 18}" stroke-width="1.1" opacity=".6"/></g><path d="M${50 - 19.5} ${sy + 14}Q${50 - 11} ${sy + 25} ${50 - 2.5} ${sy + 18}Q${50 - 11} ${sy + 21} ${50 - 19.5} ${sy + 14}ZM${50 + 19.5} ${sy + 14}Q${50 + 11} ${sy + 25} ${50 + 2.5} ${sy + 18}Q${50 + 11} ${sy + 21} ${50 + 19.5} ${sy + 14}Z" fill="#000" opacity=".12"/>`;
   const bodyG = `<path d="M${50 - nw} 58H${50 + nw}V${y0 + 3}H${50 - nw}Z" fill="${sk}"/><path d="M${50 - nw} 62V${y0}M${50 + nw} 62V${y0}" ${th()}/>`
     + `<path d="M${50 - nw} 62H${50 + nw}V74Q50 80 ${50 - nw} 74Z" fill="#000" opacity=".14"/>`
     + `<clipPath id="${id}t"><path d="${torso}"/></clipPath><path d="${torso}" fill="${O.fill}"/><g clip-path="url(#${id}t)">${O.pre}<rect x="50" y="60" width="60" height="60" fill="#000" opacity=".1"/></g>`
     + `<path d="${pL}" ${k} fill="none"/><path d="${pR}" ${k} fill="none"/>`
-    + `<path d="M${50 - ax} ${sy + 12}Q${50 - ax - 1.5} ${sy + 24} ${50 - ax} 112M${50 + ax} ${sy + 12}Q${50 + ax + 1.5} ${sy + 24} ${50 + ax} 112" ${th()} opacity="${ot == 6 || ot == 15 ? 0 : .22}"/>${ot == 0 || ot == 1 || ot == 7 ? musc : ''}`
+    + `<path d="M${50 - ax} ${sy + 12}Q${50 - ax - 1.5} ${sy + 24} ${50 - ax} 112M${50 + ax} ${sy + 12}Q${50 + ax + 1.5} ${sy + 24} ${50 + ax} 112" ${th()} opacity="${ot == 6 || ot == 15 ? 0 : .22}"/>${ot == 0 || ot == 1 || ot == 7 ? musc : ''}${adultF ? bust : ''}`
     + (nkP[0] ? `<path d="${nkP[0]}" fill="${sk}"/><path d="${nkP[1]}" ${th(1.7)}/>` : '') + O.post;
+  // ---- csecsemő: pólya ----
+  const sw0 = shade(oc, .62), sw1 = shade(oc, .42);
+  const swShape = 'M17 114C17 94 30 80 50 78C70 80 83 94 83 114Z';
+  const swaddle = `<clipPath id="${id}w"><path d="${swShape}"/></clipPath><path d="${swShape}" fill="${sw0}"/>`
+    + `<g clip-path="url(#${id}w)"><path d="M10 96Q50 108 90 90L90 103Q50 120 10 109Z" fill="${sw1}"/><path d="M22 84Q50 98 78 84L78 92Q50 106 22 92Z" fill="${shade(oc, .3)}"/>`
+    + [[28, 110, 1.6], [44, 113, 1.3], [62, 109, 1.6], [76, 101, 1.4], [32, 97, 1.1], [58, 90, 1.2]].map(c => `<circle cx="${c[0]}" cy="${c[1]}" r="${c[2]}" fill="${oc}" opacity=".55"/>`).join('') + `</g>`
+    + `<path d="${swShape}" fill="none" ${k}/><path d="M22 84Q50 98 78 84" ${th(1.4)} opacity=".55"/><path d="M10 96Q50 108 90 90" fill="none" stroke="${OL}" stroke-width="1.2" opacity=".35" clip-path="url(#${id}w)"/>`
+    + `<circle cx="34" cy="94" r="4.4" fill="${sk}" ${kw(1.5)}/><path d="M32.4 93q1.8 -1.4 3.6 0" ${th(1)} opacity=".5"/>`;
   // ---- nyakra ----
   const neck = [
     '',
@@ -586,7 +598,9 @@ function avSvg(l, a, dead, vb) {
     '', '',
     `<path d="M23 50Q15 8 50 9Q85 8 77 50L80 82Q66 88 60 72L40 72Q34 88 20 82Z" fill="${hc}" ${k}/>`, ''][hs] || '';
   const locks = [1, 20].includes(hs) ? lLong : hs == 17 ? braid(-1, 58, 23) + braid(1, 58, 23) : hs == 18 ? braid(1, 58, 22) : hs == 19 ? `<path d="M26 54Q19 70 25 82Q19 94 27 104L38 100Q35 84 38 72Q37 64 36 58Z" fill="${hc}" ${k}/><path d="M74 54Q81 70 75 82Q81 94 73 104L62 100Q65 84 62 72Q63 64 64 58Z" fill="${hc}" ${k}/>` : '';
-  const babyTuft = `<path d="M44 21Q41 7 52 10Q61 13 55 21Z" fill="${hc}" ${k}/>`;
+  const babyTuft = a < 1 ? `<path d="M40 24Q50 17 60 24" fill="none" stroke="${hc}" stroke-width="2.2" stroke-linecap="round" opacity=".28"/><path d="M44 22Q50 19 56 22" fill="none" stroke="${hc}" stroke-width="1.6" stroke-linecap="round" opacity=".4"/>`
+    : a < 2 ? `<path d="M46 21Q45 13 51 14Q56 16 54 21Z" fill="${hc}" ${kw(1.4)}/>`
+    : `<path d="M44 21Q41 7 52 10Q61 13 55 21Z" fill="${hc}" ${k}/><path d="M37 23Q40 15 45 21" fill="none" stroke="${hc}" stroke-width="2" stroke-linecap="round" opacity=".7"/>`;
   const front = [
     `<path d="M25 46Q21 11 50 11Q79 11 75 46Q73 34 66 29Q52 36 38 28Q29 34 25 46Z" fill="${hc}" ${k}/>${hl}`,
     `<path d="M25 48Q20 11 50 11Q80 11 75 48Q68 33 50 24Q32 33 25 48Z" fill="${hc}" ${k}/>${hl}`,
@@ -616,12 +630,15 @@ function avSvg(l, a, dead, vb) {
   ][hs] || '';
   // ---- arc ----
   const face = f ? 'M27 42Q27 19 50 19Q73 19 73 42Q73 57 63 65Q50 72 37 65Q27 57 27 42Z' : 'M27 40Q27 19 50 19Q73 19 73 40L73 51Q73 68 50 69Q27 68 27 51Z';
-  const eye = x => `<ellipse cx="${x}" cy="47" rx="${kid ? 3.2 : 2.8}" ry="${kid ? 3.8 : 3.4}" fill="${OL}"/>`;
+  const ek = c01((a - 8) / 8), eye = x => `<ellipse cx="${x}" cy="47" rx="${(3.2 - .4 * ek).toFixed(2)}" ry="${(3.8 - .4 * ek).toFixed(2)}" fill="${OL}"/>`;
   const lash = (x, s) => f && a >= 10 ? `<path d="M${x + s * 3.4} 45.4l${s * 2.6} -2" stroke="${OL}" stroke-width="1.7" stroke-linecap="round"/>` : '';
   const brow = (x1, x2) => `<path d="M${x1} 39.5Q${(x1 + x2) / 2} 36.4 ${x2} 38.6" fill="none" stroke="${hb}" stroke-width="${f ? 2.3 : 3.1}" stroke-linecap="round"/>`;
   const mouth = `<path d="M44.5 59Q50 63.2 55.5 59" ${th(1.9)}/>`;
   const nose = `<path d="M50 50.5Q52.4 54 49.6 54.6" fill="none" stroke="${skD}" stroke-width="1.6" stroke-linecap="round"/>`;
   const chin = +l.bd == 5 || +l.bd == 6 ? `<path d="M41 66Q50 70 59 66" ${th(1.4)} opacity=".28"/>` : '';
+  const acN = a >= 12 && a <= 17 ? [1, 3, 4, 5, 4, 2][a - 12] : 0;
+  const acne = [[34, 55], [64, 53], [44, 29], [58, 27], [67, 44], [32, 44], [50, 33]].slice(0, acN).map(c => `<circle cx="${c[0]}" cy="${c[1]}" r="1.3" fill="#d9645a" opacity=".85"/>`).join('');
+  const fuzz = !f && a >= 14 && a <= 17 ? `<path d="M44 55.6Q50 53.6 56 55.6" fill="none" stroke="${hb}" stroke-width="2.2" stroke-linecap="round" opacity="${((a - 13) * .13).toFixed(2)}"/>` : '';
   const old = a >= 50 ? `<path d="M32 54q2 2.4 4 1.2M68 54q-2 2.4 -4 1.2M40 33q10 -2.4 20 0" ${th(1.1)} opacity=".3"/>` : '';
   const fr = shade(xc, -.3), lens = 'fill="#fff" fill-opacity=".22"';
   const glasses = (gl == -1 ? (a >= 55 && (l.sk + l.hc + l.hs) % 2 == 0 ? 1 : 0) : gl) ? [0,
@@ -654,14 +671,15 @@ function avSvg(l, a, dead, vb) {
     band + cups + `<path d="M19 57Q17 72 34 68" ${th(2.6)}/><circle cx="35" cy="68" r="3.4" fill="${xc}" ${kw(1.2)}/>`,
     `<circle cx="27" cy="58" r="3" fill="none" stroke="#e6b84a" stroke-width="1.7"/><circle cx="73" cy="58" r="3" fill="none" stroke="#e6b84a" stroke-width="1.7"/><circle cx="27" cy="63.5" r="2.2" fill="${xc}" ${kw(.9)}/><circle cx="73" cy="63.5" r="2.2" fill="${xc}" ${kw(.9)}/>`
   ][ea] || '';
-  const hd = `translate(50 52) scale(${(((kid ? (baby ? 1.28 : 1.1) : 1) * bd.hz) * bd.fw).toFixed(3)} ${((kid ? (baby ? 1.28 : 1.1) : 1) * bd.hz)}) translate(-50 -52)`;
-  const tb = kid ? `translate(50 112) scale(${baby ? '.7 .8' : '.84 .92'}) translate(-50 -112)` : '';
+  const hz0 = baby ? 1.28 : 1 + .14 * (1 - gr);
+  const hd = `translate(50 52) scale(${(hz0 * bd.hz * bd.fw).toFixed(3)} ${(hz0 * bd.hz).toFixed(3)}) translate(-50 -52)`;
+  const tb = baby || a >= 16 ? '' : `translate(50 112) scale(${(.84 + .16 * gr).toFixed(3)} ${(.92 + .08 * gr).toFixed(3)}) translate(-50 -112)`;
   const hasBrows = !baby;
   return `<svg viewBox="${vb || '0 0 100 110'}" xmlns="http://www.w3.org/2000/svg"><clipPath id="${id}c"><rect width="100" height="110" rx="16"/></clipPath><g clip-path="url(#${id}c)"><rect width="100" height="110" fill="${BG[l.oc] || BG[0]}"/><circle cx="50" cy="50" r="44" fill="#fff" opacity=".4"/>`
-    + `<g transform="${hd}">${baby ? '' : back}</g><g transform="${tb}">${bodyG}${baby ? '' : locks}${neck}</g>`
+    + `<g transform="${hd}">${baby ? '' : back}</g><g transform="${tb}">${baby ? swaddle : bodyG + locks + neck}</g>`
     + `<g transform="${hd}"><ellipse cx="27" cy="49" rx="3.8" ry="5.2" fill="${sk}" ${k}/><ellipse cx="73" cy="49" rx="3.8" ry="5.2" fill="${sk}" ${k}/>`
     + `<clipPath id="${id}f"><path d="${face}"/></clipPath><path d="${face}" fill="${sk}" ${k}/><rect x="52" y="14" width="30" height="62" fill="#000" opacity=".08" clip-path="url(#${id}f)"/>`
-    + `${eye(39)}${eye(61)}${lash(39, -1)}${lash(61, 1)}${hasBrows ? brow(33, 44.5) + brow(67, 55.5) : ''}${nose}${mouth}${chin}${old}${glasses}${baby ? babyTuft : front}${hat}${ear}</g></g></svg>`;
+    + `${eye(39)}${eye(61)}${lash(39, -1)}${lash(61, 1)}${hasBrows ? brow(33, 44.5) + brow(67, 55.5) : ''}${nose}${mouth}${chin}${old}${acne}${fuzz}${a < 7 ? `<ellipse cx="32.5" cy="56" rx="4.2" ry="2.8" fill="#ff7a8a" opacity=".32"/><ellipse cx="67.5" cy="56" rx="4.2" ry="2.8" fill="#ff7a8a" opacity=".32"/>` : ''}${glasses}${baby ? babyTuft : front}${hat}${ear}</g></g></svg>`;
 }
 const RI = [
   { k: 'hang', l: ['Közös program', 'Hang out'], ok: [9, 4, 'Együtt töltöttetek egy délutánt: ', 'You spent an afternoon with: '] },
