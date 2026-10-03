@@ -150,3 +150,16 @@ header{gap:12px}
 .cbtns button{padding:15px 8px;font-size:16px;background:#ffffff1c}
 #cgo{background:var(--pap);box-shadow:0 4px 0 #a93c1d}
 @media (prefers-reduced-motion:reduce){#logo span{opacity:1;transform:none}}
+
+/* statok: ikon + sáv + szám, nyílra nevek */
+#bars{position:relative;padding-bottom:17px}
+.cell{text-align:center}
+.ic{font-size:20px;line-height:1.1}
+.ic em{display:none;font-style:normal;font-size:11px;font-weight:700;margin-top:2px}
+#bars.names .ic em{display:block}
+.cell .tr{margin-top:5px}
+.vn{display:block;font-size:11px;font-weight:700;margin-top:3px}
+#lbl{position:absolute;left:50%;bottom:0;transform:translateX(-50%);min-height:0;padding:0 18px;background:transparent;border:0;box-shadow:none;color:#9fb3c0;font-size:12px;line-height:15px;transition:transform .25s}
+#bars.names #lbl{transform:translateX(-50%) rotate(180deg)}
+.lang{position:relative;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:6px;color:#9fb3c0;animation:fadeUp 1s 1.8s both}
+.lang .chip{min-height:34px;padding:6px 14px;font-size:13px}

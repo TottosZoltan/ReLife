@@ -22,43 +22,44 @@
     <div class="info">
       <b id="nm"></b>
       <div id="sg"></div>
-      <div class="row"><span id="mo"></span><button id="nw" class="ghost">Menü</button></div>
+      <div class="row"><span id="mo"></span><button id="nw" class="ghost" data-i="menu"></button></div>
     </div>
-    <div id="age"><i id="ag">0</i><small>év</small></div>
+    <div id="age"><i id="ag">0</i><small data-i="yr"></small></div>
   </header>
   <section id="bars"></section>
   <main id="view"></main>
   <footer id="dock">
-    <button data-s="job"><i>💼</i><span>Munka</span></button>
-    <button data-s="assets"><i>🏠</i><span>Vagyon</span></button>
-    <button id="up"><b>+1</b><span>év</span></button>
-    <button data-s="rel"><i>👥</i><span>Emberek</span></button>
-    <button data-s="act"><i>🎯</i><span>Teendők</span></button>
+    <button data-s="job"><i>💼</i><span data-i="work"></span></button>
+    <button data-s="assets"><i>🏠</i><span data-i="assets"></span></button>
+    <button id="up"><b>+1</b><span data-i="yr"></span></button>
+    <button data-s="rel"><i>👥</i><span data-i="ppl"></span></button>
+    <button data-s="act"><i>🎯</i><span data-i="todo"></span></button>
   </footer>
   <div id="sheet" class="ov sheet" hidden><div class="panel"><div class="grab"><b id="stt"></b><button id="cls" aria-label="Bezár">✕</button></div><div id="sbody"></div></div></div>
   <div id="modal" class="ov" hidden><div class="box"><h2 id="mt"></h2><p id="md"></p><div id="mb"></div></div></div>
-  <div id="end" class="ov" hidden><div class="box"><h2>Vége az életednek</h2><p id="es"></p><button id="again">Új élet kezdése</button></div></div>
+  <div id="end" class="ov" hidden><div class="box"><h2 data-i="endt"></h2><p id="es"></p><button id="again" data-i="again"></button></div></div>
 
   <div id="title" class="scr">
     <div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div>
     <h1 id="logo" aria-label="ReLife"><span style="--i:0">R</span><span style="--i:1">e</span><span style="--i:2">L</span><span style="--i:3">i</span><span style="--i:4">f</span><span style="--i:5">e</span></h1>
-    <p class="tag">Egy élet. Annyi döntés.</p>
+    <p class="tag" data-i="tag"></p>
     <div class="tl"><i></i></div>
-    <button id="tnew" class="big">Élet kezdése</button>
-    <button id="tcont" class="big alt" hidden>Folytatás</button>
+    <button id="tnew" class="big" data-i="start"></button>
+    <button id="tcont" class="big alt" hidden data-i="cont"></button>
+    <div class="lang"><small data-i="lang"></small><button class="chip" data-l="hu">Magyar</button><button class="chip" data-l="en">English</button></div>
   </div>
 
   <div id="create" class="scr" hidden>
     <div class="cwrap">
-      <button id="cback" class="ghost">‹ Vissza</button>
+      <button id="cback" class="ghost" data-i="back"></button>
       <div id="cav"></div>
       <div class="names">
-        <input id="cln" placeholder="Vezetéknév" maxlength="16" autocomplete="off">
-        <input id="cfn" placeholder="Keresztnév" maxlength="16" autocomplete="off">
+        <input id="cln" data-ip="sur" maxlength="16" autocomplete="off">
+        <input id="cfn" data-ip="giv" maxlength="16" autocomplete="off">
         <button id="dice" aria-label="Véletlen név">🎲</button>
       </div>
       <div id="copts"></div>
-      <div class="cbtns"><button id="crand">🎲 Teljesen véletlen</button><button id="cgo">Megszületek</button></div>
+      <div class="cbtns"><button id="crand" data-i="ra"></button><button id="cgo" data-i="go"></button></div>
     </div>
   </div>
 
