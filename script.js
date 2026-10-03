@@ -95,6 +95,7 @@ const RN = [
 ];
 
 const CITY = [['Budapest', 'Budapesten'], ['Debrecen', 'Debrecenben'], ['Szeged', 'Szegeden'], ['Pécs', 'Pécsett'], ['Győr', 'Győrben'], ['Miskolc', 'Miskolcon']];
+const TRAITS = { ext: 'Extrovertált', int: 'Introvertált', amb: 'Ambiciózus', calm: 'Nyugodt' };
 const ASSETS = [
   { n: 'Használt Suzuki', t: 'car', i: '🚗', v: 1.5e6 }, { n: 'Toyota Corolla', t: 'car', i: '🚙', v: 6e6 }, { n: 'BMW', t: 'car', i: '🏎️', v: 18e6 },
   { n: 'Garzon', t: 'house', i: '🏢', v: 20e6 }, { n: 'Családi ház', t: 'house', i: '🏡', v: 55e6 }, { n: 'Balatoni villa', t: 'house', i: '🏰', v: 150e6 }
@@ -102,24 +103,26 @@ const ASSETS = [
 const SICK = ['Cukorbetegség', 'Szívbetegség', 'Tüdőgyulladás', 'Daganatos betegség', 'Magas vérnyomás'];
 
 // ----- állapot, mentés -----
-const lg = (t, c = '') => { p.logs.push({ a: p.age, t, c }); if (p.logs.length > 160) p.logs.shift(); };
+const lg = (t, c = '') => { p.logs.push({ a: p.age, t, c, n: p.ln = (p.ln || 0) + 1 }); if (p.logs.length > 160) p.logs.shift(); };
 const save = () => { try { localStorage.setItem('relife_save', JSON.stringify(p)); } catch (e) {} };
 const person = (role, age, bond, g) => ({ n: `${P(SN)} ${P(g == 'f' ? NF : NM)}`, role, age, bond, alive: true });
 const stage = a => a < 3 ? 'Csecsemő' : a < 6 ? 'Óvodás' : a < 14 ? 'Általános iskolás' : a < 18 ? 'Gimnazista' : p.uni ? 'Egyetemista' : a < 65 ? 'Felnőtt' : 'Nyugdíjas';
 const kids = () => p.rel.filter(r => r.alive && r.role == 'Gyerek');
 const partner = () => p.rel.find(r => r.alive && (r.role == 'Párod' || r.role == 'Házastárs'));
 
-function newLife() {
-  const g = P(['f', 'm']), sn = P(SN);
-  p = { g, name: `${sn} ${P(g == 'f' ? NF : NM)}`, age: 0, money: 0, hap: R(75, 95), hea: R(80, 100), sma: R(25, 75), loo: R(20, 85),
-    edu: 0, uni: false, job: null, pay: 0, yrs: 0, pension: 0, fam: R(1, 3), dead: false, done: {}, logs: [], rel: [], assets: [], crim: 0, prison: 0, sick: null, city: P(CITY) };
+function newLife(o = {}) {
+  const g = o.g == 'f' || o.g == 'm' ? o.g : P(['f', 'm']), sn = o.ln || P(SN), fn = o.fn || P(g == 'f' ? NF : NM);
+  const city = CITY.find(c => c[0] == o.city) || P(CITY), skin = +o.skin >= 1 ? +o.skin : R(1, 5), trait = TRAITS[o.trait] ? o.trait : P(Object.keys(TRAITS)), gk = ST[o.gift] ? o.gift : P(Object.keys(ST));
+  p = { g, skin, trait, name: `${sn} ${fn}`, age: 0, money: 0, hap: R(75, 95), hea: R(80, 100), sma: R(25, 75), loo: R(20, 85),
+    edu: 0, uni: false, job: null, pay: 0, yrs: 0, pension: 0, fam: [1, 2, 3].includes(+o.fam) ? +o.fam : R(1, 3), dead: false, done: {}, logs: [], rel: [], assets: [], crim: 0, prison: 0, sick: null, city };
+  p[gk] = cl(p[gk] + 15);
   const m = { ...person('Anya', R(22, 38), R(60, 90), 'f'), par: 1 }, f = { ...person('Apa', R(23, 42), R(55, 90), 'm'), par: 1 };
   m.n = `${sn} ${P(NF)}`; f.n = `${sn} ${P(NM)}`;
   p.rel.push(m, f);
   if (Math.random() < .4) p.rel.push({ ...person('Testvér', R(1, 6), 50, P(['f', 'm'])), n: `${sn} ${P(NF.concat(NM))}` });
-  lg(`Megszülettél ${p.city[1]}. A neved ${p.name}, a szüleid ${m.n} és ${f.n}. A család ${['szerény', 'átlagos', 'tehetős'][p.fam - 1]} körülmények között él.`, 'good');
+  lg(`Megszülettél ${p.city[1]}. A neved ${p.name}, a szüleid ${m.n} és ${f.n}. A család ${['szerény', 'átlagos', 'tehetős'][p.fam - 1]} körülmények között él. Jellemed: ${TRAITS[trait].toLowerCase()}.`, 'good');
 }
-function load() { try { p = JSON.parse(localStorage.getItem('relife_save')); } catch (e) {} if (!p || !p.rel) newLife(); }
+function load() { try { p = JSON.parse(localStorage.getItem('relife_save')); } catch (e) { p = null; } if (!p || !p.rel || !p.assets) p = null; }
 
 // ----- hatások -----
 function apply(fx) {
@@ -136,6 +139,9 @@ function apply(fx) {
 function fxlog(t, fx) {
   const s = apply(fx), sc = ['hap', 'hea', 'sma', 'loo'].reduce((q, k) => q + (fx[k] || 0), 0) + Math.sign(fx.money || 0) * 5 + (fx.raise ? 9 : 0);
   lg(s ? `${t}  (${s})` : t, sc >= 0 ? 'good' : 'bad');
+  if (Math.abs(sc) >= 8) flash(sc > 0 ? 'good' : 'bad');
+  if (sc >= 15) confetti(60);
+  if (sc <= -12 && navigator.vibrate) navigator.vibrate(40);
 }
 function pick(outs) {
   let r = Math.random() * outs.reduce((s, o) => s + o[0], 0);
@@ -173,10 +179,10 @@ function up() {
   if (p.sick) { apply({ hea: -R(3, 8) }); lg(`A betegséged (${p.sick}) rontja az egészségedet.`, 'bad'); }
   else if (a > 20 && Math.random() < .03 + (100 - p.hea) / 1500) { p.sick = P(SICK); lg(`Diagnosztizáltak nálad: ${p.sick}. Menj orvoshoz!`, 'bad'); }
   // természetes változás
-  p.hap = cl(p.hap - R(0, 3) + (partner() ? 1 : 0));
+  p.hap = cl(p.hap - R(0, p.trait == 'calm' ? 1 : 3) + (partner() ? 1 : 0));
   if (a > 40) p.hea = cl(p.hea - R(0, 3)); if (a > 60) p.hea = cl(p.hea - R(0, 2));
   if (a > 35) p.loo = cl(p.loo - R(0, 2));
-  if (a >= 6 && a <= 18) p.sma = cl(p.sma + R(1, 3));
+  if (a >= 6 && a <= 18) p.sma = cl(p.sma + R(1, 3) + (p.trait == 'int' ? 1 : 0));
   // tanulmányok
   if (a == 18) { p.edu = p.sma >= 25 ? 1 : 0; lg(p.edu ? 'Leérettségiztél.' : 'Nem sikerült az érettségi, maradt az általános iskola.', p.edu ? 'good' : 'bad'); }
   if (a == 22 && p.uni) {
@@ -185,10 +191,10 @@ function up() {
   }
   // munka
   if (p.job) {
-    p.yrs++; const r = Math.random();
+    p.yrs++; const r = Math.random(), pr = p.trait == 'amb' ? .17 : .1;
     if (a >= 65) { p.pension = Math.round(p.pay * .5); lg(`Nyugdíjba mentél (${p.job}). Nyugdíj: ${fmt(p.pension)} / év.`, 'good'); p.job = null; p.pay = 0; }
-    else if (r < .1) { fxlog('Előléptettek a munkahelyeden!', { raise: .15, hap: 8 }); }
-    else if (r < .13) { lg(`Kirúgtak (${p.job}).`, 'bad'); apply({ hap: -15 }); p.job = null; p.pay = 0; }
+    else if (r < pr) { fxlog('Előléptettek a munkahelyeden!', { raise: .15, hap: 8 }); }
+    else if (r < pr + .03) { lg(`Kirúgtak (${p.job}).`, 'bad'); apply({ hap: -15 }); p.job = null; p.pay = 0; }
   } else if (a == 65 && !p.pension) p.pension = 1.5e6;
   // emberek
   p.rel.forEach(r => {
@@ -235,7 +241,7 @@ const ACT = [
   { id: 'pt', i: '🧾', n: 'Diákmunka', m: 14, c: 0, run: () => fxlog('Diákmunkáztál.', { money: R(300, 600) * 1e3, hap: -3 }) },
   { id: 'meet', i: '💘', n: 'Ismerkedés', m: 16, c: 0, run: () => {
     if (partner()) return fxlog('Már van párod, inkább vele foglalkozz.', { hap: -1 });
-    if (Math.random() < .3 + p.loo / 200) { const g = P(['f', 'm']), q = person('Párod', Math.max(16, p.age + R(-4, 4)), 45, g); p.rel.push(q); fxlog(`Megismerkedtél valakivel: ${q.n}!`, { hap: 10 }); }
+    if (Math.random() < .3 + p.loo / 200 + (p.trait == 'ext' ? .15 : 0)) { const g = P(['f', 'm']), q = person('Párod', Math.max(16, p.age + R(-4, 4)), 45, g); p.rel.push(q); fxlog(`Megismerkedtél valakivel: ${q.n}!`, { hap: 10 }); }
     else fxlog('Nem jött össze semmi.', { hap: -3 });
   } },
   { id: 'steal', i: '🛒', n: 'Bolti lopás', m: 12, c: 0, k: 1, run: () => crime('Bolti lopás', .7, R(2, 6) * 1e4, 1) },
@@ -284,7 +290,7 @@ function quit() { if (confirm('Biztosan felmondasz?')) { lg(`Felmondtál (${p.jo
 
 // ----- megjelenítés -----
 const TT = { job: 'Munka és tanulás', assets: 'Vagyon', rel: 'Emberek', act: 'Teendők' };
-const logHtml = () => { let h = '', last = -1; for (const l of p.logs.slice().reverse()) { if (l.a !== last) { h += `<h3>${l.a} éves</h3>`; last = l.a; } h += `<p class="lg ${l.c}">${l.t}</p>`; } return h; };
+const logHtml = () => { const L = p.logs; let h = '', last = -1; for (let j = L.length - 1; j >= 0; j--) { const l = L[j]; if (l.a !== last) { h += `<h3>${l.a} éves</h3>`; last = l.a; } h += `<p class="lg ${l.c}${l.n > seen ? ' new' : ''}" style="animation-delay:${(L.length - 1 - j) * 70}ms">${l.t}</p>`; } return h; };
 const row = (top, sub, btn) => `<div class="card"><div class="top"><b>${top}</b><small>${sub}</small></div>${btn}</div>`;
 
 function panel(t) {
@@ -328,15 +334,46 @@ function panel(t) {
 function beg(i) { const r = p.rel[i]; p.done['m' + i] = 1; if (r.bond >= 55 && Math.random() < .7) fxlog(`${r.n} adott neked pénzt.`, { money: R(1, 4) * 1e5 * p.fam }); else fxlog(`${r.n} nemet mondott.`, { hap: -4 }); render(); }
 function split(i) { const r = p.rel[i]; if (!confirm(`Biztosan szakítasz vele: ${r.n}?`)) return; if (r.role == 'Házastárs') p.money = Math.round(p.money * .7); r.alive = false; fxlog(`Szakítottál vele: ${r.n}.`, { hap: -8 }); render(); }
 
+// ----- effektek -----
+const RM = matchMedia('(prefers-reduced-motion:reduce)').matches;
+let seen = 0, prev = null, lastTab = null, endT = 0;
+function flash(c) { if (RM) return; const f = $('#flash'); f.className = ''; void f.offsetWidth; f.className = c; }
+function confetti(n = 70) {
+  if (RM) return;
+  const cv = $('#cv'), A = $('#app'); cv.width = A.clientWidth; cv.height = A.clientHeight;
+  const x = cv.getContext('2d'), cols = ['#e4572e', '#f0b429', '#1f8a83', '#ffffff', '#7aa2f7'];
+  const ps = Array.from({ length: n }, () => ({ x: cv.width / 2, y: cv.height * .55, vx: (Math.random() - .5) * 15, vy: -Math.random() * 14 - 4, s: R(6, 11), c: P(cols), r: Math.random() * 6, vr: (Math.random() - .5) * .4 }));
+  let t = 0;
+  (function f() {
+    x.clearRect(0, 0, cv.width, cv.height); t++;
+    ps.forEach(q => { q.vy += .35; q.x += q.vx; q.y += q.vy; q.r += q.vr; x.save(); x.translate(q.x, q.y); x.rotate(q.r); x.fillStyle = q.c; x.globalAlpha = Math.max(0, 1 - t / 110); x.fillRect(-q.s / 2, -q.s / 3, q.s, q.s * .6); x.restore(); });
+    if (t < 110) requestAnimationFrame(f); else x.clearRect(0, 0, cv.width, cv.height);
+  })();
+}
+
+// ----- megjelenítés -----
+const SKIN = ['', '\u{1F3FB}', '\u{1F3FC}', '\u{1F3FD}', '\u{1F3FE}', '\u{1F3FF}'], SKINC = ['', '#f8dcc6', '#e9bd96', '#c98f62', '#9a6240', '#5e3a24'];
+const avatar = (g, a, skin, dead) => dead ? '🪦' : (a < 2 ? '👶' : a < 20 ? (g == 'f' ? '👧' : '👦') : a < 65 ? (g == 'f' ? '👩' : '👨') : (g == 'f' ? '👵' : '👴')) + (SKIN[skin] || '');
+
 function render() {
+  const A = $('#app'), a = p.age;
+  A.dataset.st = a < 13 ? 'kid' : a < 20 ? 'teen' : a < 65 ? 'adult' : 'old'; A.classList.toggle('dead', p.dead);
   $('#nm').textContent = p.name;
-  $('#sg').textContent = (p.dead ? 'Elhunyt' : p.prison > 0 ? 'Börtönben' : stage(p.age)) + (p.sick ? ' 🤒' : '') + ', ' + p.city[0];
+  $('#sg').textContent = (p.dead ? 'Elhunyt' : p.prison > 0 ? 'Börtönben' : stage(a)) + (p.sick ? ' 🤒' : '') + ', ' + p.city[0];
   $('#mo').textContent = fmt(p.money);
-  const ag = $('#ag'); if (ag.textContent != p.age) { ag.textContent = p.age; ag.classList.remove('pop'); void ag.offsetWidth; ag.classList.add('pop'); }
-  for (const k in ST) { const v = Math.round(p[k]); $('#v' + k).textContent = v; const i = $('#b' + k); i.style.width = v + '%'; i.style.background = v < 25 ? '#c23b3b' : v < 50 ? '#f0b429' : ''; }
-  $('#view').innerHTML = logHtml();
+  if (prev && p.money != prev.money) { const m = $('#mo'); m.classList.remove('upm', 'dnm'); void m.offsetWidth; m.classList.add(p.money > prev.money ? 'upm' : 'dnm'); }
+  const ag = $('#ag'), av = $('#av');
+  if (ag.textContent != a) { ag.textContent = a; [ag, av].forEach(x => { x.classList.remove('pop'); void x.offsetWidth; x.classList.add('pop'); }); }
+  av.textContent = avatar(p.g, a, p.skin || 3, p.dead);
+  for (const k in ST) {
+    const v = Math.round(p[k]); $('#v' + k).textContent = v;
+    const i = $('#b' + k); i.style.width = v + '%'; i.style.background = v < 25 ? '#c23b3b' : v < 50 ? '#f0b429' : '';
+    if (prev && v != prev[k]) { const d = v - prev[k], f = document.createElement('span'); f.className = 'fl ' + (d > 0 ? 'p' : 'n'); f.textContent = (d > 0 ? '+' : '') + d; $('#c' + k).append(f); setTimeout(() => f.remove(), 1300); }
+  }
+  $('#view').innerHTML = logHtml(); seen = p.ln || 0;
   const sb = $('#sbody'), sc = sb.scrollTop;
   sb.innerHTML = tab ? panel(tab) : ''; sb.scrollTop = sc;
+  sb.classList.remove('fresh'); if (tab && tab != lastTab) { void sb.offsetWidth; sb.classList.add('fresh'); } lastTab = tab;
   $('#sheet').hidden = !tab; $('#stt').textContent = TT[tab] || '';
   document.querySelectorAll('#dock [data-s]').forEach(b => b.classList.toggle('on', b.dataset.s == tab));
   $('#up').disabled = p.dead;
@@ -345,18 +382,54 @@ function render() {
     if (p.age >= 90) rb.push('🏅 Hosszú élet'); if (p.age < 30) rb.push('💔 Korai búcsú'); if (net >= 1e8) rb.push('💰 Százmilliomos');
     if (k >= 3) rb.push('👨‍👩‍👧‍👦 Nagycsalád'); if (p.crim >= 2) rb.push('🚨 Köztörvényes'); if (p.edu == 2) rb.push('🎓 Diplomás'); if (p.rel.some(r => r.role == 'Házastárs')) rb.push('💍 Házasság');
     $('#es').textContent = `${p.name} ${p.age} évet élt (${p.city[0]}).\nVégzettség: ${EDU[p.edu]}\nMunka: ${p.job || (p.pension ? 'nyugdíjas' : 'nincs')}\nNettó vagyon: ${fmt(net)}\nGyerekek: ${k}` + (rb.length ? '\n\n' + rb.join('\n') : '');
-    $('#end').hidden = false;
+    if ($('#end').hidden && !endT) { flash('bad'); endT = setTimeout(() => { $('#end').hidden = false; endT = 0; }, 1100); }
   }
+  prev = { money: p.money }; for (const k in ST) prev[k] = Math.round(p[k]);
   save();
 }
-function restart(ask) { if (!ask || confirm('Új életet kezdesz? A mostani elvész!')) { newLife(); $('#end').hidden = true; $('#modal').hidden = true; tab = null; render(); } }
+
+// ----- képernyők: főoldal és karakterkészítő -----
+const show = id => document.querySelectorAll('.scr').forEach(s => s.hidden = s.id != id);
+const clean = s => s.replace(/[<>&"'`\\]/g, '').trim().slice(0, 16);
+function showTitle() { $('#tcont').hidden = !(p && !p.dead); show('title'); }
+const CFG = [
+  { k: 'g', l: 'Nem', o: [['f', 'Lány'], ['m', 'Fiú'], ['r', '🎲']] },
+  { k: 'skin', l: 'Bőrszín', o: [[1, ''], [2, ''], [3, ''], [4, ''], [5, ''], ['r', '🎲']] },
+  { k: 'city', l: 'Szülőváros', o: CITY.map(c => [c[0], c[0]]).concat([['r', '🎲']]) },
+  { k: 'fam', l: 'Család', o: [[1, 'Szerény'], [2, 'Átlagos'], [3, 'Tehetős'], ['r', '🎲']] },
+  { k: 'gift', l: 'Tehetség (+15)', o: [['hap', '😊 Vidám'], ['hea', '❤️ Egészséges'], ['sma', '🧠 Okos'], ['loo', '✨ Szép'], ['r', '🎲']] },
+  { k: 'trait', l: 'Jellem', o: Object.entries(TRAITS).concat([['r', '🎲']]) }
+];
+let cc = {};
+function drawC() {
+  $('#copts').innerHTML = CFG.map(c => `<div class="cg"><small>${c.l}</small><div class="chips">${c.o.map(([v, t]) =>
+    `<button class="chip${cc[c.k] == v ? ' on' : ''}" data-k="${c.k}" data-v="${v}">${c.k == 'skin' && v != 'r' ? `<i class="sw" style="background:${SKINC[v]}"></i>` : t}</button>`).join('')}</div></div>`).join('');
+  const em = cc.g == 'r' ? '🧑' : cc.g == 'f' ? '👩' : '👨';
+  $('#cav').textContent = em + (cc.skin == 'r' ? '' : SKIN[cc.skin]);
+}
+function openCreate() { cc = { g: 'r', skin: 'r', city: 'r', fam: 'r', gift: 'r', trait: 'r' }; $('#cfn').value = $('#cln').value = ''; drawC(); show('create'); }
+function startLife(rand) {
+  newLife(rand ? {} : { ...cc, fn: clean($('#cfn').value), ln: clean($('#cln').value) });
+  seen = 0; prev = null; tab = null; lastTab = null; clearTimeout(endT); endT = 0;
+  document.querySelectorAll('.scr').forEach(s => s.hidden = true); $('#end').hidden = true; $('#modal').hidden = true;
+  render(); confetti(90);
+}
 
 // ----- indítás -----
-$('#bars').innerHTML = Object.entries(ST).map(([k, [e, n]]) => `<div><div class="st"><span>${e} ${n}</span><span id="v${k}"></span></div><div class="tr"><i id="b${k}"></i></div></div>`).join('');
+$('#bars').innerHTML = Object.entries(ST).map(([k, [e, n]]) => `<div class="cell" id="c${k}"><div class="st"><span>${e} ${n}</span><span id="v${k}"></span></div><div class="tr"><i id="b${k}"></i></div></div>`).join('');
 $('#up').onclick = up;
-$('#nw').onclick = () => restart(true);
-$('#again').onclick = () => restart(false);
+$('#nw').onclick = showTitle;
+$('#tnew').onclick = () => { if (p && !p.dead && !confirm('A mostani élet elvész. Biztos vagy benne?')) return; openCreate(); };
+$('#tcont').onclick = () => { document.querySelectorAll('.scr').forEach(s => s.hidden = true); render(); };
+$('#cback').onclick = showTitle;
+$('#again').onclick = () => { $('#end').hidden = true; openCreate(); };
+$('#crand').onclick = () => startLife(true);
+$('#cgo').onclick = () => startLife(false);
+$('#dice').onclick = () => { const g = cc.g == 'r' ? P(['f', 'm']) : cc.g; $('#cln').value = P(SN); $('#cfn').value = P(g == 'f' ? NF : NM); };
+$('#copts').onclick = e => { const b = e.target.closest('.chip'); if (b) { cc[b.dataset.k] = b.dataset.v; drawC(); } };
 $('#cls').onclick = () => { tab = null; render(); };
 $('#sheet').onclick = e => { if (e.target.id == 'sheet') { tab = null; render(); } };
 document.querySelectorAll('#dock [data-s]').forEach(b => b.onclick = () => { tab = tab == b.dataset.s ? null : b.dataset.s; render(); });
-load(); render();
+load();
+if (p && !p.dead) { seen = p.ln || 0; render(); }
+showTitle();
