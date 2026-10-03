@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GitLife</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+  <header>
+    <div>
+      <b id="nm"></b>
+      <div id="sg"></div>
+      <div class="row"><span id="mo"></span><button id="nw" class="ghost">Új élet</button></div>
+    </div>
+    <div id="age"><i id="ag">0</i><small>év</small></div>
+  </header>
+  <section id="bars"></section>
+  <main id="view"></main>
+  <footer>
+    <nav id="tabs">
+      <button data-t="log">Napló</button>
+      <button data-t="act">Teendők</button>
+      <button data-t="rel">Emberek</button>
+      <button data-t="job">Munka</button>
+    </nav>
+    <button id="up">+1 év</button>
+  </footer>
+  <div id="modal" class="ov" hidden><div class="box"><h2 id="mt"></h2><p id="md"></p><div id="mb"></div></div></div>
+  <div id="end" class="ov" hidden><div class="box"><h2>Vége az életednek</h2><p id="es"></p><button id="again">Új élet kezdése</button></div></div>
+</div>
+<script src="script.js"></script>
+</body>
+</html>
