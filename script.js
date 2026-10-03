@@ -182,7 +182,7 @@ function newLife(o = {}) {
   p = { g, skin, trait, name: `${sn} ${fn}`, age: 0, money: 0, hap: R(75, 95), hea: R(80, 100), sma: R(25, 75), loo: R(20, 85),
     edu: 0, uni: false, job: null, pay: 0, yrs: 0, pension: 0, fam: [1, 2, 3].includes(+o.fam) ? +o.fam : R(1, 3), dead: false, done: {}, logs: [], rel: [], assets: [], crim: 0, prison: 0, sick: null, city };
   p[gk] = cl(p[gk] + 15);
-  p.look = { g, sk: skin, hs: pk(o.hs, () => P(g == 'f' ? [1, 2, 0, 4] : [0, 3, 4, 0])), hc: pk(o.hc, () => R(0, 4)), oc: pk(o.oc, () => R(0, 7)) };
+  p.look = { g, sk: skin, hs: pk(o.hs, () => rndHs(g)), hc: pk(o.hc, () => R(0, 4)), oc: pk(o.oc, () => R(0, 7)), bd: pk(o.bd, rndBd) };
   const m = { ...person('Anya', R(22, 38), R(60, 90), 'f'), par: 1 }, f = { ...person('Apa', R(23, 42), R(55, 90), 'm'), par: 1 };
   m.n = `${sn} ${P(NF)}`; f.n = `${sn} ${P(NM)}`;
   p.rel.push(m, f);
@@ -426,37 +426,93 @@ function confetti(n = 70) {
 const SKIN = ['', '\u{1F3FB}', '\u{1F3FC}', '\u{1F3FD}', '\u{1F3FE}', '\u{1F3FF}'], SKINC = ['', '#f8dcc6', '#e9bd96', '#c98f62', '#9a6240', '#5e3a24'];
 
 const HC = ['#24180f', '#6b4226', '#e0b24a', '#b5381f', '#8a8f9a', '#d96a9f'], OC = ['#e4572e', '#1f8a83', '#3a6fd8', '#f0b429', '#7a5cc7', '#3b3b46', '#e86a9a', '#4a9d4a'], SW = { skin: SKINC, hc: HC, oc: OC };
-const HSN = [['rövid', 'short'], ['hosszú', 'long'], ['feltűzött', 'tied-up'], ['nagyon rövid', 'buzzed'], ['göndör', 'curly']];
+const HSN = [['rövid', 'short'], ['hosszú', 'long'], ['feltűzött', 'tied-up'], ['nagyon rövid', 'buzzed'], ['göndör', 'curly'], ['félhosszú', 'bob'], ['lófarkas', 'ponytail'], ['tüskés', 'spiky'], ['copfos', 'pigtail'], ['kopasz', 'bald']];
+const BDN = [['átlagos', 'average'], ['karcsú', 'slim'], ['nyurga', 'lanky'], ['izmos', 'muscular'], ['atletikus', 'athletic'], ['telt', 'curvy'], ['nagydarab', 'heavyset'], ['zömök', 'stocky'], ['körte formájú', 'pear-shaped'], ['apró', 'petite']];
 const HCN = [['fekete', 'black'], ['barna', 'brown'], ['szőke', 'blond'], ['vörös', 'red'], ['ősz', 'gray'], ['rózsaszín', 'pink']];
 const OCN = [['piros', 'red'], ['kékeszöld', 'teal'], ['kék', 'blue'], ['sárga', 'yellow'], ['lila', 'purple'], ['sötét', 'dark'], ['rózsaszín', 'pink'], ['zöld', 'green']];
 const pk = (v, f) => v != null && v !== 'r' ? +v : f();
-const mkLook = (g, sk) => ({ g, sk: sk || R(1, 5), hs: P(g == 'f' ? [1, 2, 0, 4] : [0, 3, 4, 0]), hc: R(0, 4), oc: R(0, 7) });
+const rndHs = g => P(g == 'f' ? [1, 2, 0, 4, 5, 6, 8, 5, 6] : [0, 3, 4, 7, 0, 3, 7, 9]);
+const rndBd = () => P([0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+const mkLook = (g, sk) => ({ g, sk: sk || R(1, 5), hs: rndHs(g), hc: R(0, 4), oc: R(0, 7), bd: rndBd() });
 const lk = r => r.look || (r.look = mkLook(NF.includes(r.n.split(' ')[1]) || r.role == 'Anya' ? 'f' : 'm'));
-const desc = l => T([`${T(HCN[l.hc])} ${T(HSN[l.hs])} haj, ${T(OCN[l.oc])} felső`, `${T(HCN[l.hc])} ${T(HSN[l.hs])} hair, ${T(OCN[l.oc])} top`]);
+const desc = l => { const h = l.hs == 9 ? T(HSN[9]) : `${T(HCN[l.hc])} ${T(HSN[l.hs])} ${T(['haj', 'hair'])}`; return `${h}, ${T(OCN[l.oc])} ${T(['felső', 'top'])}, ${T(BDN[l.bd || 0])} ${T(['alkat', 'build'])}`; };
 let UID = 0;
 const BG = ['#fde2d8', '#d3efeb', '#d6e2fb', '#fdf0c4', '#e3d9f6', '#dcdce4', '#fbd8e6', '#d9eed5'];
-function avSvg(l, a, dead) {
+// szín sötétítés (f<0) / világosítás (f>0)
+const shade = (hex, f) => { const n = parseInt(hex.slice(1), 16); let c = [n >> 16, (n >> 8) & 255, n & 255]; c = c.map(v => Math.round(f < 0 ? v * (1 + f) : v + (255 - v) * f)); return `rgb(${c})`; };
+// testalkatok: bx = alsó félszélesség, sx = váll félszélesség, sy = váll magassága, nw = nyak félszélesség, fw = arc szélesség, hz = fej méret
+const BODY = [
+  { bx: 34, sx: 32, sy: 80, nw: 6.5, fw: 1, hz: 1 },      // átlagos
+  { bx: 26, sx: 25, sy: 81, nw: 5.5, fw: .95, hz: 1 },    // karcsú
+  { bx: 24, sx: 27, sy: 85, nw: 4.8, fw: .93, hz: 1 },    // nyurga (hosszú nyak)
+  { bx: 47, sx: 46, sy: 77, nw: 10.5, fw: 1.03, hz: 1 },   // izmos
+  { bx: 30, sx: 40, sy: 79, nw: 7.5, fw: 1, hz: 1 },      // atletikus (V alak)
+  { bx: 49, sx: 40, sy: 80, nw: 8.5, fw: 1.1, hz: 1 },     // telt
+  { bx: 56, sx: 50, sy: 79, nw: 11, fw: 1.2, hz: 1 },     // nagydarab
+  { bx: 40, sx: 39, sy: 73, nw: 9, fw: 1.04, hz: 1 },     // zömök (rövid nyak)
+  { bx: 44, sx: 27, sy: 82, nw: 6.2, fw: 1, hz: 1 },      // körte
+  { bx: 21, sx: 22, sy: 83, nw: 5, fw: .98, hz: 1.07 }    // apró
+];
+function avSvg(l, a, dead, vb) {
   if (dead) return '🪦';
-  const id = 'g' + (++UID), sk = SKINC[l.sk] || SKINC[3], hc = a >= 65 ? '#d5d8de' : HC[l.hc], oc = OC[l.oc], f = l.g == 'f', hs = l.hs, bust = f && a >= 18, kid = a < 13;
-  const k = 'stroke="#2a1a14" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"', th = 'fill="none" stroke="#2a1a14" stroke-width="1.5" stroke-linecap="round"';
-  const ec = ['#5a3a22', '#2f6fb5', '#3b8f5a', '#7a5a9e', '#3a3a3a'][(l.sk + l.oc + l.hc) % 5];
-  const body = f && a >= 13 ? 'M14 110Q15 82 37 76L63 76Q85 82 86 110Z' : 'M6 110Q8 82 34 76L66 76Q92 82 94 110Z';
-  const face = f ? 'M30 44Q29 24 50 23Q71 24 70 44Q70 58 61 66Q50 74 39 66Q30 58 30 44Z' : 'M30 44Q29 24 50 23Q71 24 70 44Q71 60 61 68Q50 73 39 68Q29 60 30 44Z';
-  const bang = 'M29 46Q25 18 50 16Q75 18 71 46Q68 33 59 30Q54 40 44 33Q33 33 29 46Z';
-  const hl = `<path d="M36 25Q50 17 64 26" fill="none" stroke="#fff" opacity=".4" stroke-width="3" stroke-linecap="round"/>`;
-  const circ = [[30, 30], [38, 20], [50, 16], [62, 20], [70, 30], [26, 46], [74, 46]].map(c => `<circle cx="${c[0]}" cy="${c[1]}" r="11" fill="${hc}" ${k}/>`).join('');
-  const back = hs == 1 ? `<path d="M26 48Q21 14 50 13Q79 14 74 48L79 98Q50 106 21 98Z" fill="${hc}" ${k}/>` : hs == 2 ? `<circle cx="50" cy="11" r="9" fill="${hc}" ${k}/><path d="M44 8Q50 4 56 8" fill="none" stroke="#fff" opacity=".4" stroke-width="2.4" stroke-linecap="round"/>` : hs == 4 ? circ : '';
-  const front = hs == 3 ? `<path d="M30 40Q31 22 50 21Q69 22 70 40Q60 27 50 27Q40 27 30 40Z" fill="${hc}" opacity=".6"/>`
-    : hs == 4 ? [[40, 29], [50, 25], [60, 29]].map(c => `<circle cx="${c[0]}" cy="${c[1]}" r="8" fill="${hc}"/>`).join('') + hl : `<path d="${bang}" fill="${hc}" ${k}/>${hl}<path d="M44 33Q47 26 52 22" ${th} opacity=".35"/>`;
-  const locks = hs == 1 ? `<path d="M27 56Q21 84 29 102Q38 92 36 64Z" fill="${hc}" ${k}/><path d="M73 56Q79 84 71 102Q62 92 64 64Z" fill="${hc}" ${k}/>` : '';
-  const eye = (x, s) => `<ellipse cx="${x}" cy="50" rx="6" ry="6.6" fill="#fff"/><ellipse cx="${x}" cy="51" rx="4.4" ry="5.4" fill="${ec}"/><ellipse cx="${x}" cy="53" rx="4.4" ry="3" fill="#000" opacity=".2"/><circle cx="${x}" cy="51" r="2.2" fill="#1a1010"/><circle cx="${x - 1.6}" cy="48.8" r="1.7" fill="#fff"/><circle cx="${x + 1.8}" cy="53" r=".8" fill="#fff"/><path d="M${x - 7} 47Q${x} 42.5 ${x + 7} 47" fill="none" stroke="#2a1a14" stroke-width="${f ? 2.8 : 2.2}" stroke-linecap="round"/>` + (f && a >= 13 ? `<path d="M${x + s * 7} 47l${s * 3} -2" stroke="#2a1a14" stroke-width="1.6" stroke-linecap="round"/>` : '') + `<path d="M${x - 6} 40.5Q${x} 37.5 ${x + 6} 40" fill="none" stroke="${hc}" stroke-width="${f ? 2.2 : 3.2}" stroke-linecap="round"/>`;
-  const neckline = (l.oc % 2 ? 'M39 75.5L50 92L61 75.5Z' : 'M38 75.5Q50 91 62 75.5Z');
-  const bs = bust ? `<path d="M30 94Q38 108 49 98M51 98Q62 108 70 94" ${th} stroke-width="1.9"/><path d="M33 99Q40 107 48 101Q41 102 33 99ZM67 99Q60 107 52 101Q59 102 67 99Z" fill="#000" opacity=".13"/><path d="M34 91Q41 97 47 92M53 92Q59 97 66 91" fill="none" stroke="#fff" opacity=".4" stroke-width="2.6" stroke-linecap="round"/>` : '';
-  const old = a >= 50 ? `<path d="M31 55q2 2 4 1M69 55q-2 2 -4 1M40 38q10 -2 20 0" ${th} opacity=".3" stroke-width="1"/>` : '';
-  const mouth = f ? `<path d="M43.5 65Q50 70 56.5 65Q50 67.5 43.5 65Z" fill="#d9667a" stroke="#2a1a14" stroke-width="1.3" stroke-linejoin="round"/>` : `<path d="M44 65.5Q50 69.5 56 65.5" ${th} stroke-width="1.9"/>`;
-  const bodyG = `<clipPath id="${id}t"><path d="${body}"/></clipPath><path d="${body}" fill="${oc}" ${k}/><rect x="50" y="70" width="50" height="45" fill="#000" opacity=".13" clip-path="url(#${id}t)"/><path d="M26 82Q23 98 25 110M74 82Q77 98 75 110" ${th} opacity=".3"/>${bs}`;
-  const hd = kid ? 'translate(50 52) scale(1.1) translate(-50 -52)' : '', tb = kid ? 'translate(50 110) scale(.82 .92) translate(-50 -110)' : '';
-  return `<svg viewBox="0 0 100 110" xmlns="http://www.w3.org/2000/svg"><clipPath id="${id}c"><rect width="100" height="110" rx="16"/></clipPath><g clip-path="url(#${id}c)"><rect width="100" height="110" fill="${BG[l.oc]}"/><circle cx="50" cy="48" r="42" fill="#fff" opacity=".35"/><g transform="${hd}">${back}</g><g transform="${tb}"><path d="M42 60V80Q50 86 58 80V60Z" fill="${sk}" ${k}/>${bodyG}<path d="${neckline}" fill="${sk}"/><path d="${neckline.replace('Z', '')}" ${th} stroke-width="1.8"/><path d="M35 76Q50 97 65 76" fill="none" stroke="#000" opacity=".18" stroke-width="2.5"/>${locks}</g><g transform="${hd}"><ellipse cx="50" cy="73" rx="8" ry="4" fill="#000" opacity=".16"/><ellipse cx="29.5" cy="50" rx="4" ry="6" fill="${sk}" ${k}/><ellipse cx="70.5" cy="50" rx="4" ry="6" fill="${sk}" ${k}/><clipPath id="${id}f"><path d="${face}"/></clipPath><path d="${face}" fill="${sk}" ${k}/><rect x="50" y="20" width="30" height="56" fill="#000" opacity=".1" clip-path="url(#${id}f)"/><ellipse cx="50" cy="31" rx="24" ry="8" fill="#000" opacity=".1" clip-path="url(#${id}f)"/><ellipse cx="36" cy="60" rx="4.5" ry="2.6" fill="#ff6b81" opacity=".3"/><ellipse cx="64" cy="60" rx="4.5" ry="2.6" fill="#ff6b81" opacity=".3"/>${eye(39, -1)}${eye(61, 1)}<path d="M50 57Q52.2 59.8 49.5 60.2" fill="none" stroke="#7a4a30" stroke-width="1.3" stroke-linecap="round" opacity=".7"/>${mouth}${old}${front}</g></g></svg>`;
+  const id = 'g' + (++UID), sk = SKINC[l.sk] || SKINC[3], f = l.g == 'f', baby = a < 3, kid = a < 13, bd = BODY[+l.bd || 0] || BODY[0];
+  const hc = a >= 65 ? '#d5d8de' : HC[l.hc] || HC[0], oc = OC[l.oc] || OC[0], hs = baby ? 10 : +l.hs || 0;
+  const OL = '#2b1d17', kw = w => `stroke="${OL}" stroke-width="${w}" stroke-linejoin="round" stroke-linecap="round"`, k = kw(2), th = (w = 1.7) => `fill="none" stroke="${OL}" stroke-width="${w}" stroke-linecap="round"`;
+  const skD = shade(sk, -.18), hb = shade(hc, -.4), hl = `<path d="M37 24Q50 17 63 25" fill="none" stroke="#fff" opacity=".35" stroke-width="3" stroke-linecap="round"/>`;
+  // ---- test ----
+  const g = f ? .91 : 1, sx = bd.sx * g, bx = bd.bx * g, sy = bd.sy, nw = bd.nw, y0 = sy - 5;
+  const SL = 50 - sx, SR = 50 + sx, BL = 50 - bx, BR = 50 + bx;
+  const pL = `M${BL} 112L${SL} ${sy + 8}C${SL} ${sy - 2} ${50 - nw - 10} ${sy - 4} ${50 - nw} ${y0}`, pR = `M${50 + nw} ${y0}C${50 + nw + 10} ${sy - 4} ${SR} ${sy - 2} ${SR} ${sy + 8}L${BR} 112`;
+  const torso = `${pL}L${50 + nw} ${y0}${pR.slice(pR.indexOf('C'))}Z`;
+  const vneck = l.oc % 2, nk = vneck ? `M${50 - nw - 1} ${y0 - 1}L${50 + nw + 1} ${y0 - 1}L50 ${y0 + 13}Z` : `M${50 - nw - 1} ${y0 - 1}L${50 + nw + 1} ${y0 - 1}Q50 ${y0 + 10} ${50 - nw - 1} ${y0 - 1}Z`;
+  const nkS = vneck ? `M${50 - nw - 1} ${y0 - 1}L50 ${y0 + 13}L${50 + nw + 1} ${y0 - 1}` : `M${50 - nw - 1} ${y0 - 1}Q50 ${y0 + 10} ${50 + nw + 1} ${y0 - 1}`;
+  const ax = sx * .66, musc = +l.bd == 3 || +l.bd == 4 ? `<path d="M${50 - 15} ${sy + 15}Q${50 - 7} ${sy + 20} 50 ${sy + 15}Q${50 + 7} ${sy + 20} ${50 + 15} ${sy + 15}" ${th(1.5)} opacity=".22"/>` : '';
+  const bodyG = `<path d="M${50 - nw} 58H${50 + nw}V${y0 + 3}H${50 - nw}Z" fill="${sk}"/><path d="M${50 - nw} 62V${y0}M${50 + nw} 62V${y0}" ${th()}/>`
+    + `<path d="M${50 - nw} 62H${50 + nw}V74Q50 80 ${50 - nw} 74Z" fill="#000" opacity=".14"/>`
+    + `<clipPath id="${id}t"><path d="${torso}"/></clipPath><path d="${torso}" fill="${oc}"/><rect x="50" y="60" width="60" height="60" fill="#000" opacity=".1" clip-path="url(#${id}t)"/>`
+    + `<path d="${pL}" ${k} fill="none"/><path d="${pR}" ${k} fill="none"/>`
+    + `<path d="M${50 - ax} ${sy + 12}Q${50 - ax - 1.5} ${sy + 24} ${50 - ax} 112M${50 + ax} ${sy + 12}Q${50 + ax + 1.5} ${sy + 24} ${50 + ax} 112" ${th()} opacity=".22"/>${musc}`
+    + `<path d="${nk}" fill="${sk}"/><path d="${nkS}" ${th(1.7)}/>`;
+  // ---- haj ----
+  const circ = [[30, 30], [38, 20], [50, 15], [62, 20], [70, 30], [25, 46], [75, 46], [27, 38], [73, 38]].map(c => `<circle cx="${c[0]}" cy="${c[1]}" r="11" fill="${hc}" ${k}/>`).join('');
+  const tie = (x, y, c) => `<circle cx="${x}" cy="${y}" r="3.4" fill="${c || shade(oc, -.1)}" ${kw(1.4)}/>`;
+  const back = [
+    '', `<path d="M24 48Q17 8 50 9Q83 8 76 48L81 98Q50 106 19 98Z" fill="${hc}" ${k}/>`,
+    `<circle cx="50" cy="11" r="10" fill="${hc}" ${k}/><path d="M44 8Q50 4 56 8" fill="none" stroke="#fff" opacity=".4" stroke-width="2.4" stroke-linecap="round"/>`, '', circ,
+    `<path d="M23 50Q16 8 50 9Q84 8 77 50L79 74Q66 80 61 70L39 70Q34 80 21 74Z" fill="${hc}" ${k}/>`,
+    `<path d="M68 26Q93 22 91 56Q89 76 77 84Q82 62 73 46Z" fill="${hc}" ${k}/>`, '',
+    `<path d="M29 32Q7 34 7 62Q7 78 18 82Q15 62 29 50Z" fill="${hc}" ${k}/><path d="M71 32Q93 34 93 62Q93 78 82 82Q85 62 71 50Z" fill="${hc}" ${k}/>`, ''][hs] || '';
+  const locks = hs == 1 ? `<path d="M26 54Q19 84 26 102Q38 96 38 70Z" fill="${hc}" ${k}/><path d="M74 54Q81 84 74 102Q62 96 62 70Z" fill="${hc}" ${k}/>` : '';
+  const front = [
+    `<path d="M25 46Q21 11 50 11Q79 11 75 46Q73 34 66 29Q52 36 38 28Q29 34 25 46Z" fill="${hc}" ${k}/>${hl}`,
+    `<path d="M25 48Q20 11 50 11Q80 11 75 48Q68 33 50 24Q32 33 25 48Z" fill="${hc}" ${k}/>${hl}`,
+    `<path d="M26 46Q22 13 50 13Q78 13 74 46Q70 28 50 26Q30 28 26 46Z" fill="${hc}" ${k}/>${tie(50, 19)}`,
+    `<path d="M27 42Q26 18 50 17Q74 18 73 42Q66 28 50 27Q34 28 27 42Z" fill="${hc}" opacity=".8"/>`,
+    [[40, 28], [50, 24], [60, 28]].map(c => `<circle cx="${c[0]}" cy="${c[1]}" r="8.5" fill="${hc}" ${kw(1.4)}/>`).join('') + hl,
+    `<path d="M24 48Q20 10 50 10Q80 10 76 48L72 41Q71 35 70 34Q50 39 30 34Q29 35 28 41Z" fill="${hc}" ${k}/>${hl}`,
+    `<path d="M25 46Q21 11 50 11Q79 11 75 46Q72 31 62 27Q50 33 38 27Q28 32 25 46Z" fill="${hc}" ${k}/>${hl}${tie(72, 28)}`,
+    `<path d="M25 46L23 26L32 21L35 6L44 18L50 3L57 18L65 6L68 21L77 26L75 46Q72 33 64 30Q52 36 38 29Q28 34 25 46Z" fill="${hc}" ${k}/>`,
+    `<path d="M25 48Q20 11 50 11Q80 11 75 48Q68 32 50 24Q32 32 25 48Z" fill="${hc}" ${k}/>${hl}${tie(27, 38, '#e86a9a')}${tie(73, 38, '#e86a9a')}`,
+    `<path d="M38 25Q50 19 62 25" fill="none" stroke="#fff" opacity=".55" stroke-width="3" stroke-linecap="round"/>`,
+    `<path d="M44 21Q41 7 52 10Q61 13 55 21Z" fill="${hc}" ${k}/>`][hs] || '';
+  // ---- arc ----
+  const face = f ? 'M27 42Q27 19 50 19Q73 19 73 42Q73 57 63 65Q50 72 37 65Q27 57 27 42Z' : 'M27 40Q27 19 50 19Q73 19 73 40L73 51Q73 68 50 69Q27 68 27 51Z';
+  const eye = x => `<ellipse cx="${x}" cy="47" rx="${kid ? 3.2 : 2.8}" ry="${kid ? 3.8 : 3.4}" fill="${OL}"/>`;
+  const lash = (x, s) => f && a >= 10 ? `<path d="M${x + s * 3.4} 45.4l${s * 2.6} -2" stroke="${OL}" stroke-width="1.7" stroke-linecap="round"/>` : '';
+  const brow = (x1, x2) => `<path d="M${x1} 39.5Q${(x1 + x2) / 2} 36.4 ${x2} 38.6" fill="none" stroke="${hb}" stroke-width="${f ? 2.3 : 3.1}" stroke-linecap="round"/>`;
+  const mouth = `<path d="M44.5 59Q50 63.2 55.5 59" ${th(1.9)}/>`;
+  const nose = `<path d="M50 50.5Q52.4 54 49.6 54.6" fill="none" stroke="${skD}" stroke-width="1.6" stroke-linecap="round"/>`;
+  const chin = +l.bd == 5 || +l.bd == 6 ? `<path d="M41 66Q50 70 59 66" ${th(1.4)} opacity=".28"/>` : '';
+  const old = a >= 50 ? `<path d="M32 54q2 2.4 4 1.2M68 54q-2 2.4 -4 1.2M40 33q10 -2.4 20 0" ${th(1.1)} opacity=".3"/>` : '';
+  const glasses = a >= 55 && (l.sk + l.hc + l.hs) % 2 == 0 ? `<g fill="#fff" fill-opacity=".22" stroke="${OL}" stroke-width="1.5"><circle cx="39" cy="47" r="6.6"/><circle cx="61" cy="47" r="6.6"/></g><path d="M45.6 46Q50 44 54.4 46M32.4 46L28 45M67.6 46L72 45" ${th(1.5)}/>` : '';
+  const hz = (kid ? (baby ? 1.28 : 1.1) : 1) * bd.hz, hd = `translate(50 52) scale(${(hz * bd.fw).toFixed(3)} ${hz}) translate(-50 -52)`;
+  const tb = kid ? `translate(50 112) scale(${baby ? '.7 .8' : '.84 .92'}) translate(-50 -112)` : '';
+  const hasBrows = !baby;
+  return `<svg viewBox="${vb || '0 0 100 110'}" xmlns="http://www.w3.org/2000/svg"><clipPath id="${id}c"><rect width="100" height="110" rx="16"/></clipPath><g clip-path="url(#${id}c)"><rect width="100" height="110" fill="${BG[l.oc] || BG[0]}"/><circle cx="50" cy="50" r="44" fill="#fff" opacity=".4"/>`
+    + `<g transform="${hd}">${back}</g><g transform="${tb}">${bodyG}${locks}</g>`
+    + `<g transform="${hd}"><ellipse cx="27" cy="49" rx="3.8" ry="5.2" fill="${sk}" ${k}/><ellipse cx="73" cy="49" rx="3.8" ry="5.2" fill="${sk}" ${k}/>`
+    + `<clipPath id="${id}f"><path d="${face}"/></clipPath><path d="${face}" fill="${sk}" ${k}/><rect x="52" y="14" width="30" height="62" fill="#000" opacity=".08" clip-path="url(#${id}f)"/>`
+    + `${eye(39)}${eye(61)}${lash(39, -1)}${lash(61, 1)}${hasBrows ? brow(33, 44.5) + brow(67, 55.5) : ''}${nose}${mouth}${chin}${old}${glasses}${front}</g></g></svg>`;
 }
 const RI = [
   { k: 'hang', l: ['Közös program', 'Hang out'], ok: [9, 4, 'Együtt töltöttetek egy délutánt: ', 'You spent an afternoon with: '] },
@@ -516,7 +572,8 @@ function showTitle() { $('#tcont').hidden = !(p && !p.dead); show('title'); }
 const cfg = () => [
   { k: 'g', l: T(['Nem', 'Gender']), o: [['f', T(['Lány', 'Girl'])], ['m', T(['Fiú', 'Boy'])], ['r', '🎲']] },
   { ap: 1, k: 'skin', l: T(['Bőrszín', 'Skin tone']), o: [[1, ''], [2, ''], [3, ''], [4, ''], [5, ''], ['r', '🎲']] },
-  { ap: 1, k: 'hs', l: T(['Haj', 'Hair']), o: [[0, T(['Rövid', 'Short'])], [1, T(['Hosszú', 'Long'])], [2, T(['Feltűzött', 'Tied-up'])], [3, T(['Kopasz', 'Buzzed'])], [4, T(['Göndör', 'Curly'])], ['r', '🎲']] },
+  { ap: 1, k: 'hs', pv: 'hair', l: T(['Frizura', 'Hairstyle']), o: [...HSN.keys()].map(i => [i, T(HSN[i])]).concat([['r', '🎲']]) },
+  { ap: 1, k: 'bd', pv: 'body', l: T(['Testalkat', 'Body shape']), o: [...BDN.keys()].map(i => [i, T(BDN[i])]).concat([['r', '🎲']]) },
   { ap: 1, k: 'hc', l: T(['Hajszín', 'Hair color']), o: [[0, ''], [1, ''], [2, ''], [3, ''], [4, ''], [5, ''], ['r', '🎲']] },
   { ap: 1, k: 'oc', l: T(['Ruha', 'Outfit']), o: [[0, ''], [1, ''], [2, ''], [3, ''], [4, ''], [5, ''], [6, ''], [7, ''], ['r', '🎲']] },
   { k: 'city', l: T(['Szülőváros', 'Hometown']), o: CITY.map(c => [c[0], c[0]]).concat([['r', '🎲']]) },
@@ -526,13 +583,18 @@ const cfg = () => [
 ];
 let cc = {};
 let apOpen = false;
+const ccLook = (o = {}) => { const g = cc.g == 'f' ? 'f' : 'm', n = (k, d) => o[k] != null ? o[k] : cc[k] == 'r' || cc[k] == null ? d : +cc[k];
+  return { g, sk: n('skin', 3), hs: n('hs', g == 'f' ? 1 : 0), hc: n('hc', 1), oc: n('oc', 0), bd: n('bd', 0) }; };
 function drawC() {
-  const grp = c => `<div class="cg"><small>${c.l}</small><div class="chips">${c.o.map(([v, t]) =>
-    `<button class="chip${cc[c.k] == v ? ' on' : ''}" data-k="${c.k}" data-v="${v}">${SW[c.k] && v != 'r' ? `<i class="sw" style="background:${SW[c.k][v]}"></i>` : t}</button>`).join('')}</div></div>`;
+  const grp = c => `<div class="cg"><small>${c.l}</small><div class="chips">${c.o.map(([v, t]) => {
+    const on = cc[c.k] == v ? ' on' : '', at = `data-k="${c.k}" data-v="${v}"`;
+    if (c.pv && v != 'r') return `<button class="chip pv${on}" ${at} title="${t}" aria-label="${t}">${avSvg(ccLook({ [c.k]: v }), 20, false, c.pv == 'hair' ? '4 0 92 84' : '0 0 100 110')}</button>`;
+    return `<button class="chip${on}" ${at}>${SW[c.k] && v != 'r' ? `<i class="sw" style="background:${SW[c.k][v]}"></i>` : t}</button>`;
+  }).join('')}</div></div>`;
   const A = cfg(); $('#copts').innerHTML = A.filter(c => !c.ap).map(grp).join('') + `<details class="ap" ${apOpen ? 'open' : ''}><summary>${T(['Kinézet testreszabása (opcionális)', 'Customize appearance (optional)'])}</summary>${A.filter(c => c.ap).map(grp).join('')}</details>`;
-  $('#cav').innerHTML = avSvg({ g: cc.g == 'f' ? 'f' : 'm', sk: cc.skin == 'r' ? 3 : +cc.skin, hs: cc.hs == 'r' ? (cc.g == 'f' ? 1 : 0) : +cc.hs, hc: cc.hc == 'r' ? 1 : +cc.hc, oc: cc.oc == 'r' ? 0 : +cc.oc }, 20);
+  $('#cav').innerHTML = avSvg(ccLook(), 20);
 }
-function openCreate() { cc = { g: 'r', skin: 'r', hs: 'r', hc: 'r', oc: 'r', city: 'r', fam: 'r', gift: 'r', trait: 'r' }; $('#cfn').value = $('#cln').value = ''; drawC(); show('create'); }
+function openCreate() { cc = { g: 'r', skin: 'r', hs: 'r', hc: 'r', oc: 'r', bd: 'r', city: 'r', fam: 'r', gift: 'r', trait: 'r' }; $('#cfn').value = $('#cln').value = ''; drawC(); show('create'); }
 function startLife(rand) {
   newLife(rand ? {} : { ...cc, fn: clean($('#cfn').value), ln: clean($('#cln').value) });
   seen = 0; prev = null; tab = null; lastTab = null; clearTimeout(endT); endT = 0;

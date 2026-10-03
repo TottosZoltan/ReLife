@@ -165,8 +165,14 @@ header{gap:12px}
 .lang .chip{min-height:34px;padding:6px 14px;font-size:13px}
 
 #av,#cav{display:flex;align-items:flex-end;justify-content:center}
-#av svg{height:100%!important;width:auto!important;max-height:58px}
-#cav svg{height:150px;width:auto}
+#av{width:auto;height:62px;aspect-ratio:100/110;border-radius:15px;overflow:hidden;background:var(--ink2);box-shadow:0 0 0 3px #ffffff1c}
+#av svg{display:block;width:100%;height:100%}
+#cav{width:auto;height:auto;border-radius:0;background:none;box-shadow:none;font-size:70px;filter:drop-shadow(0 6px 26px rgba(228,87,46,.35))}
+#cav svg{display:block;height:158px;width:auto}
+.chip.pv{padding:3px;min-height:0;border-radius:14px;overflow:hidden}
+.chip.pv svg{display:block;height:50px;width:auto;border-radius:11px}
+.chip.pv.on{box-shadow:0 0 0 2px var(--pap)}
+.chip.pv.on{background:var(--pap)}
 .rwrap{display:flex;gap:10px;align-items:flex-start}
 .rav svg{width:54px;height:59px;display:block}
 .rbody{flex:1;min-width:0}
