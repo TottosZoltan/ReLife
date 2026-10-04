@@ -194,3 +194,15 @@ html,body,#app,#create{overflow-x:hidden;overscroll-behavior-x:none}
 #create,.cwrap *{touch-action:pan-y}
 .cwrap input{touch-action:manipulation}
 #cback{min-height:36px;padding:6px 16px;font-size:14px;margin-top:4px}
+
+#revive{width:100%;margin-bottom:10px;padding:13px;background:var(--sun);color:var(--ink);box-shadow:0 4px 0 #b88a14}
+#revive[hidden]{display:none}
+
+/* alsó szalaghirdetés (natív, az app fölé kerül): ennyi helyet hagyunk neki */
+body.ad #app{padding-bottom:var(--ad,56px)}
+body.ad .scr,body.ad .ov{bottom:var(--ad,56px)}
+body.ad .sheet{bottom:calc(var(--dock) + var(--ad,56px))}
+
+.pc{cursor:pointer}.pc .rwrap{align-items:center}.chev{font-size:26px;color:var(--mut);padding:0 4px}
+.pd .rav svg{width:72px;height:79px}.act:disabled{opacity:.45}
+#sbody>.ghost{margin-bottom:8px}
