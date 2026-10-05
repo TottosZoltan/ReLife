@@ -13,7 +13,7 @@
     testRewardedId: 'ca-app-pub-3940256099942544/5224354917',  // Google teszt egység (Android)
     bannerId: 'ca-app-pub-3289948892121330/6277843087',        // a SAJÁT szalaghirdetési egységed
     testBannerId: 'ca-app-pub-3940256099942544/6300978111',    // Google teszt szalag (Android)
-    bannerAfterMinutes: 15                                     // ennyi perccel az első indítás előtt SOHA nem jelenik meg szalag (tesztelésnél állítsd 0-ra)
+    bannerAfterMinutes: 5                                     // ennyi perccel az első indítás előtt SOHA nem jelenik meg szalag (tesztelésnél állítsd 0-ra)
   };
   const adId = () => CFG.isTesting ? CFG.testRewardedId : CFG.rewardedId;
 

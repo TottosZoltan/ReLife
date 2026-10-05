@@ -206,3 +206,9 @@ body.ad .sheet{bottom:calc(var(--dock) + var(--ad,56px))}
 .pc{cursor:pointer}.pc .rwrap{align-items:center}.chev{font-size:26px;color:var(--mut);padding:0 4px}
 .pd .rav svg{width:72px;height:79px}.act:disabled{opacity:.45}
 #sbody>.ghost{margin-bottom:8px}
+
+.cs{color:#8a5a14;font-weight:700}.cs.no{color:#c23b3b}.act.dn{opacity:.5}.act small{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.card.pc{cursor:pointer}
+#back{position:fixed;right:14px;bottom:calc(var(--dock) + 14px);z-index:4;max-width:72vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background:var(--lake);color:#fff;border-radius:99px;padding:10px 16px;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.3);animation:rise .3s ease-out}
+body.ad #back{bottom:calc(var(--dock) + var(--ad,56px) + 14px)}
+#back[hidden]{display:none}
