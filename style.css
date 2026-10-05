@@ -205,7 +205,7 @@ body.ad .sheet{bottom:calc(var(--dock) + var(--ad,56px))}
 
 .pc{cursor:pointer}.pc .rwrap{align-items:center}.chev{font-size:26px;color:var(--mut);padding:0 4px}
 .pd .rav svg{width:72px;height:79px}.act:disabled{opacity:.45}
-#sbody>.ghost{margin-bottom:8px}
+#sbody>.ghost{margin-bottom:10px;background:var(--lake);color:#fff;border:0;padding:10px 16px;min-height:42px;font-size:14px;font-weight:700;border-radius:99px}
 
 .cs{color:#8a5a14;font-weight:700}.cs.no{color:#c23b3b}.act.dn{opacity:.5}.act small{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
 .card.pc{cursor:pointer}
@@ -233,3 +233,5 @@ footer button.on::after{content:"";position:absolute;top:0;left:22%;right:22%;he
 .seg{display:grid;grid-template-columns:1fr 1fr;background:#d5ddd6;border-radius:12px;padding:3px;margin-bottom:10px}
 .seg button{background:transparent;color:var(--mut);padding:10px 4px;font-size:13px;border-radius:10px}
 .seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.15)}
+
+footer button{font-size:9.5px}footer button span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}

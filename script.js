@@ -650,16 +650,17 @@ function abtn(x) {
   return `<button class="act${x.done ? ' dn' : ''}" ${x.done || x.off || !can(c) ? 'disabled' : ''} onclick="${x.fn}"><b>${x.i} ${x.n}</b>${sb ? `<small>${sb}</small>` : ''}</button>`;
 }
 function go(x) { sub = x; render(); $('#sbody').scrollTop = 0; }
-function back() { sub = ({ travel: 'c:fun', inv: 'c:money' })[sub] || (sub && sub.startsWith('h:') ? 'hobs' : null); render(); $('#sbody').scrollTop = 0; }
-const bk = () => '<button class="ghost" onclick="back()">‹ Vissza</button>';
+function goBack() { sub = ({ travel: 'c:fun', inv: 'c:money' })[sub] || (sub && sub.startsWith('h:') ? 'hobs' : null); render(); $('#sbody').scrollTop = 0; }
+const bk = () => '<button class="ghost" onclick="goBack()">‹ Vissza</button>';
 function subTitle(t, sb, ro) {
   if (t == 'rel') return ro != null && p.rel[ro] ? dn(p.rel[ro].n) : T(TT.rel);
   if (t == 'act' && sb) { if (sb.startsWith('c:')) { const C = CATS.find(c => c.id == sb.slice(2)); return C ? C.n : T(TT.act); } return sb == 'travel' ? 'Utazás' : 'Befektetések'; }
   if (t == 'assets' && sb && p.assets[+sb.slice(2)]) return p.assets[+sb.slice(2)].n;
-  if (t == 'job' && sb) { if (sb.startsWith('h:')) { const x = HOB.find(q => q.id == sb.slice(2)); return x ? x.n : T(TT.job); } if (sb == 'jobs') return 'Állások'; if (sb == 'hobs') return 'Hobbik'; if (sb == 'jwork') return 'Munkahelyi teendők'; }
+  if (t == 'job' && sb) { if (sb.startsWith('h:')) { const x = HOB.find(q => q.id == sb.slice(2)); return x ? x.n : T(TT.job); } if (sb == 'jobs') return 'Állások'; if (sb == 'hobs') return 'Hobbik'; if (sb == 'jwork') return 'Munkahelyi tevékenységek'; if (sb == 'school') return occ()[1]; }
+  if (t == 'job') return occ()[1];
   return T(TT[t]) || '';
 }
-const placeName = lp => { const t = T(TT[lp.tab]), q = subTitle(lp.tab, lp.sub, lp.relOpen); return q && q != t ? t + ' › ' + q : t; };
+const placeName = lp => { const t = lp.tab == 'job' ? occ()[1] : T(TT[lp.tab]), q = subTitle(lp.tab, lp.sub, lp.relOpen); return q && q != t ? t + ' › ' + q : t; };
 
 // --- kategóriák ---
 const CATS = [
@@ -910,7 +911,7 @@ const JA = [
 ];
 function jobActs() {
   const a = p.age, jp = Math.round(p.jp || 0);
-  return `<div class="card"><div class="top"><b>Munkahelyi megítélés</b><small>${jp}/100</small></div><div class="tr"><i style="width:${jp}%"></i></div><small>Magas megítélésnél több az előléptetés, alacsonynál nagyobb a kirúgás esélye.</small></div><h3>Munkahelyi teendők</h3><div class="grid">`
+  return `<div class="card"><div class="top"><b>Munkahelyi megítélés</b><small>${jp}/100</small></div><div class="tr"><i style="width:${jp}%"></i></div><small>Magas megítélésnél több az előléptetés, alacsonynál nagyobb a kirúgás esélye.</small></div><h3>Munkahelyi tevékenységek</h3><div class="grid">`
     + JA.filter(x => !x.u || x.u()).map(x => abtn({ i: x.i, n: x.n, c: a < 18 ? 0 : x.c || 0, r: x.r, done: p.done['j' + x.id], fn: `doJobAct('${x.id}')` })).join('') + '</div>';
 }
 function doJobAct(id) {
@@ -927,7 +928,56 @@ function jobList() {
 }
 let jt = 'n';
 const setJt = x => { jt = x; render(); };
-const mrow = (i, t, sb, fn) => `<button class="mrow" onclick="${fn}"><i>${i}</i><span><b>${t}</b>${sb ? `<small>${sb}</small>` : ''}</span><em>›</em></button>`;
+const mcard = (i, t, sb, fn) => `<button class="act" onclick="${fn}"><b>${i} ${t}</b>${sb ? `<small>${sb}</small>` : ''}</button>`;
+function occ() {
+  const a = p.age;
+  if (p.prison > 0) return ['⛓️', T(['Börtön', 'Prison'])];
+  if (p.car) return [CAR_BY[p.car.id].i, T(['Munka', 'Work'])];
+  if (p.job) return ['💼', T(['Munka', 'Work'])];
+  if (a < 3) return ['🍼', T(['Otthon', 'Home'])];
+  if (a < 6) return ['🧸', T(['Óvoda', 'Preschool'])];
+  if (a < 14) return ['🏫', T(['Iskola', 'School'])];
+  if (a < 18) return ['🎒', T(['Iskola', 'School'])];
+  if (p.uni) return ['🎓', T(['Egyetem', 'University'])];
+  if (a >= 65) return ['🏖️', T(['Nyugdíj', 'Retired'])];
+  return ['🔍', T(['Munkanélküli', 'Jobless'])];
+}
+const inSchool = () => p.age >= 3 && (p.age < 18 || p.uni);
+const sName = () => p.age < 6 ? 'Óvoda' : p.uni ? 'Egyetem' : 'Iskola';
+const gr = () => p.gr == null ? 50 : p.gr, gg = d => { p.gr = cl(gr() + d); };
+function mate(t) {
+  const l = p.rel.filter(r => r.alive && r.role == 'Osztálytárs');
+  if (!l.length || (l.length < 5 && roll(.5))) { const q = person('Osztálytárs', Math.max(3, p.age + R(-1, 1)), 40, P(['f', 'm'])); p.rel.push(q); fxlog(`${t} Új barátod lett: ${q.n}.`, { hap: 4 }); }
+  else { const r = P(l); r.bond = cl(r.bond + R(4, 9)); fxlog(`${t} Közelebb kerültél hozzá: ${r.n}.`, { hap: 3 }); }
+}
+function exam(t) { const sc = (p.sma + gr()) / 2 + R(-20, 20); if (sc >= 60) { gg(R(5, 9)); fxlog(`${t}: remekül sikerült!`, { hap: 4 }); } else if (sc >= 40) { gg(1); fxlog(`${t}: közepesen sikerült.`, { hap: 0 }); } else { gg(-6); fxlog(`${t}: rosszul sikerült.`, { hap: -4 }); } }
+const SCH = [
+  { id: 'kplay', i: '🧸', n: 'Játék a csoportban', a: [3, 5], r: ['hap', 'bond'], run: () => mate('Együtt játszottatok az óvodában.') },
+  { id: 'kdraw', i: '🎨', n: 'Rajzolás, barkácsolás', a: [3, 5], r: ['hap', 'sma'], run: () => fxlog('Szép dolgokat alkottál az óvodában.', { hap: R(3, 6), sma: 1 }) },
+  { id: 'ksong', i: '🎶', n: 'Éneklés, mondókák', a: [3, 5], r: ['hap', 'sma'], run: () => fxlog('Mondókákat tanultál az óvónénivel.', { hap: R(2, 5), sma: R(1, 2) }) },
+  { id: 'knap', i: '😴', n: 'Délutáni alvás', a: [3, 5], r: ['hea'], run: () => fxlog('Jót aludtál a délutáni pihenőn.', { hea: 3, hap: 1 }) },
+  { id: 'study', i: '📚', n: 'Tanulás', a: [6, 17], r: ['sma', 'perf'], run: () => { gg(R(4, 8)); fxlog('Sokat tanultál, javultak a jegyeid.', { sma: R(2, 4), hap: -2 }); } },
+  { id: 'hw', i: '✍️', n: 'Házi feladat', a: [6, 17], r: ['perf'], run: () => { gg(R(2, 5)); fxlog('Gondosan megírtad a házi feladatot.', { sma: 1 }); } },
+  { id: 'hand', i: '🙋', n: 'Jelentkezés órán', a: [6, 17], r: ['perf', 'sma'], run: () => { if (roll(.7)) { gg(R(3, 6)); fxlog('Jól válaszoltál, a tanár dicsért.', { hap: 3, sma: 1 }); } else { gg(-1); fxlog('Rosszul válaszoltál, kicsit égtél.', { hap: -3 }); } } },
+  { id: 'test', i: '📝', n: 'Dolgozat', a: [6, 17], r: ['perf'], run: () => exam('Dolgozat') },
+  { id: 'brk', i: '🤝', n: 'Barátkozás szünetben', a: [6, 17], r: ['bond', 'hap'], run: () => mate('Szünetben együtt lógtatok.') },
+  { id: 'pe', i: '🏃', n: 'Testnevelés', a: [6, 17], r: ['fit', 'hea'], run: () => { p.fit = cl((p.fit == null ? 30 : p.fit) + R(2, 5)); fxlog('Sokat mozogtál testnevelésen.', { hea: 2, hap: 2 }); } },
+  { id: 'skip', i: '🏃‍♂️', n: 'Lógás', a: [10, 17], risk: 1, run: () => { if (roll(.4)) { gg(-6); fxlog('Lógáson kaptak, igazgatói intőt kaptál.', { hap: -6 }); } else { gg(-3); fxlog('Ellógtad a napot, jó volt, de lemaradtál.', { hap: 6 }); } } },
+  { id: 'ustudy', i: '📚', n: 'Tanulás vizsgára', a: [18, 30], u: 1, r: ['sma', 'perf'], run: () => { gg(R(4, 8)); fxlog('Nyomtad a tananyagot a vizsgára.', { sma: R(2, 5), hap: -3 }); } },
+  { id: 'uexam', i: '📝', n: 'Vizsga', a: [18, 30], u: 1, r: ['perf'], run: () => exam('Vizsga') },
+  { id: 'ugrp', i: '👥', n: 'Tanulócsoport', a: [18, 30], u: 1, r: ['bond', 'sma'], run: () => { mate('Együtt tanultatok a csoporttal.'); gg(2); } },
+  { id: 'upar', i: '🍻', n: 'Egyetemi buli', a: [18, 30], u: 1, c: 4e4, r: ['hap', 'bond'], risk: 1, run: () => { gg(-2); mate('Nagyot buliztatok.'); } },
+  { id: 'uint', i: '🧑‍💼', n: 'Gyakornoki munka', a: [18, 30], u: 1, r: ['money', 'perf'], run: () => { gg(R(1, 3)); fxlog('Gyakornokoskodtál egy cégnél.', { money: R(4, 9) * 1e4, hap: -1 }); } }
+];
+function schoolDo(id) {
+  const x = SCH.find(q => q.id == id), k = 's' + id, c = x.c || 0; if (!x || p.done[k] || !can(c)) return;
+  p.done[k] = 1; p.money -= c; x.run(); render();
+}
+function schoolPanel() {
+  const a = p.age, g = Math.round(gr()), l = SCH.filter(x => a >= x.a[0] && a <= x.a[1] && (!x.u || p.uni));
+  return `<div class="card"><div class="top"><b>${occ()[0]} ${sName()}</b><small>${a < 6 ? 'Óvodás vagy' : p.uni ? 'Egyetemista vagy' : a < 14 ? 'Általános iskolás vagy' : 'Gimnazista vagy'}</small></div>` + (a >= 6 ? `<div class="top"><small>Tanulmányi eredmény</small><small>${g}/100</small></div><div class="tr"><i style="width:${g}%"></i></div>` : '') + '</div>'
+    + `<h3>Tevékenységek</h3><div class="grid">` + l.map(x => abtn({ i: x.i, n: x.n, c: x.c || 0, r: x.r, risk: x.risk, done: p.done['s' + x.id], fn: `schoolDo('${x.id}')` })).join('') + '</div>';
+}
 function jobsScreen() {
   const a = p.age, sp = jt == 's';
   let b;
@@ -938,14 +988,19 @@ function jobsScreen() {
 function jobPanel() {
   const a = p.age;
   const h = row('Végzettség', T(EDU[p.edu]) + (p.uni ? ' (egyetemista)' : ''), '') + (a >= 17 ? row('Jogosítvány', p.lic ? 'Van' : 'Nincs', '') : '') + (p.crim ? row('Büntetett előélet', p.crim + ' ügy', '') : '') + (p.lang ? row('Nyelvtudás', p.lang + '/5', '') : '');
-  const hob = a >= 4 && p.prison <= 0 ? mrow('🎨', 'Hobbik', `${hobN()}/3 hobbi`, "go('hobs')") : '';
-  if (p.car) return h + carPanel() + (hob ? '<h3>Menü</h3>' + hob : '');
+  const hob = a >= 4 && p.prison <= 0 ? mcard('🎨', 'Hobbik', `${hobN()}/3 hobbi`, "go('hobs')") : '';
+  const sch = inSchool() && (p.job || p.car) ? mcard(a < 6 ? '🧸' : p.uni ? '🎓' : '🏫', sName(), 'Tanulmányok, barátok', "go('school')") : '';
+  const G = x => x ? '<h3>Menü</h3><div class="grid">' + x + '</div>' : '';
   if (p.prison > 0) return h + '<p class="empty">Börtönben nem dolgozhatsz.</p>';
+  if (p.car) return h + carPanel() + G(sch + hob);
   let top = '';
   if (p.job) top = row(p.job, `${JR[p.jr || 0]} · ${p.yrs}. éve`, `<p>Fizetés: ${fmt(p.pay)} / év</p><div class="btns"><button class="alt" onclick="quit()">Felmondok</button></div>`);
+  else if (inSchool()) top = schoolPanel();
   else if (a >= 65) top = `<p class="empty">Nyugdíjas vagy: ${fmt(p.pension)} / év.</p>`;
-  const menu = (a < 65 || p.job ? mrow('💼', 'Állások', 'Sima és különleges munkák', "go('jobs')") : '') + (p.job ? mrow('📋', 'Munkahelyi teendők', 'Megítélés, túlóra, fizetésemelés', "go('jwork')") : '') + hob;
-  return h + top + (menu ? '<h3>Menü</h3>' + menu : '');
+  else if (a >= 18) top = '<div class="card"><div class="top"><b>🔍 Munkanélküli vagy</b></div><small>Nézz szét az állások között, vagy indíts különleges karriert.</small></div>';
+  else if (a < 3) top = '<p class="empty">Még csecsemő vagy, a család gondoskodik rólad.</p>';
+  const menu = (a >= 14 && (a < 65 || p.job) ? mcard('💼', 'Állások', 'Sima és különleges munkák', "go('jobs')") : '') + (p.job ? mcard('📋', 'Munkahelyi tevékenységek', 'Megítélés, túlóra, emelés', "go('jwork')") : '') + sch + hob;
+  return h + top + G(menu);
 }
 
 // --- karrier: fejlesztések ---
@@ -969,7 +1024,7 @@ function carPanel() {
     ? `<button class="act dn" disabled><b>${K.i} ${K.n}</b><small>✓ megvan · ${K.e == 'inc' ? '+15% bevétel' : 'lassabb elfáradás'}</small></button>`
     : abtn({ i: K.i, n: K.n, c: K.c * (1 + c.rank), r: [K.e == 'inc' ? 'money' : 'perf'], fn: `buyPerk('${K.id}')` })).join('');
   return row(`${C.i} ${r[0]}`, `${c.yrs}. éve · ${C.n}`, `<p>Várható bevétel: ${fmt(est)} / év</p><div class="tr"><i style="width:${c.perf}%"></i></div><small>Teljesítmény ${Math.round(c.perf)}/100 · ${nx ? `előlépéshez 75+ kell, következő: ${nx[0]}` : 'a csúcson vagy!'}</small>`)
-    + `<h3>Teendők ebben az évben</h3><div class="grid">${C.acts.map(card).join('')}</div><h3>Fejlesztések</h3><div class="grid">${perks}</div><div class="btns">${C.biz ? `<button class="alt" onclick="sellBiz()">Cég eladása (${fmt(bizVal())})</button>` : ''}<button class="alt" onclick="quitCar()">Felhagyok vele</button></div>`;
+    + `<h3>Tevékenységek ebben az évben</h3><div class="grid">${C.acts.map(card).join('')}</div><h3>Fejlesztések</h3><div class="grid">${perks}</div><div class="btns">${C.biz ? `<button class="alt" onclick="sellBiz()">Cég eladása (${fmt(bizVal())})</button>` : ''}<button class="alt" onclick="quitCar()">Felhagyok vele</button></div>`;
 }
 
 function doAct(id) {
@@ -1024,6 +1079,7 @@ function panel(t) {
   if (t == 'job' && sub == 'jobs') return bk() + jobsScreen();
   if (t == 'job' && sub == 'hobs') return bk() + hobbyPanel();
   if (t == 'job' && sub == 'jwork') return bk() + jobActs();
+  if (t == 'job' && sub == 'school') return bk() + schoolPanel();
   return panel0(t);
 }
 function panel0(t) {
@@ -1399,6 +1455,7 @@ function render() {
   sb.classList.remove('fresh'); const pk_ = tab + '|' + sub + '|' + relOpen; if (tab && pk_ != lastTab) { void sb.offsetWidth; sb.classList.add('fresh'); } lastTab = tab ? pk_ : null;
   $('#sheet').hidden = !tab; $('#stt').textContent = subTitle(tab, sub, relOpen);
   document.querySelectorAll('#dock [data-s]').forEach(b => b.classList.toggle('on', b.dataset.s == tab));
+  { const o = occ(), jb = $('#dock [data-s=job]'); jb.querySelector('i').textContent = o[0]; jb.querySelector('span').textContent = o[1]; }
   { const bb = $('#back'); bb.hidden = !(lastPlace && !tab && !p.dead); if (lastPlace) bb.textContent = '↩ ' + placeName(lastPlace); }
   $('#up').disabled = p.dead;
   if (p.dead) {
@@ -1500,3 +1557,12 @@ if (p && p.lic == null) p.lic = hasCar();
 if (p) { p.hob = p.hob || {}; p.car = p.car || null; if (p.jp == null) p.jp = 30; p.fit = p.fit == null ? 30 : p.fit; p.lang = p.lang || 0; p.trav = p.trav || {}; p.inv = p.inv || 0; p.cry = p.cry || 0; p.debt = p.debt || 0; p.jr = p.jr || 0; p.assets.forEach(x => { if (x.cond == null) x.cond = 80; x.ins = !!x.ins; x.rent = !!x.rent; }); } // régi mentés: aki már autót vett, annak van jogsija
 if (p && !p.dead) { seen = p.ln || 0; render(); }
 showTitle();
+
+function navUp() { if (relOpen != null) { relOpen = null; render(); return true; } if (sub) { goBack(); return true; } if (tab) { tab = null; render(); return true; } return false; }
+try { history.replaceState({ r: 0 }, ''); history.pushState({ r: 1 }, ''); } catch (e) { }
+window.addEventListener('popstate', () => {
+  if (!$('#title').hidden) return;
+  if (!$('#modal').hidden || !$('#end').hidden) { try { history.pushState({ r: 1 }, ''); } catch (e) { } return; }
+  if (!$('#create').hidden) { $('#cback').click(); } else navUp();
+  try { history.pushState({ r: 1 }, ''); } catch (e) { }
+});
