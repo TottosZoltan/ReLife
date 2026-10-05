@@ -216,11 +216,11 @@ body.ad #back{bottom:calc(var(--dock) + var(--ad,56px) + 14px)}
 /* BitLife-szeru alsó sáv és menü */
 footer{background:#fff;border-top:1px solid #d5ddd6;grid-template-columns:1fr 1fr 1.2fr 1fr 1fr}
 footer button{font-size:10px;font-weight:600;letter-spacing:-.2px;border-radius:0;background:transparent!important;position:relative}
-footer button i{font-size:24px;filter:grayscale(.7);opacity:.75}
+footer button i{font-size:25px;filter:none;opacity:1}
 footer button.on{color:#2e9f4f}
 footer button.on i{filter:none;opacity:1}
 footer button.on::after{content:"";position:absolute;top:0;left:22%;right:22%;height:3px;border-radius:0 0 3px 3px;background:#2e9f4f}
-#up{background:#3fbf5f;box-shadow:0 5px 0 #2a8a43,0 8px 18px rgba(63,191,95,.4);width:72px;height:72px;margin-top:-26px}
+#up{background:#3fbf5f!important;color:#fff!important;box-shadow:0 5px 0 #2a8a43,0 8px 18px rgba(63,191,95,.4);width:72px;height:72px;margin-top:-26px}
 #up:active:not(:disabled){box-shadow:0 1px 0 #2a8a43}
 #up::before{border-color:#3fbf5f}
 #up b{font-size:34px;font-weight:700}
@@ -235,3 +235,5 @@ footer button.on::after{content:"";position:absolute;top:0;left:22%;right:22%;he
 .seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.15)}
 
 footer button{font-size:9.5px}footer button span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+footer button{color:#3a4a40}footer button.on{color:#2e9f4f}#up b,#up span{color:#fff!important}
