@@ -650,13 +650,13 @@ function abtn(x) {
   return `<button class="act${x.done ? ' dn' : ''}" ${x.done || x.off || !can(c) ? 'disabled' : ''} onclick="${x.fn}"><b>${x.i} ${x.n}</b>${sb ? `<small>${sb}</small>` : ''}</button>`;
 }
 function go(x) { sub = x; render(); $('#sbody').scrollTop = 0; }
-function back() { sub = ({ travel: 'c:fun', inv: 'c:money' })[sub] || null; render(); $('#sbody').scrollTop = 0; }
+function back() { sub = ({ travel: 'c:fun', inv: 'c:money' })[sub] || (sub && sub.startsWith('h:') ? 'hobs' : null); render(); $('#sbody').scrollTop = 0; }
 const bk = () => '<button class="ghost" onclick="back()">‹ Vissza</button>';
 function subTitle(t, sb, ro) {
   if (t == 'rel') return ro != null && p.rel[ro] ? dn(p.rel[ro].n) : T(TT.rel);
   if (t == 'act' && sb) { if (sb.startsWith('c:')) { const C = CATS.find(c => c.id == sb.slice(2)); return C ? C.n : T(TT.act); } return sb == 'travel' ? 'Utazás' : 'Befektetések'; }
   if (t == 'assets' && sb && p.assets[+sb.slice(2)]) return p.assets[+sb.slice(2)].n;
-  if (t == 'job' && sb) { if (sb.startsWith('h:')) { const x = HOB.find(q => q.id == sb.slice(2)); return x ? x.n : T(TT.job); } if (sb == 'jobs') return 'Állásváltás'; }
+  if (t == 'job' && sb) { if (sb.startsWith('h:')) { const x = HOB.find(q => q.id == sb.slice(2)); return x ? x.n : T(TT.job); } if (sb == 'jobs') return 'Állások'; if (sb == 'hobs') return 'Hobbik'; if (sb == 'jwork') return 'Munkahelyi teendők'; }
   return T(TT[t]) || '';
 }
 const placeName = lp => { const t = T(TT[lp.tab]), q = subTitle(lp.tab, lp.sub, lp.relOpen); return q && q != t ? t + ' › ' + q : t; };
@@ -923,17 +923,29 @@ function jobList() {
   return JOBS.map(j => {
     const ok = p.edu >= j.e && p.loo >= (j.l || 0) && !p.done.job && !(j.c && p.crim) && (!j.lic || p.lic) && j.n != p.job;
     return row(j.n, fmt(j.pay) + ' / év' + (p.job ? ` (${j.pay >= p.pay ? '+' : ''}${fmt(j.pay - p.pay)})` : ''), `<small>${T(EDU[j.e])}${j.s ? `, okosság ${j.s}+` : ''}${j.l ? `, kinézet ${j.l}+` : ''}${j.c ? ', tiszta előélet' : ''}${j.lic ? ', jogosítvány' : ''}</small><div class="btns"><button ${ok ? '' : 'disabled'} onclick="applyJob('${j.n}')">Jelentkezés</button></div>`);
-  }).join('') + (p.job ? '' : careerList());
+  }).join('');
+}
+let jt = 'n';
+const setJt = x => { jt = x; render(); };
+const mrow = (i, t, sb, fn) => `<button class="mrow" onclick="${fn}"><i>${i}</i><span><b>${t}</b>${sb ? `<small>${sb}</small>` : ''}</span><em>›</em></button>`;
+function jobsScreen() {
+  const a = p.age, sp = jt == 's';
+  let b;
+  if (sp) b = p.job ? '<p class="empty">Különleges karrierhez előbb mondj fel a mostani munkádból.</p>' : (careerList().replace('<h3>Különleges karrierek</h3>', '') || '<p class="empty">Még nincs elérhető különleges karrier a korodban.</p>');
+  else b = a < 16 ? '<p class="empty">16 éves kortól vállalhatsz állást.</p>' : p.uni ? '<p class="empty">Az egyetem mellett most nem dolgozol.</p>' : jobList();
+  return `<div class="seg"><button class="${sp ? '' : 'on'}" onclick="setJt('n')">💼 Sima munkák</button><button class="${sp ? 'on' : ''}" onclick="setJt('s')">⭐ Különleges</button></div>` + b;
 }
 function jobPanel() {
   const a = p.age;
   const h = row('Végzettség', T(EDU[p.edu]) + (p.uni ? ' (egyetemista)' : ''), '') + (a >= 17 ? row('Jogosítvány', p.lic ? 'Van' : 'Nincs', '') : '') + (p.crim ? row('Büntetett előélet', p.crim + ' ügy', '') : '') + (p.lang ? row('Nyelvtudás', p.lang + '/5', '') : '');
-  if (p.car) return h + carPanel();
+  const hob = a >= 4 && p.prison <= 0 ? mrow('🎨', 'Hobbik', `${hobN()}/3 hobbi`, "go('hobs')") : '';
+  if (p.car) return h + carPanel() + (hob ? '<h3>Menü</h3>' + hob : '');
   if (p.prison > 0) return h + '<p class="empty">Börtönben nem dolgozhatsz.</p>';
-  if (p.job) return h + row(p.job, `${JR[p.jr || 0]} · ${p.yrs}. éve`, `<p>Fizetés: ${fmt(p.pay)} / év</p><div class="btns"><button onclick="go('jobs')">Állásváltás</button><button class="alt" onclick="quit()">Felmondok</button></div>`) + jobActs();
-  if (a >= 65) return h + `<p class="empty">Nyugdíjas vagy: ${fmt(p.pension)} / év.</p>`;
-  if (a < 16 || p.uni) return h + `<p class="empty">${p.uni ? 'Az egyetem mellett most nem dolgozol.' : '16 éves kortól vállalhatsz állást.'}</p>` + (p.uni ? '' : careerList());
-  return h + jobList();
+  let top = '';
+  if (p.job) top = row(p.job, `${JR[p.jr || 0]} · ${p.yrs}. éve`, `<p>Fizetés: ${fmt(p.pay)} / év</p><div class="btns"><button class="alt" onclick="quit()">Felmondok</button></div>`);
+  else if (a >= 65) top = `<p class="empty">Nyugdíjas vagy: ${fmt(p.pension)} / év.</p>`;
+  const menu = (a < 65 || p.job ? mrow('💼', 'Állások', 'Sima és különleges munkák', "go('jobs')") : '') + (p.job ? mrow('📋', 'Munkahelyi teendők', 'Megítélés, túlóra, fizetésemelés', "go('jwork')") : '') + hob;
+  return h + top + (menu ? '<h3>Menü</h3>' + menu : '');
 }
 
 // --- karrier: fejlesztések ---
@@ -1001,7 +1013,7 @@ function applyJob(n) {
 function quit() { if (confirm(T(['Biztosan felmondasz?', 'Really quit your job?']))) { lg(`Felmondtál (${p.job}).`); p.job = null; p.pay = 0; render(); } }
 
 // ----- megjelenítés -----
-const TT = { job: ['Munka és hobbi', 'Work & hobbies'], assets: ['Vagyon', 'Assets'], rel: ['Emberek', 'People'], act: ['Teendők', 'Actions'] };
+const TT = { job: ['Foglalkozás', 'Occupation'], assets: ['Vagyon', 'Assets'], rel: ['Kapcsolatok', 'Relationships'], act: ['Tevékenységek', 'Activities'] };
 const logHtml = () => { const L = p.logs; let h = '', last = -1; for (let j = L.length - 1; j >= 0; j--) { const l = L[j]; if (l.a !== last) { h += `<h3>${l.a} éves</h3>`; last = l.a; } h += `<p class="lg ${l.c}${l.n > seen ? ' new' : ''}" style="animation-delay:${(L.length - 1 - j) * 70}ms">${l.t}</p>`; } return h; };
 const row = (top, sub, btn) => `<div class="card"><div class="top"><b>${top}</b><small>${sub}</small></div>${btn}</div>`;
 
@@ -1009,8 +1021,10 @@ function panel(t) {
   if (t == 'act' && sub) return bk() + actSub(sub);
   if (t == 'assets' && sub && sub.startsWith('a:')) return bk() + assetDetail(+sub.slice(2));
   if (t == 'job' && sub && sub.startsWith('h:')) return bk() + hobbyDetail(sub.slice(2));
-  if (t == 'job' && sub == 'jobs') return bk() + jobList();
-  return panel0(t) + (t == 'job' ? hobbyPanel() : '');
+  if (t == 'job' && sub == 'jobs') return bk() + jobsScreen();
+  if (t == 'job' && sub == 'hobs') return bk() + hobbyPanel();
+  if (t == 'job' && sub == 'jwork') return bk() + jobActs();
+  return panel0(t);
 }
 function panel0(t) {
   const a = p.age;
@@ -1364,7 +1378,7 @@ const avatar = (g, a, skin, dead) => dead ? '🪦' : (a < 2 ? '👶' : a < 20 ? 
 function render() {
   const A = $('#app'), a = p.age;
   if (tab && p.ln > seen && !p.dead) { lastPlace = { tab, sub, relOpen }; tab = null; sub = null; relOpen = null; $('#view').scrollTop = 0; }
-  if (tab == 'job' && sub && sub.startsWith('h:') && !p.hob[sub.slice(2)]) sub = null;
+  if (tab == 'job' && sub && sub.startsWith('h:') && !p.hob[sub.slice(2)]) sub = 'hobs';
   if (tab == 'assets' && sub && !p.assets[+sub.slice(2)]) sub = null;
   A.dataset.st = a < 13 ? 'kid' : a < 20 ? 'teen' : a < 65 ? 'adult' : 'old'; A.classList.toggle('dead', p.dead && !ackDead);
   $('#nm').textContent = dn(p.name);
@@ -1446,7 +1460,7 @@ function startLife(rand) {
 
 // ----- indítás -----
 const UI = {
-  menu: ['Menü', 'Menu'], work: ['Munka', 'Work'], assets: ['Vagyon', 'Assets'], ppl: ['Emberek', 'People'], todo: ['Teendők', 'Actions'], yr: ['év', 'yr'],
+  menu: ['Menü', 'Menu'], work: ['Foglalkozás', 'Occupation'], assets: ['Vagyon', 'Assets'], ppl: ['Kapcsolatok', 'Relations'], todo: ['Tevékenységek', 'Activities'], yr: ['év', 'yr'], agebtn: ['Kor', 'Age'],
   tag: ['Egy élet. Annyi döntés.', 'One life. So many choices.'], start: ['Élet kezdése', 'Start a life'], cont: ['Folytatás', 'Continue'], back: ['‹ Vissza', '‹ Back'],
   sur: ['Vezetéknév', 'Last name'], giv: ['Keresztnév', 'First name'], ra: ['🎲 Teljesen véletlen', '🎲 Fully random'], go: ['Megszületek', 'Be born'],
   endt: ['Vége az életednek', 'Your life is over'], again: ['Új élet kezdése', 'Start a new life'], lang: ['Nyelv', 'Language'], names: ['Nevek mutatása', 'Show names'],
