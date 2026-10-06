@@ -241,3 +241,5 @@ footer button{color:#3a4a40}footer button.on{color:#2e9f4f}#up b,#up span{color:
 .seg.pl{display:flex;overflow-x:auto;gap:2px;margin-top:10px}.seg.pl button{flex:none;padding:10px 12px;white-space:nowrap}
 
 .sl{width:100%;margin:12px 0 6px;accent-color:#3fbf5f;height:34px}
+
+.card.pc{display:flex;align-items:center;gap:10px}.card.pc .rwrap{flex:1;min-width:0}.chev{flex:none;width:36px;height:36px;border-radius:50%;background:#3fbf5f;color:#fff!important;display:grid;place-items:center;font-size:24px!important;font-weight:700;padding:0!important;box-shadow:0 2px 0 #2a8a43}

@@ -655,9 +655,10 @@ function abtn(x) {
   return `<button class="act${x.done ? ' dn' : ''}" ${x.done || x.off || !can(c) ? 'disabled' : ''} onclick="${x.fn}"><b>${x.i} ${x.n}</b>${sb ? `<small>${sb}</small>` : ''}</button>`;
 }
 function go(x) { sub = x; render(); $('#sbody').scrollTop = 0; }
-function goBack() { sub = ({ travel: 'c:fun', inv: tab == 'act' ? 'c:money' : null })[sub] || (tab == 'assets' && sub && sub.startsWith('a:') ? 'own' : null) || (tab == 'assets' && sub && (sub.startsWith('fin:') || sub.startsWith('shop:')) ? 'shop' : null) || (sub && sub.startsWith('h:') ? 'hobs' : null) || (sub && sub.startsWith('crstart:') ? 'jobs' : null); render(); $('#sbody').scrollTop = 0; }
+function goBack() { sub = ({ travel: 'c:fun', inv: tab == 'act' ? 'c:money' : null })[sub] || (tab == 'assets' && sub && sub.startsWith('a:') ? 'own' : null) || (tab == 'assets' && sub && (sub.startsWith('fin:') || sub.startsWith('shop:')) ? 'shop' : null) || (sub && sub.startsWith('h:') ? 'hobs' : null) || (sub && sub.startsWith('crstart:') ? 'jobs' : null) || (tab == 'rel' && sub && sub.startsWith('kin:') && p.rel[+sub.slice(4)] ? 'rc:' + relCat(p.rel[+sub.slice(4)]) : null); render(); $('#sbody').scrollTop = 0; }
 const bk = () => '<button class="ghost" onclick="goBack()">‹ Vissza</button>';
 function subTitle(t, sb, ro) {
+  if (t == 'rel' && sb && sb.startsWith('rc:')) return (RCATS.find(x => x[0] == sb.slice(3)) || ['', 'Kapcsolatok'])[1].replace(/^\S+\s/, '');
   if (t == 'rel' && sb && sb.startsWith('kin:')) return 'Rokonok';
   if (t == 'rel') return ro != null && p.rel[ro] ? dn(p.rel[ro].n) : T(TT.rel);
   if (t == 'act' && sb) { if (sb.startsWith('c:')) { const C = CATS.find(c => c.id == sb.slice(2)); return C ? C.n : T(TT.act); } return sb == 'travel' ? 'Utazás' : 'Befektetések'; }
@@ -1194,9 +1195,14 @@ CH.push(
 const RCATS = [['fam', '👨‍👩‍👧 Család'], ['love', '💘 Kapcsolat'], ['friend', '🧑‍🤝‍🧑 Barátok'], ['know', '👋 Ismerősök']];
 const ROLECAT = { Anya: 'fam', Apa: 'fam', Testvér: 'fam', Gyerek: 'fam', Párod: 'love', Házastárs: 'love', Barát: 'friend' };
 const relCat = r => r.cat || ROLECAT[r.role] || 'know';
-function relList(head) {
-  const out = RCATS.map(([c, t]) => { const l = p.rel.map((r, i) => [r, i]).filter(([r]) => r.alive && relCat(r) == c); return l.length ? `<h3>${t} · ${l.length}</h3>` + l.map(([r, i]) => `<div class="card pc" onclick="openRel(${i})">${head(r, '')}<span class="chev">›</span></div>`).join('') : ''; }).join('');
-  return out || '<p class="empty">Nincs senki körülötted.</p>';
+const relIn = c => p.rel.map((r, i) => [r, i]).filter(([r]) => r.alive && relCat(r) == c);
+function relMenu() {
+  const g = RCATS.filter(([c]) => relIn(c).length).map(([c, t]) => { const l = relIn(c), ic = t.split(' ')[0], nm = t.slice(ic.length + 1); return mcard(ic, nm, l.length + ' fő', `go('rc:${c}')`); }).join('');
+  return g ? '<div class="grid">' + g + '</div>' : '<p class="empty">Nincs senki körülötted.</p>';
+}
+function relList(head, c) {
+  const l = relIn(c);
+  return l.length ? l.map(([r, i]) => `<div class="card pc" onclick="openRel(${i})">${head(r, '')}<span class="chev">›</span></div>`).join('') : '<p class="empty">Itt most nincs senki.</p>';
 }
 function genKin(r) {
   if (Math.random() < .3) return [];
@@ -1295,7 +1301,7 @@ function panel0(t) {
   if (t == 'rel') {
     if (relOpen != null && !(p.rel[relOpen] && p.rel[relOpen].alive)) relOpen = null;
     const head = (r, extra) => `<div class="rwrap"><div class="rav">${avSvg(lk(r), r.age)}</div><div class="rbody"><div class="top"><b>${dn(r.n)}</b><small>${rl(r.role)}, ${r.age}${T([' éves', ' y/o'])}</small></div><div class="tr"><i style="width:${r.bond}%"></i></div>${extra}</div></div>`;
-    if (relOpen == null) return relList(head);
+    if (relOpen == null) return sub && sub.startsWith('rc:') ? bk() + relList(head, sub.slice(3)) : relMenu();
     const i = relOpen, r = p.rel[i], gc = a < 18 ? 0 : 1e5;
     const Bt = (ic, n, id, c, fn, rw, show = true) => show ? abtn({ i: ic, n, c, r: rw, done: p.done[id], fn }) : '';
     const b = Bt('💬', 'Beszélgetés', 't' + i, 0, `talk(${i})`, ['bond', 'hap'])
@@ -1305,7 +1311,7 @@ function panel0(t) {
       + Bt('👶', 'Gyerek vállalása', 'b' + i, 0, `baby(${i})`, ['baby'], r.role == 'Házastárs' && a <= 45)
       + RI.filter(x => a >= (x.m || 0) && (!x.M || a <= x.M) && (!x.roles || x.roles.includes(r.role)) && (!x.role || x.role == r.role) && (!x.u || x.u(r))).map(x => Bt(x.i, T(x.l), 'i' + x.k + i, a < 18 ? 0 : x.c || 0, `rint(${i},'${x.k}')`, riR(x))).join('')
       + (LOVE.includes(r.role) ? Bt('💔', 'Szakítás', 'x' + i, 0, `split(${i})`, []) : '') + (DRIFT.includes(r.role) ? Bt('🚪', 'Kapcsolat megszakítása', 'x' + i, 0, `cut(${i})`, []) : '');
-    return `<button class="ghost" onclick="openRel(null)">‹ Vissza</button><div class="card pd">${head(r, `<small class="dsc">Kapcsolat: ${Math.round(r.bond)}/100 · ${desc(lk(r))}</small>`)}</div>${kinCard(i)}<h3>Mit csinálsz vele?</h3><div class="grid">${b}</div><h3>Besorolás</h3><div class="grid">${catBtns(i)}</div>`;
+    return `<button class="ghost" onclick="openRel(null)">‹ Vissza</button><div class="card pd">${head(r, `<small class="dsc">Kapcsolat: ${Math.round(r.bond)}/100</small>`)}</div>${kinCard(i)}<h3>Mit csinálsz vele?</h3><div class="grid">${b}</div><h3>Besorolás</h3><div class="grid">${catBtns(i)}</div>`;
   }
   return jobPanel();
 }
