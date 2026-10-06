@@ -237,3 +237,7 @@ footer button.on::after{content:"";position:absolute;top:0;left:22%;right:22%;he
 footer button{font-size:9.5px}footer button span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 footer button{color:#3a4a40}footer button.on{color:#2e9f4f}#up b,#up span{color:#fff!important}
+
+.seg.pl{display:flex;overflow-x:auto;gap:2px;margin-top:10px}.seg.pl button{flex:none;padding:10px 12px;white-space:nowrap}
+
+.sl{width:100%;margin:12px 0 6px;accent-color:#3fbf5f;height:34px}
