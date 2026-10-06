@@ -10,7 +10,7 @@ const ROLE_EN = { Anya: 'Mother', Apa: 'Father', 'Testvér': 'Sibling', 'Barát'
 const rl = r => LANG == 'en' ? (ROLE_EN[r] || r) : r;
 const DRIFT = ['Barát', 'Osztálytárs', 'Munkatárs', 'Szomszéd', 'Riválisod', 'Mentor'];
 let pend = null;
-const fill = s => pend ? s.replace(/\{n\}/g, dn(pend.n)).replace(/\{f\}/g, dn(pend.n).split(' ')[0]) : s;
+const fill = s => pend ? s.replace(/\{n\}/g, dn(pend.n)).replace(/\{f\}/g, dn(pend.n).split(' ')[0]).replace(/\{s\}/g, schName(pend.sch)) : s;
 const exl = role => p.rel.filter(r => r.alive && role.split(',').includes(r.role) && r.age >= 18);
 const mkNpc = o => { const g = P(['f', 'm']); return { n: `${P(SN)} ${P(g == 'f' ? NF : NM)}`, role: o.role, age: o.a ? R(o.a[0], o.a[1]) : Math.max(3, p.age + R(o.r[0], o.r[1])), bond: 40, alive: true }; };
 const NF = ['Anna', 'Hanna', 'Lili', 'Zsófia', 'Emma', 'Nóra', 'Boglárka', 'Dóra', 'Réka', 'Vivien', 'Luca', 'Eszter', 'Panna', 'Kinga', 'Fanni', 'Bianka'];
@@ -19,7 +19,7 @@ const SN = ['Kovács', 'Tóth', 'Szabó', 'Németh', 'Farkas', 'Horváth', 'Varg
 const ST = { hap: ['😊', ['Boldog', 'Happy']], hea: ['❤️', ['Egészség', 'Health']], sma: ['🧠', ['Okos', 'Smart']], loo: ['✨', ['Kinézet', 'Looks']] };
 const fmt = n => { const a = Math.abs(n), en = LANG == 'en'; return (n < 0 ? '−' : '') + (a >= 1e6 ? (a / 1e6).toFixed(1).replace('.', en ? '.' : ',') + ' M Ft' : Math.round(a / 1e3) + (en ? ' k Ft' : ' e Ft')); };
 const EDU = [['Általános', 'Primary'], ['Érettségi', 'High school'], ['Diploma', 'Degree']];
-let p, tab = null, relOpen = null, sub = null, lastPlace = null;
+let p, tab = null, relOpen = null, sub = null, lastPlace = null, goAdopt = false, adSel = null;
 const hasCar = () => p.assets.some(x => x.t == 'car'), hasHouse = () => p.assets.some(x => x.t == 'house'), kidsU = () => kids().filter(k => k.age < 18);
 const driver = () => p.lic && hasCar(); // autós események csak jogosítvánnyal ÉS autóval
 const can = c => !c || p.money >= c; const roll = w => Math.random() < w, worst = t => p.assets.filter(x => x.t == t).reduce((m, x) => Math.min(m, x.cond == null ? 80 : x.cond), 100), hasIns = t => p.assets.some(x => x.ins && (x.t == t || (t == 'car' && x.t == 'bike'))), netw = () => p.money + (p.sav || 0) + p.assets.reduce((q, x) => q + x.v, 0) + (p.inv || 0) + (p.cry || 0) - (p.debt || 0); // ingyenes dolog mindig elérhető, mínuszban is
@@ -67,8 +67,8 @@ const CH = [
   { a: [30, 90], t: 'Gyanús hívás', d: 'Egy „banki ügyintéző” elkéri az adataidat.', o: [
     ['Megadom', [[1, 'Átverés volt! Kiürítették a számládat.', { money: -8e5, hap: -15 }]]],
     ['Leteszem', [[1, 'Okosan leraktad.', { sma: 2 }]]]] },
-  { a: [7, 13], t: 'Kutya', d: 'Nagyon vágysz egy kutyára. Megkéred a szüleidet?', o: [
-    ['Kérem', [[2, 'Kaptál egy kutyát, a legjobb barátod lett.', { hap: 15 }], [1, 'Nemet mondtak.', { hap: -6 }]]],
+  { a: [7, 13], u: () => !p.pet, t: 'Kisállat', d: 'Nagyon vágysz egy kisállatra. Megkéred a szüleidet?', o: [
+    ['Kérem', [[2, 'A szüleid beleegyeztek, választhatsz egy kisállatot!', { hap: 8, adopt: 0 }], [1, 'Nemet mondtak.', { hap: -6 }]]],
     ['Inkább nem', [[1, 'Lemondtál róla.', { hap: 1 }]]]] },
   { a: [40, 80], t: 'Szűrővizsgálat', d: 'Esedékes az éves szűrővizsgálatod.', o: [
     ['Elmegyek (200 e Ft)', [[1, 'Időben kiszúrták a bajt.', { money: -2e5, hea: 8 }]], 2e5],
@@ -141,9 +141,10 @@ CH.push(
   { a: [18, 50], u: () => !partner(), np: { role: 'Párod', r: [-5, 5] }, t: ['Társkereső', 'Dating app'], d: ['{n} rád jobbra húzott egy társkereső appon.', '{n} swiped right on you on a dating app.'], o: [
     [['Elmegyek randira', 'Go on a date'], [[2, ['Remek este volt! Összejöttetek.', 'It was a great evening! You got together.'], { hap: 12, npc: ['Párod', 50] }], [1, ['Kellemes beszélgetés volt, de nem működött a kémia.', 'A pleasant chat, but no chemistry.'], { hap: 1, npc: ['Barát', 35] }], [1, ['Kiderült, hogy {n} hazudott magáról.', 'It turned out {n} had lied about themselves.'], { hap: -6 }]]],
     [['Nem válaszolok', 'Ignore'], [[1, ['Továbbgörgettél.', 'You kept scrolling.'], { hap: -1 }]]]] },
-  { a: [25, 70], np: { role: 'Barát', r: [-2, 2] }, t: ['Régi osztálytárs', 'Old classmate'], d: ['Egy régi osztálytársad, {n} szembejön az utcán.', 'An old classmate, {n}, runs into you on the street.'], o: [
-    [['Meghívom egy kávéra', 'Invite for coffee'], [[3, ['Órákig beszélgettetek, újra jóban lettetek.', 'You talked for hours and reconnected.'], { hap: 8, npc: ['Barát', 55] }]]],
-    [['Köszönök és megyek', 'Say hi and go'], [[1, ['Röviden váltottatok pár szót.', 'You exchanged a few quick words.'], { hap: 1 }]]]] },
+  { a: [8, 90], u: () => pastMates().length > 0, pk: () => pastMates(), t: ['Régi osztálytárs', 'Old classmate'], d: ['Az utcán összefutottál {n} nevű egykori {s} osztálytársaddal.', 'You ran into {n}, your former {s} classmate, on the street.'], o: [
+    [['Meghívom egy kávéra', 'Invite for coffee'], [[3, ['Órákig beszélgettetek, felidéztétek a régi időket.', 'You talked for hours and remembered the old days.'], { hap: 8, bond: 20 }], [1, ['Kicsit kínos volt, de kedvesen elbeszélgettetek.', 'It was a bit awkward, but a nice chat.'], { hap: 2, bond: 8 }]]],
+    [['Telefonszámot cserélünk', 'Swap numbers'], [[1, ['Telefonszámot cseréltetek, ezentúl tartjátok a kapcsolatot.', 'You swapped numbers and will stay in touch.'], { hap: 3, bond: 12 }]]],
+    [['Köszönök és megyek', 'Say hi and go'], [[1, ['Röviden váltottatok pár szót.', 'You exchanged a few quick words.'], { hap: 1, bond: 2 }]]]] },
   { a: [18, 24], u: () => p.uni, np: { role: 'Osztálytárs', r: [-1, 3] }, t: ['Közös tanulás', 'Study group'], d: ['{n} egyetemi csoporttársad együtt tanulna veled a vizsgára.', 'Your classmate {n} wants to study with you for the exam.'], o: [
     [['Igen', 'Yes'], [[2, ['Együtt sokkal könnyebb volt!', 'Studying together made it much easier!'], { sma: 5, hap: 3, npc: ['Barát', 55] }], [1, ['Többet beszélgettetek, mint tanultatok.', 'You talked more than you studied.'], { sma: 1, hap: 6, npc: ['Barát', 50] }]]],
     [['Egyedül tanulok', 'Study alone'], [[1, ['Csendben haladtál, de magányos volt.', 'You made quiet progress, but it felt lonely.'], { sma: 4, hap: -3 }]]]] },
@@ -452,6 +453,14 @@ RN.push(
   [18, 70, 'A kollégák meghívtak egy közös sörözésre.', { hap: 5 }, () => p.job]
 );
 
+CH.push(
+  { a: [8, 80], u: () => !p.pet, t: ['Állatmenhely', 'Animal shelter'], d: ['Elmész egy állatmenhely mellett, ahol sok állat vár gazdira. Bemész megnézni őket?', 'You pass an animal shelter full of animals waiting for a home. Go in?'], o: [
+    [['Bemegyek', 'Go in'], [[1, ['A menhelyen sok kedves állatot láttál, választhatsz magadnak egyet.', 'You met lots of lovely animals at the shelter, and you can pick one.'], { hap: 3, adopt: 3e4 }]]],
+    [['Most nem', 'Not now'], [[1, ['Továbbmentél.', 'You walked on.'], { hap: 0 }]]]] },
+  { a: [8, 80], u: () => !p.pet, t: ['Kóbor állat', 'Stray animal'], d: ['Egy éhes kóbor állat követ hazáig. Befogadod?', 'A hungry stray follows you all the way home. Take it in?'], o: [
+    [['Befogadom', 'Take it in'], [[1, ['Befogadtad, most már te vagy a gazdija. Megnézheted, milyen állat, és el is nevezheted.', 'You took it in. You can check what animal it is and name it.'], { hap: 5, adopt: 0 }]]],
+    [['Nem tudom megtartani', 'I cannot keep it'], [[1, ['Szomorúan továbbmentél, de egy menhelyet értesítettél.', 'You walked on sadly, but called a shelter.'], { hap: -2 }]]]] }
+);
 const CITY = [['Budapest', 'Budapesten'], ['Debrecen', 'Debrecenben'], ['Szeged', 'Szegeden'], ['Pécs', 'Pécsett'], ['Győr', 'Győrben'], ['Miskolc', 'Miskolcon']];
 const TRAITS = { ext: ['Extrovertált', 'Extroverted'], int: ['Introvertált', 'Introverted'], amb: ['Ambiciózus', 'Ambitious'], calm: ['Nyugodt', 'Calm'] };
 const ASSETS = [
@@ -471,6 +480,29 @@ const person = (role, age, bond, g) => ({ n: `${P(SN)} ${P(g == 'f' ? NF : NM)}`
 const stage = a => T(a < 3 ? ['Csecsemő', 'Baby'] : a < 6 ? ['Óvodás', 'Preschooler'] : a < 14 ? ['Általános iskolás', 'Schoolkid'] : a < 18 ? ['Gimnazista', 'High schooler'] : p.uni ? ['Egyetemista', 'Student'] : a < 65 ? ['Felnőtt', 'Adult'] : ['Nyugdíjas', 'Retiree']);
 const kids = () => p.rel.filter(r => r.alive && r.role == 'Gyerek');
 const partner = () => p.rel.find(r => r.alive && (r.role == 'Párod' || r.role == 'Házastárs'));
+
+// ----- iskolák és osztálytársak (minden iskolában más emberek) -----
+const SCHA = { k: ['óvodai', 'kindergarten'], a: ['általános iskolai', 'primary school'], g: ['gimnáziumi', 'high school'], u: ['egyetemi', 'university'], x: ['régi', 'old'] };
+const schName = c => T(SCHA[c] || SCHA.x);
+const schoolId = () => { const a = p.age; return a < 3 ? null : a < 6 ? 'k' : a < 14 ? 'a' : a < 18 ? 'g' : p.uni ? 'u' : null; };
+function uname(g) { const t = new Set(p.rel.map(r => r.n)); t.add(p.name); let n; for (let i = 0; i < 50; i++) { n = `${P(SN)} ${P(g == 'f' ? NF : NM)}`; if (!t.has(n)) return n; } return n; }
+function mkMate(sc) { const g = P(['f', 'm']), q = person('Osztálytárs', Math.max(3, p.age + R(-1, 1)), 40, g); q.n = uname(g); q.sch = sc || schoolId() || 'x'; return q; }
+const mates = sc => p.rel.filter(r => r.alive && r.role == 'Osztálytárs' && !r.past && r.sch == sc);
+const pastMates = () => p.rel.filter(r => r.alive && r.past && (r.role == 'Osztálytárs' || r.was == 'Osztálytárs'));
+function newSchool() {
+  const sc = schoolId();
+  p.rel.forEach(r => { if (r.alive && !r.past && (r.role == 'Osztálytárs' || r.was == 'Osztálytárs') && r.sch != sc) r.past = true; });
+  if (!sc) return;
+  const l = []; for (let i = R(3, 5); i > 0; i--) { const q = mkMate(sc); p.rel.push(q); l.push(q.n); }
+  const w = { k: 'Új csoportba kerültél az óvodában', a: 'Új osztályba kerültél az általános iskolában', g: 'Új osztályba kerültél a gimnáziumban', u: 'Új évfolyamtársaid lettek az egyetemen' }[sc];
+  lg(`🏫 ${w}. Új osztálytársaid: ${l.slice(0, 3).join(', ')}${l.length > 3 ? ' és mások' : ''}. A régiekkel már csak az utcán futhatsz össze.`, 'good');
+}
+const roleLab = r => { const wl = x => x == 'Osztálytárs' && r.past ? T(['Volt osztálytárs', 'Former classmate']) : rl(x); return (r.was && r.was != r.role ? wl(r.was) + ' · ' : '') + wl(r.role); };
+function popup(t, d, btns) {
+  $('#mt').textContent = t; $('#md').textContent = d; const b = $('#mb'); b.innerHTML = '';
+  btns.forEach(([l, fn]) => { const x = document.createElement('button'); x.textContent = l; x.onclick = () => { $('#modal').hidden = true; if (fn) fn(); else render(); }; b.append(x); });
+  $('#modal').hidden = false;
+}
 
 function newLife(o = {}) {
   const g = o.g == 'f' || o.g == 'm' ? o.g : P(['f', 'm']), sn = o.ln || P(SN), fn = o.fn || P(g == 'f' ? NF : NM);
@@ -495,7 +527,7 @@ function apply(fx) {
     const v = fx[k];
     if (k == 'money') { let m = v, nt = ''; if (fx.ins && v < 0 && hasIns(fx.ins)) { m = Math.round(v * .25); nt = ' 🛡️'; } p.money += m; if (p.age < 20 && p.money < 0) { p.money = 0; nt += ' 👪'; } o.push((m > 0 ? '+' : '−') + fmt(Math.abs(m)) + nt); }
     else if (k == 'raise') { p.pay = Math.round(p.pay * (1 + v)); o.push('+' + Math.round(v * 100) + '% fizetés'); }
-    else if (k == 'uni') p.uni = true;
+    else if (k == 'uni') { p.uni = true; newSchool(); }
     else if (k == 'lic') p.lic = true;
     else if (k == 'nolic') p.lic = false;
     else if (k == 'crash') { const j = p.assets.findIndex(x => x.t == 'car'); if (j >= 0) { const x = p.assets[j]; if (x.ins) { const pay = Math.round(x.v * .6); p.money += pay; o.push('🛡️ +' + fmt(pay)); } p.assets.splice(j, 1); Object.keys(p.done).forEach(q => q.startsWith('as') && delete p.done[q]); } }
@@ -505,7 +537,8 @@ function apply(fx) {
     else if (k == 'perf') { if (p.car) p.car.perf = cl(p.car.perf + v); }
     else if (k == 'rank') { p.jr = Math.min(6, (p.jr || 0) + v); }
     else if (k == 'hob') { const ks = Object.keys(p.hob || {}); if (ks.length) { const h = p.hob[P(ks)]; h.lv = cl(h.lv + 4); } }
-    else if (k == 'npc') { if (pend && !p.rel.includes(pend)) { pend.role = v[0]; pend.bond = v[1]; p.rel.push(pend); } }
+    else if (k == 'npc') { if (pend && !p.rel.includes(pend)) { if (pend.role == 'Osztálytárs') { pend.sch = schoolId() || 'x'; if (v[0] != 'Osztálytárs') pend.was = 'Osztálytárs'; } pend.role = v[0]; pend.bond = v[1]; p.rel.push(pend); } }
+    else if (k == 'adopt') { p.offer = { c: v }; goAdopt = true; }
     else if (k == 'bond') { if (pend) pend.bond = cl(pend.bond + v); }
     else if (ST[k]) { const b = p[k]; p[k] = cl(b + v); const d = Math.round(p[k] - b); if (d) o.push((d > 0 ? '+' : '') + d + ' ' + ST[k][0]); }
   }
@@ -528,7 +561,7 @@ function ask(ev) {
   ev.o.forEach(([l, outs, req]) => {
     const x = document.createElement('button'); x.textContent = fill(T(l));
     if (req && p.money < req) { x.disabled = true; x.textContent += u('nomoney'); }
-    x.onclick = () => { $('#modal').hidden = true; pick(outs); pend = null; render(); };
+    x.onclick = () => { $('#modal').hidden = true; pick(outs); pend = null; render(); if (goAdopt) { goAdopt = false; adSel = null; tab = 'act'; sub = 'adopt'; render(); $('#sbody').scrollTop = 0; } };
     b.append(x);
   });
   $('#modal').hidden = false;
@@ -537,9 +570,10 @@ function ask(ev) {
 // ----- öregedés -----
 function up() {
   if (p.dead) return;
-  const a = ++p.age, n0 = p.logs.length; pend = null; tab = null; sub = null; relOpen = null; lastPlace = null;
+  const sPrev = schoolId(), a = ++p.age, n0 = p.logs.length; pend = null; tab = null; sub = null; relOpen = null; lastPlace = null; p.offer = null; adSel = null;
   p.done = {};
   if (MS[a]) lg(MS[a]);
+  if (schoolId() != sPrev) newSchool();
   const jail = p.prison > 0;
   if (jail) { p.prison--; apply({ hap: -4 }); lg(p.prison ? 'Börtönben telt az év.' : 'Letelt a büntetésed, szabadlábra kerültél.', p.prison ? 'bad' : 'good'); }
   // pénz
@@ -562,7 +596,7 @@ function up() {
   // tanulmányok
   if (a == 18) { p.edu = p.sma >= 25 ? 1 : 0; lg(p.edu ? 'Leérettségiztél.' : 'Nem sikerült az érettségi, így az általános iskolai végzettséged maradt.', p.edu ? 'good' : 'bad'); }
   if (a == 22 && p.uni) {
-    p.uni = false;
+    p.uni = false; newSchool();
     if (p.sma >= 45) { p.edu = 2; fxlog('Megszerezted a diplomádat!', { hap: 15 }); } else lg('Az egyetemet nem sikerült befejezned.', 'bad');
   }
   // munka
@@ -596,7 +630,7 @@ function up() {
   let ev = null;
   if (jail) { /* börtönben nincs esemény */ }
   else if (a == 18 && p.edu == 1) ev = UNI;
-  else if (Math.random() < .3) { const l = CH.filter(e => a >= e.a[0] && a <= e.a[1] && (!e.u || e.u())); if (l.length) { ev = P(l); pend = ev.np ? mkNpc(ev.np) : ev.ex ? P(exl(ev.ex)) : null; } }
+  else if (Math.random() < .3) { const l = CH.filter(e => a >= e.a[0] && a <= e.a[1] && (!e.u || e.u())); if (l.length) { ev = P(l); pend = ev.np ? mkNpc(ev.np) : ev.pk ? P(ev.pk()) : ev.ex ? P(exl(ev.ex)) : null; } }
   if (!ev && !jail && Math.random() < .5) { const l = RN.filter(e => a >= e[0] && a <= e[1] && (!e[4] || e[4]())); if (l.length) { const e = P(l); fxlog(e[2], e[3]); } }
   if (p.logs.length == n0) lg(P(QUIET));
   render();
@@ -655,13 +689,14 @@ function abtn(x) {
   return `<button class="act${x.done ? ' dn' : ''}" ${x.done || x.off || !can(c) ? 'disabled' : ''} onclick="${x.fn}"><b>${x.i} ${x.n}</b>${sb ? `<small>${sb}</small>` : ''}</button>`;
 }
 function go(x) { sub = x; render(); $('#sbody').scrollTop = 0; }
-function goBack() { sub = ({ travel: 'c:fun', inv: tab == 'act' ? 'c:money' : null })[sub] || (tab == 'assets' && sub && sub.startsWith('a:') ? 'own' : null) || (tab == 'assets' && sub && (sub.startsWith('fin:') || sub.startsWith('shop:')) ? 'shop' : null) || (sub && sub.startsWith('h:') ? 'hobs' : null) || (sub && sub.startsWith('crstart:') ? 'jobs' : null) || (tab == 'rel' && sub && sub.startsWith('kin:') && p.rel[+sub.slice(4)] ? 'rc:' + relCat(p.rel[+sub.slice(4)]) : null); render(); $('#sbody').scrollTop = 0; }
+function goBack() { sub = ({ travel: 'c:fun', adopt: 'c:home', inv: tab == 'act' ? 'c:money' : null })[sub] || (tab == 'assets' && sub && sub.startsWith('a:') ? 'own' : null) || (tab == 'assets' && sub && (sub.startsWith('fin:') || sub.startsWith('shop:')) ? 'shop' : null) || (sub && sub.startsWith('h:') ? 'hobs' : null) || (sub && sub.startsWith('crstart:') ? 'jobs' : null) || (tab == 'rel' && sub && sub.startsWith('kin:') && p.rel[+sub.slice(4)] ? 'rc:' + relCat(p.rel[+sub.slice(4)]) : null); render(); $('#sbody').scrollTop = 0; }
 const bk = () => '<button class="ghost" onclick="goBack()">‹ Vissza</button>';
 function subTitle(t, sb, ro) {
+  if (t == 'rel' && ro == 'pet') return p.pet ? p.pet.n : T(TT.rel);
   if (t == 'rel' && sb && sb.startsWith('rc:')) return (RCATS.find(x => x[0] == sb.slice(3)) || ['', 'Kapcsolatok'])[1].replace(/^\S+\s/, '');
   if (t == 'rel' && sb && sb.startsWith('kin:')) return 'Rokonok';
   if (t == 'rel') return ro != null && p.rel[ro] ? dn(p.rel[ro].n) : T(TT.rel);
-  if (t == 'act' && sb) { if (sb.startsWith('c:')) { const C = CATS.find(c => c.id == sb.slice(2)); return C ? C.n : T(TT.act); } return sb == 'travel' ? 'Utazás' : 'Befektetések'; }
+  if (t == 'act' && sb) { if (sb.startsWith('c:')) { const C = CATS.find(c => c.id == sb.slice(2)); return C ? C.n : T(TT.act); } return sb == 'travel' ? 'Utazás' : sb == 'adopt' ? 'Kisállat' : 'Befektetések'; }
   if (t == 'assets' && sb) return sb.startsWith('a:') ? (p.assets[+sb.slice(2)] ? p.assets[+sb.slice(2)].n : T(TT.assets)) : FSUB[sb] || T(TT.assets);
   if (t == 'job' && sb) { if (sb.startsWith('h:')) { const x = HOB.find(q => q.id == sb.slice(2)); return x ? x.n : T(TT.job); } if (sb.startsWith('crstart:')) return 'Platform választása'; if (sb == 'jobs') return 'Állások'; if (sb == 'hobs') return 'Hobbik'; if (sb == 'jwork') return 'Munkahelyi tevékenységek'; if (sb == 'school') return occ()[1]; }
   if (t == 'job') return occ()[1];
@@ -726,7 +761,6 @@ ACT.push(
   { id: 'clean', cat: 'home', i: '🧽', n: 'Takarítás', m: 8, c: 0, r: ['hap', 'bond'], run: () => { p.rel.forEach(r => { if (r.alive && r.par) r.bond = cl(r.bond + 2); }); fxlog('Kitakarítottál, tisztaság van.', { hap: R(1, 3) }); } },
   { id: 'garden', cat: 'home', i: '🌻', n: 'Kertészkedés', m: 10, c: 0, u: () => hasHouse(), r: ['hap', 'hea'], run: () => fxlog('Dolgoztál a kertben.', { hap: R(3, 6), hea: R(1, 3) }) },
   { id: 'diy', cat: 'home', i: '🔨', n: 'Barkácsolás', m: 12, c: 3e4, r: ['sma', 'hap'], run: () => roll(.75) ? fxlog('Összeraktál valami hasznosat.', { sma: 1, hap: 3 }) : fxlog('Elrontottad a barkácsolást.', { hap: -3 }) },
-  { id: 'adopt', cat: 'home', i: '🐾', n: 'Kisállat örökbefogadása', m: 6, c: 8e4, u: () => !p.pet, r: ['hap'], run: adopt },
   { id: 'move', cat: 'home', i: '📦', n: 'Költözés másik városba', m: 18, c: 4e5, r: ['hap'], rk: 1, run: () => { const old = p.city[0]; p.city = P(CITY.filter(c => c[0] != old)); p.rel.forEach(r => { if (r.alive && DRIFT.includes(r.role)) r.bond = cl(r.bond - R(3, 10)); }); fxlog(`Elköltöztél ide: ${p.city[0]}. Új élet, új lehetőségek.`, { hap: R(-3, 6) }); } },
   // törvénytelen
   { id: 'graff', cat: 'illegal', i: '🎨', n: 'Graffiti', m: 12, c: 0, k: 1, r: ['hap'], run: () => crime('Graffiti', .8, 0, 1) },
@@ -736,22 +770,71 @@ ACT.push(
 ACT.forEach(x => { if (!x.cat) x.cat = 'fun'; });
 
 // --- kisállat ---
-const PETS = [{ k: 'kutya', acc: 'kutyát', i: '🐶', life: 14 }, { k: 'macska', acc: 'macskát', i: '🐱', life: 16 }, { k: 'nyúl', acc: 'nyulat', i: '🐰', life: 8 }, { k: 'hörcsög', acc: 'hörcsögöt', i: '🐹', life: 3 }, { k: 'papagáj', acc: 'papagájt', i: '🦜', life: 20 }];
-const PN = ['Max', 'Luna', 'Bodri', 'Cirmi', 'Bundi', 'Kormi', 'Pötyi', 'Frakk', 'Mici', 'Zeusz', 'Szilvi', 'Maci'];
-function adopt() { const K = P(PETS); p.pet = { k: K.k, i: K.i, n: P(PN), age: 0, hp: 80, bond: 50 }; fxlog(`Örökbe fogadtál egy ${K.acc}: ${p.pet.n}!`, { hap: 10 }); }
+const PETS = [
+  { k: 'kutya', n: 'Kutya', acc: 'kutyát', i: '🐶', life: 14, d: 'hűséges, sok mozgás' }, { k: 'macska', n: 'Macska', acc: 'macskát', i: '🐱', life: 16, d: 'önálló, kényes' },
+  { k: 'nyúl', n: 'Nyúl', acc: 'nyulat', i: '🐰', life: 8, d: 'szelíd, kedves' }, { k: 'hörcsög', n: 'Hörcsög', acc: 'hörcsögöt', i: '🐹', life: 3, d: 'kicsi, éjjel aktív' },
+  { k: 'papagáj', n: 'Papagáj', acc: 'papagájt', i: '🦜', life: 20, d: 'okos, beszélni tanul' }, { k: 'teknős', n: 'Teknős', acc: 'teknőst', i: '🐢', life: 40, d: 'lassú, hosszú életű' },
+  { k: 'aranyhal', n: 'Aranyhal', acc: 'aranyhalat', i: '🐠', life: 6, d: 'nyugodt, könnyen tartható' }];
+const PN = ['Max', 'Luna', 'Bodri', 'Cirmi', 'Bundi', 'Kormi', 'Pötyi', 'Frakk', 'Mici', 'Zeusz', 'Szilvi', 'Maci', 'Foltos', 'Csipsz', 'Tappancs', 'Milka', 'Pamacs', 'Gombóc'];
+const ALLP = PETS.map(q => q.k);
+const PACT = [
+  { k: 'pet', i: '🤚', n: 'Simogatás', ok: ['kutya', 'macska', 'nyúl', 'hörcsög', 'papagáj', 'teknős'], r: ['hap', 'bond'] },
+  { k: 'play', i: '🎾', n: 'Játék', ok: ['kutya', 'macska', 'nyúl', 'hörcsög', 'papagáj'], r: ['hap', 'bond'] },
+  { k: 'walk', i: '🦮', n: 'Séta', ok: ['kutya'], r: ['hap', 'hea', 'fit'] },
+  { k: 'feed', i: '🍖', n: 'Csemege', c: 1e4, ok: ALLP, r: ['hea', 'bond'] },
+  { k: 'groom', i: '🛁', n: 'Fürdetés, ápolás', ok: ['kutya', 'macska', 'nyúl'], r: ['hea', 'bond'] },
+  { k: 'clean', i: '🧹', n: 'Lakhely takarítása', ok: ['nyúl', 'hörcsög', 'papagáj', 'teknős', 'aranyhal'], r: ['hea'] },
+  { k: 'trick', i: '🎓', n: 'Trükk tanítása', ok: ['kutya', 'papagáj'], r: ['bond', 'sma'] },
+  { k: 'vet', i: '🩺', n: 'Állatorvos', c: 8e4, ok: ALLP, r: ['hea'] }];
+const PNAME = x => String(x || '').replace(/[<>&"'`\\]/g, '').trim().slice(0, 16);
+const adoptCost = () => p.age < 18 ? 0 : p.offer ? p.offer.c : 8e4;
+function selAd(k) { adSel = k; render(); }
+function adoptPanel() {
+  if (p.pet) return `<p class="empty">Már van kisállatod: ${p.pet.i} ${p.pet.n}. Őt a Kapcsolatok › Család alatt találod.</p>`;
+  const c = adoptCost(), K = PETS.find(q => q.k == adSel);
+  let h = `<div class="card"><div class="top"><b>🐾 Kisállat örökbefogadása</b><small>${c ? fmt(c) : 'ingyen'}</small></div><small>${p.offer ? 'Most különleges lehetőség adódott, ' : ''}Válaszd ki az állatot, és add meg a nevét.</small></div><div class="grid">`
+    + PETS.map(q => `<button class="act" style="${q.k == adSel ? 'outline:3px solid #3fbf5f' : ''}" onclick="selAd('${q.k}')"><b>${q.i} ${q.n}</b><small>~${q.life} év · ${q.d}</small></button>`).join('') + '</div>';
+  if (K) h += `<div class="card" style="margin-top:8px"><b>${K.i} Hogy hívják?</b><div style="display:flex;gap:8px;margin:8px 0"><input id="pnm" maxlength="16" autocomplete="off" value="${P(PN)}" style="flex:1;min-width:0;border:1px solid #b8c4bc;border-radius:10px;padding:10px"><button class="act" style="flex:none;width:52px;align-items:center" onclick="document.getElementById('pnm').value=P(PN)">🎲</button></div><div class="grid">${abtn({ i: '💛', n: 'Örökbefogadom', c, r: ['hap'], done: p.done.adopt, fn: `adoptPet('${K.k}')` })}</div></div>`;
+  return h;
+}
+function adoptPet(k) {
+  const K = PETS.find(q => q.k == k), c = adoptCost(); if (!K || p.pet || p.done.adopt || !can(c)) return;
+  const el = document.getElementById('pnm'), nm = PNAME(el && el.value) || P(PN);
+  if (!p.offer && !parentGate(8e4, 'kisállat')) { p.done.adopt = 1; return render(); }
+  p.done.adopt = 1; p.money -= c; p.offer = null; adSel = null;
+  p.pet = { k: K.k, i: K.i, n: nm, age: 0, hp: 80, bond: 50, tr: 0 };
+  fxlog(`Örökbe fogadtál egy ${K.acc}: ${nm}! ${K.i}`, { hap: 10 }); render();
+}
 function petAct(k) {
-  const t = p.pet, id = 'pet' + k, c = k == 'vet' && p.age >= 18 ? 8e4 : 0; if (!t || p.done[id] || !can(c)) return; p.done[id] = 1; p.money -= c;
-  if (k == 'play') { t.bond = cl(t.bond + R(6, 12)); fxlog(`Játszottál ${t.n}-nal.`, { hap: R(3, 6) }); }
-  else if (k == 'walk') { t.bond = cl(t.bond + 4); t.hp = cl(t.hp + R(3, 6)); p.fit = cl((p.fit || 0) + R(2, 4)); fxlog(`Sétáltál ${t.n}-nal.`, { hap: R(2, 4), hea: R(1, 3) }); }
-  else { t.hp = cl(t.hp + R(25, 40)); fxlog(`Állatorvosnál jártatok ${t.n}-nal.`, { hap: 1 }); }
+  const t = p.pet, x = PACT.find(q => q.k == k), id = 'pet' + k, c = p.age >= 18 ? x && x.c || 0 : 0; if (!t || !x || !x.ok.includes(t.k) || p.done[id] || !can(c)) return; p.done[id] = 1; p.money -= c;
+  const n = t.n;
+  if (k == 'pet') { t.bond = cl(t.bond + R(4, 8)); fxlog(`Megsimogattad a kisállatod: ${n}.`, { hap: R(2, 4) }); }
+  else if (k == 'play') { t.bond = cl(t.bond + R(6, 12)); fxlog(`Játszottál a kisállatoddal: ${n}.`, { hap: R(3, 6) }); }
+  else if (k == 'walk') { t.bond = cl(t.bond + 4); t.hp = cl(t.hp + R(3, 6)); p.fit = cl((p.fit || 0) + R(2, 4)); fxlog(`Sétáltál a kutyáddal: ${n}.`, { hap: R(2, 4), hea: R(1, 3) }); }
+  else if (k == 'feed') { t.bond = cl(t.bond + R(3, 6)); t.hp = cl(t.hp + R(2, 5)); fxlog(`Finomsággal kedveskedtél neki: ${n}.`, { hap: R(1, 3) }); }
+  else if (k == 'groom') { t.bond = cl(t.bond + R(3, 6)); t.hp = cl(t.hp + R(1, 4)); fxlog(`Megfürdetted, kikefélted: ${n}.`, { hap: R(1, 3) }); }
+  else if (k == 'clean') { t.hp = cl(t.hp + R(3, 7)); t.bond = cl(t.bond + R(1, 3)); fxlog(`Kitakarítottad a lakhelyét: ${n}.`, { hap: 1 }); }
+  else if (k == 'trick') { if (roll(.7)) { t.tr = (t.tr || 0) + 1; t.bond = cl(t.bond + R(4, 8)); fxlog(`Új trükköt tanult tőled: ${n}. (Trükkök: ${t.tr})`, { hap: R(3, 6), sma: 1 }); } else { t.bond = cl(t.bond + 2); fxlog(`Ma nem akart a trükk menni: ${n}.`, { hap: 1 }); } }
+  else { t.hp = cl(t.hp + R(25, 40)); fxlog(`Állatorvosnál jártatok: ${n}.`, { hap: 1 }); }
   render();
 }
+function petRename() {
+  const t = p.pet; if (!t) return; let v = null; try { v = prompt(T(['Új név:', 'New name:']), t.n); } catch (e) { }
+  const nm = PNAME(v); if (!nm || nm == t.n) return; const o = t.n; t.n = nm; lg(`Átkereszteltél egy kisállatot: ${o} → ${nm}.`); render();
+}
+function petActions() {
+  const t = p.pet; return '<div class="grid" style="margin-top:8px">' + PACT.filter(x => x.ok.includes(t.k)).map(x => abtn({ i: x.i, n: x.n, c: p.age >= 18 ? x.c || 0 : 0, r: x.r, done: p.done['pet' + x.k], fn: `petAct('${x.k}')` })).join('') + '</div>';
+}
+const petState = t => { const w = []; if (t.hp < 35) w.push('gyenge, vidd orvoshoz'); if (t.bond < 30) w.push('magányos'); else if (t.bond >= 75) w.push('nagyon ragaszkodik hozzád'); return w.length ? w.join(', ') : 'jól van'; };
 function petBlock() {
   const t = p.pet; if (!t) return '';
-  return `<div class="card"><div class="top"><b>${t.i} ${t.n}</b><small>${t.k}, ${t.age}. éves</small></div><div class="tr"><i style="width:${t.hp}%"></i></div><small>Egészség ${Math.round(t.hp)} · Kötődés ${Math.round(t.bond)}</small><div class="grid" style="margin-top:8px">`
-    + abtn({ i: '🎾', n: 'Játék', r: ['hap', 'bond'], done: p.done.petplay, fn: "petAct('play')" })
-    + (t.k == 'kutya' ? abtn({ i: '🦮', n: 'Séta', r: ['hap', 'hea', 'fit'], done: p.done.petwalk, fn: "petAct('walk')" }) : '')
-    + abtn({ i: '🩺', n: 'Állatorvos', c: p.age < 18 ? 0 : 8e4, r: ['hea'], done: p.done.petvet, fn: "petAct('vet')" }) + '</div></div>';
+  return `<div class="card"><div class="top"><b>${t.i} ${t.n}</b><small>${t.k}, ${t.age}. éves</small></div><div class="tr"><i style="width:${t.hp}%"></i></div><small>Egészség ${Math.round(t.hp)} · Kötődés ${Math.round(t.bond)}</small>` + petActions() + '</div>';
+}
+function petDetail() {
+  const t = p.pet; if (!t) return '<p class="empty">Nincs kisállatod.</p>';
+  return `<div class="card pd"><div class="rwrap"><div class="rav pav">${t.i}</div><div class="rbody"><div class="top"><b>${t.n}</b><small>Kisállat · ${t.k}, ${t.age} éves</small></div><small class="dsc">Állapot: ${petState(t)}${t.tr ? ' · trükkök: ' + t.tr : ''}</small></div></div></div>`
+    + `<div class="card"><div class="top"><small>Egészség</small><small>${Math.round(t.hp)}/100</small></div><div class="tr"><i style="width:${t.hp}%"></i></div><div class="top"><small>Kötődés</small><small>${Math.round(t.bond)}/100</small></div><div class="tr"><i style="width:${t.bond}%"></i></div></div>`
+    + '<h3>Mit csinálsz vele?</h3>' + petActions().replace(' style="margin-top:8px"', '') + '<h3>Egyebek</h3><div class="grid"><button class="act" onclick="petRename()"><b>✏️ Átnevezés</b></button></div>';
 }
 function petYear() {
   const t = p.pet; if (!t) return; const K = PETS.find(q => q.k == t.k); t.age++; t.hp = cl(t.hp - R(4, 10)); t.bond = cl(t.bond - R(2, 6));
@@ -799,18 +882,19 @@ const CATX = {
   mind: () => `<div class="card"><div class="top"><b>🗣️ Nyelvtudás</b><small>${p.lang || 0}/5</small></div><small>Minden szint növeli az állásinterjúk esélyét.</small></div>`,
   money: () => `<div class="card"><div class="top"><b>Pénzügyek</b><small>nettó ${fmt(netw())}</small></div><small>Készpénz ${fmt(p.money)} · Befektetés ${fmt((p.inv || 0) + (p.cry || 0))}${p.debt > 0 ? ` · Tartozás ${fmt(p.debt)}` : ''}</small></div>` + (p.age >= 18 ? `<div class="grid" style="margin-bottom:8px"><button class="act" onclick="go('inv')"><b>📈 Befektetések</b><small>részvény, kripto</small></button></div>` : ''),
   fun: () => `<div class="grid" style="margin-bottom:8px"><button class="act" onclick="go('travel')"><b>✈️ Utazás</b><small>${Object.keys(p.trav || {}).length} hely eddig</small></button></div>`,
-  home: () => petBlock(),
+  home: () => petBlock() + (!p.pet && p.age >= 6 ? `<div class="grid" style="margin-bottom:8px">${mcard('🐾', 'Kisállat örökbefogadása', p.offer ? 'különleges lehetőség!' : (adoptCost() ? fmt(adoptCost()) : 'ingyen'), "adSel=null;go('adopt')")}</div>` : ''),
   illegal: () => '<p class="lg bad">⚠️ Ha elkapnak, pénzbüntetés vagy börtön jár. Börtönben nem dolgozhatsz.</p>'
 };
 function actPanel() {
   const a = p.age;
   const top = (p.sick ? `<p class="lg bad">🤒 Betegség: ${p.sick}. Menj orvoshoz!</p>` : '') + (p.prison > 0 ? `<p class="lg bad">⛓️ Még ${p.prison} év börtön van hátra.</p>` : '');
   return top + '<div class="grid">' + CATS.filter(C => a >= C.m).map(C => {
-    const l = catAvail(C.id), n = l.filter(x => !p.done[x.id]).length + (C.id == 'fun' && !p.done.trip ? 1 : 0) + (C.id == 'money' && a >= 18 ? 1 : 0);
+    const l = catAvail(C.id), n = l.filter(x => !p.done[x.id]).length + (C.id == 'fun' && !p.done.trip ? 1 : 0) + (C.id == 'money' && a >= 18 ? 1 : 0) + (C.id == 'home' && a >= 6 && !p.pet ? 1 : 0);
     return `<button class="act" onclick="go('c:${C.id}')"><b>${C.i} ${C.n}</b><small>${n ? n + ' lehetőség' : 'ebben az évben kész'}</small></button>`;
   }).join('') + '</div>';
 }
 function actSub(sb) {
+  if (sb == 'adopt') return adoptPanel();
   if (sb == 'travel') {
     const l = DEST.filter(d => p.age >= d.m), vis = Object.keys(p.trav || {}).map(k => DEST.find(d => d.id == k)).filter(Boolean).map(d => d.i + ' ' + d.n).join(', ');
     return `<div class="card"><div class="top"><b>🌍 Utazások</b><small>${Object.keys(p.trav || {}).length}/${DEST.length}</small></div><small>${vis || 'Még sehol sem jártál.'} Évente egy utat tehetsz.</small></div><div class="grid">` + l.map(d => abtn({ i: d.i, n: d.n, c: p.age < 18 ? 0 : d.c, r: ['hap', 'sma'], done: p.done.trip, fn: `travel('${d.id}')` })).join('') + '</div>';
@@ -996,8 +1080,8 @@ const inSchool = () => p.age >= 3 && (p.age < 18 || p.uni);
 const sName = () => p.age < 6 ? 'Óvoda' : p.uni ? 'Egyetem' : 'Iskola';
 const gr = () => p.gr == null ? 50 : p.gr, gg = d => { p.gr = cl(gr() + d); };
 function mate(t) {
-  const l = p.rel.filter(r => r.alive && r.role == 'Osztálytárs');
-  if (!l.length || (l.length < 5 && roll(.5))) { const q = person('Osztálytárs', Math.max(3, p.age + R(-1, 1)), 40, P(['f', 'm'])); p.rel.push(q); fxlog(`${t} Új barátod lett: ${q.n}.`, { hap: 4 }); }
+  const sc = schoolId(), l = mates(sc);
+  if (!l.length || (l.length < 6 && roll(.5))) { const q = mkMate(sc); p.rel.push(q); fxlog(`${t} Megismerkedtél egy osztálytársaddal: ${q.n}.`, { hap: 4 }); }
   else { const r = P(l); r.bond = cl(r.bond + R(4, 9)); fxlog(`${t} Közelebb kerültél hozzá: ${r.n}.`, { hap: 3 }); }
 }
 function exam(t) { const sc = (p.sma + gr()) / 2 + R(-20, 20); if (sc >= 60) { gg(R(5, 9)); fxlog(`${t}: remekül sikerült!`, { hap: 4 }); } else if (sc >= 40) { gg(1); fxlog(`${t}: közepesen sikerült.`, { hap: 0 }); } else { gg(-6); fxlog(`${t}: rosszul sikerült.`, { hap: -4 }); } }
@@ -1197,12 +1281,14 @@ const ROLECAT = { Anya: 'fam', Apa: 'fam', Testvér: 'fam', Gyerek: 'fam', Páro
 const relCat = r => r.cat || ROLECAT[r.role] || 'know';
 const relIn = c => p.rel.map((r, i) => [r, i]).filter(([r]) => r.alive && relCat(r) == c);
 function relMenu() {
-  const g = RCATS.filter(([c]) => relIn(c).length).map(([c, t]) => { const l = relIn(c), ic = t.split(' ')[0], nm = t.slice(ic.length + 1); return mcard(ic, nm, l.length + ' fő', `go('rc:${c}')`); }).join('');
+  const g = RCATS.filter(([c]) => relIn(c).length || (c == 'fam' && p.pet)).map(([c, t]) => { const l = relIn(c), ic = t.split(' ')[0], nm = t.slice(ic.length + 1); return mcard(ic, nm, (l.length + (c == 'fam' && p.pet ? 1 : 0)) + ' fő', `go('rc:${c}')`); }).join('');
   return g ? '<div class="grid">' + g + '</div>' : '<p class="empty">Nincs senki körülötted.</p>';
 }
 function relList(head, c) {
-  const l = relIn(c);
-  return l.length ? l.map(([r, i]) => `<div class="card pc" onclick="openRel(${i})">${head(r, '')}<span class="chev">›</span></div>`).join('') : '<p class="empty">Itt most nincs senki.</p>';
+  const l = relIn(c), t = p.pet;
+  const pc = c == 'fam' && t ? `<div class="card pc" onclick="openRel('pet')"><div class="rwrap"><div class="rav pav">${t.i}</div><div class="rbody"><div class="top"><b>${t.n}</b><small>Kisállat, ${t.k}, ${t.age} éves</small></div><div class="tr"><i style="width:${t.bond}%"></i></div></div></div><span class="chev">›</span></div>` : '';
+  const rest = l.map(([r, i]) => `<div class="card pc" onclick="openRel(${i})">${head(r, '')}<span class="chev">›</span></div>`).join('');
+  return (pc + rest) || '<p class="empty">Itt most nincs senki.</p>';
 }
 function genKin(r) {
   if (Math.random() < .3) return [];
@@ -1212,8 +1298,34 @@ function genKin(r) {
 }
 const kinN = r => (r.kin || []).filter(q => q.alive).length;
 const kinCard = i => { const r = p.rel[i], n = kinN(r); return n ? `<div class="grid" style="margin-bottom:6px">${mcard('👪', 'Rokonok', n + ' fő', `go('kin:${i}')`)}</div>` : ''; };
-const catBtns = i => RCATS.map(([c, t]) => { const cur = relCat(p.rel[i]) == c; return `<button class="act${cur ? ' dn' : ''}" ${cur ? 'disabled' : ''} onclick="setCat(${i},'${c}')"><b>${t}</b><small>${cur ? '✓ jelenlegi' : 'áthelyezés ide'}</small></button>`; }).join('');
-function setCat(i, c) { if (p.rel[i] && RCATS.some(x => x[0] == c)) { p.rel[i].cat = c; render(); } }
+const ASKR = ['Osztálytárs', 'Munkatárs', 'Szomszéd', 'Riválisod', 'Mentor'];
+const needAsk = (r, c) => (c == 'friend' && ASKR.includes(r.role)) || (c == 'love' && (ASKR.includes(r.role) || r.role == 'Barát'));
+const catBtns = i => RCATS.map(([c, t]) => { const r = p.rel[i], cur = relCat(r) == c; return `<button class="act${cur ? ' dn' : ''}" ${cur ? 'disabled' : ''} onclick="setCat(${i},'${c}')"><b>${t}</b><small>${cur ? '✓ jelenlegi' : needAsk(r, c) ? 'megkérdezed tőle' : 'áthelyezés ide'}</small></button>`; }).join('');
+function setCat(i, c) {
+  const r = p.rel[i]; if (!r || !RCATS.some(x => x[0] == c) || relCat(r) == c) return;
+  if (!needAsk(r, c)) { r.cat = c; return render(); }
+  const n = dn(r.n), no = [[T(['Rendben', 'OK']), () => render()]];
+  if (p.done['q' + i]) return popup(T(['Ma már kérdezted', 'You already asked']), T([`${n} ebben az évben már válaszolt neked. Próbáld újra jövőre, vagy töltsetek előbb több időt együtt.`, `${n} already answered you this year. Try again next year, or spend more time together first.`]), no);
+  if (c == 'love') {
+    if (partner()) return popup(T(['Már van párod', 'You have a partner']), T(['Egyszerre csak egy párkapcsolatod lehet.', 'You can only have one partner at a time.']), no);
+    if (p.age < 16 || r.age < 16) return popup(T(['Még túl fiatal', 'Too young']), T([`Párkapcsolatot 16 éves kortól lehet kezdeni, mindkét félnek.`, 'A relationship needs both of you to be at least 16.']), no);
+    if (Math.abs(r.age - p.age) > (p.age < 18 || r.age < 18 ? 3 : 30)) return popup(T(['Nagy a korkülönbség', 'Age gap']), T([`${n} és közted túl nagy a korkülönbség.`, `The age gap between you and ${n} is too big.`]), no);
+  }
+  const lv = c == 'love', b = r.bond;
+  const ch = lv ? (b >= 75 ? .75 : b >= 60 ? .5 : b >= 45 ? .25 : .06) : (b >= 70 ? .92 : b >= 55 ? .8 : b >= 40 ? .55 : b >= 25 ? .3 : .1) * (r.role == 'Riválisod' ? .25 : 1);
+  popup(lv ? T(['💘 Kapcsolat?', 'Relationship?']) : T(['🤝 Barátság?', 'Friendship?']), lv ? T([`Megkérdezed tőle: ${n}, hogy járnátok-e együtt?`, `You ask ${n} if they want to date you.`]) : T([`Megkérdezed tőle: ${n}, hogy szeretne-e a barátod lenni?`, `You ask ${n} if they want to be your friend.`]), [
+    [T(['Megkérdezem', 'Ask']), () => {
+      p.done['q' + i] = 1;
+      if (Math.random() < ch) {
+        r.was = r.was || r.role; r.role = lv ? 'Párod' : 'Barát'; r.cat = c; r.bond = cl(Math.max(b, lv ? 55 : 45) + 8);
+        popup(T(['🎉 Elfogadta!', '🎉 Accepted!']), lv ? T([`${n} igent mondott. Mostantól együtt jártok.`, `${n} said yes. You are a couple now.`]) : T([`${n} igent mondott. Mostantól barátok vagytok.`, `${n} said yes. You are friends now.`]), [[T(['Örülök!', 'Great!']), () => { fxlog(lv ? `Összejöttetek: ${r.n}!` : `Barátok lettetek: ${r.n}.`, { hap: lv ? 12 : 8 }); render(); }]]);
+      } else {
+        r.bond = cl(b - (lv ? 8 : 4));
+        popup(T(['😕 Nemet mondott', '😕 Said no']), T([`${n} most nem szeretne. A besorolás marad, ahogy eddig volt: ${roleLab(r)}.`, `${n} would rather not. Nothing changes: ${roleLab(r)}.`]), [[T(['Értem', 'I see']), () => { fxlog(lv ? `${r.n} nem akar járni veled.` : `${r.n} nem szeretne barát lenni.`, { hap: lv ? -6 : -3 }); render(); }]]);
+      }
+    }],
+    [T(['Mégsem', 'Cancel']), () => render()]]);
+}
 function kinPanel(i) {
   const r = p.rel[i]; if (!r || !r.alive) return '<p class="empty">Nincs senki.</p>';
   const l = (r.kin || []).map((q, j) => [q, j]).filter(([q]) => q.alive); if (!l.length) return '<p class="empty">Nincsenek rokonok.</p>';
@@ -1299,8 +1411,9 @@ function panel0(t) {
   if (t == 'act') return actPanel();
   if (t == 'assets') return assetsPanel();
   if (t == 'rel') {
+    if (relOpen == 'pet') { if (p.pet) return '<button class="ghost" onclick="openRel(null)">‹ Vissza</button>' + petDetail(); relOpen = null; }
     if (relOpen != null && !(p.rel[relOpen] && p.rel[relOpen].alive)) relOpen = null;
-    const head = (r, extra) => `<div class="rwrap"><div class="rav">${avSvg(lk(r), r.age)}</div><div class="rbody"><div class="top"><b>${dn(r.n)}</b><small>${rl(r.role)}, ${r.age}${T([' éves', ' y/o'])}</small></div><div class="tr"><i style="width:${r.bond}%"></i></div>${extra}</div></div>`;
+    const head = (r, extra) => `<div class="rwrap"><div class="rav">${avSvg(lk(r), r.age)}</div><div class="rbody"><div class="top"><b>${dn(r.n)}</b><small>${roleLab(r)}, ${r.age}${T([' éves', ' y/o'])}</small></div><div class="tr"><i style="width:${r.bond}%"></i></div>${extra}</div></div>`;
     if (relOpen == null) return sub && sub.startsWith('rc:') ? bk() + relList(head, sub.slice(3)) : relMenu();
     const i = relOpen, r = p.rel[i], gc = a < 18 ? 0 : 1e5;
     const Bt = (ic, n, id, c, fn, rw, show = true) => show ? abtn({ i: ic, n, c, r: rw, done: p.done[id], fn }) : '';
@@ -1766,6 +1879,8 @@ $('#sheet').onclick = e => { if (e.target.id == 'sheet') { tab = null; sub = nul
 document.querySelectorAll('#dock [data-s]').forEach(b => b.onclick = () => { tab = tab == b.dataset.s ? null : b.dataset.s; sub = null; relOpen = null; render(); });
 load();
 if (p && p.lic == null) p.lic = hasCar();
+if (p) p.rel.forEach(r => { if (r.role == 'Osztálytárs' && r.sch == null) { if (inSchool()) r.sch = schoolId(); else { r.sch = 'x'; r.past = true; } } });
+if (p && p.pet && p.pet.tr == null) p.pet.tr = 0;
 if (p && p.car && p.car.id == 'streamer') { const f = [300, 4000, 40000, 400000, 2e6][p.car.rank || 0]; p.car = { id: 'vid', rank: p.car.rank || 0, perf: p.car.perf || 35, yrs: p.car.yrs || 0, perks: p.car.perks, acc: { yt: { f, n: 0, vw: 0, ver: false, ban: 0, act: 0 } }, sel: 'yt' }; }
 if (p) p.rel.forEach(r => { if (r.par && r.kin == null) r.kin = genKin(r); });
 if (p) { p.hob = p.hob || {}; p.car = p.car || null; if (p.jp == null) p.jp = 30; p.fit = p.fit == null ? 30 : p.fit; p.lang = p.lang || 0; p.trav = p.trav || {}; p.inv = p.inv || 0; p.cry = p.cry || 0; p.debt = p.debt || 0; p.jr = p.jr || 0; p.assets.forEach(x => { if (x.cond == null) x.cond = 80; x.ins = !!x.ins; x.rent = !!x.rent; }); } // régi mentés: aki már autót vett, annak van jogsija
