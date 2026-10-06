@@ -246,3 +246,13 @@ footer button{color:#3a4a40}footer button.on{color:#2e9f4f}#up b,#up span{color:
 .pav{width:54px;height:59px;display:grid;place-items:center;font-size:34px;background:#e8efe9;border-radius:14px;flex:none}
 .pd .pav{width:72px;height:79px;font-size:46px}
 .card.pc .pav{flex:none}
+
+/* extras */
+body[data-fs=s] #app{zoom:.92}body[data-fs=l] #app{zoom:1.12}
+body[data-th=dark] #app{--paper:#101a22;--card:#1c2b36;--mut:#9fb0ba;color:#e6edf0}
+body[data-th=dark] .box,body[data-th=dark] .box p,body[data-th=dark] .card{color:#e6edf0}
+body[data-diff=hard] #revive{display:none!important}
+body[data-view=simple] #bars .tr+.vn,body[data-view=simple] .card small{opacity:.8}
+#cfg .chip.on{background:var(--lake);color:#fff}#cfg .box{max-height:90%}
+.mood{position:absolute;right:-4px;bottom:-4px;font-size:18px;line-height:1;background:#fffd;border-radius:50%;padding:2px}
+#app[data-season="0"]{--paper:#e6f1e4}#app[data-season="1"]{--paper:#f3efd8}#app[data-season="2"]{--paper:#f1e5d6}#app[data-season="3"]{--paper:#e3ecf3}
