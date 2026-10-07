@@ -11,7 +11,7 @@ Object.assign(D, { 'Mennyit fektetsz be?': 'How much do you invest?', 'Befektet�
   'Mennyit teszel be?': 'How much do you deposit?', 'Betétbe teszem': 'Deposit', 'Nincs elég pénzed befektetni (legalább 100 e Ft kell).': 'Not enough money to invest (at least 100k HUF needed).',
   'Nincs elég pénzed betétre (legalább 100 e Ft kell).': 'Not enough money for a deposit (at least 100k HUF needed).', 'Munkahely': 'Workplace', 'Végzettség': 'Education', 'Jogosítvány': 'Driving licence', 'Van': 'Yes', 'Nincs': 'No',
   'Nyugdíjas vagy': 'You are retired', 'Menü': 'Menu', 'Állások': 'Jobs', 'Hobbik': 'Hobbies', 'Sima és különleges munkák': 'Regular and special jobs', 'Munkahelyi tevékenységek': 'Work activities', 'Büntetett előélet': 'Criminal record', 'Nyelvtudás': 'Language skills' });
-Object.assign(D, { 'Automata év': 'Auto year', 'ebben az évben mindent elvégeztél': 'you have done everything this year', 'Költözés': 'Moving', 'válassz új várost': 'pick a new city',
+Object.assign(D, { 'Automata tevékenységek': 'Auto activities', 'ebben az évben mindent elvégeztél': 'you have done everything this year', 'Költözés': 'Moving', 'válassz új várost': 'pick a new city',
   'Kisállat örökbefogadása': 'Adopt a pet', 'találd meg a társadat': 'find your companion', 'különleges lehetőség': 'special opportunity', 'belföldi és külföldi utak': 'domestic and international trips',
   'Jótékonyság': 'Charity', 'Mennyit adományozol?': 'How much do you donate?', 'Adományozok': 'Donate', 'Adományozni legalább 100 e Ft-tal lehet.': 'You can donate from 100k HUF.',
   'Évente az első adományod jó érzést ad, a nagyobb összeg a hírnevedet is növeli.': 'Your first donation each year feels good, and a bigger sum raises your reputation too.',
@@ -19,7 +19,7 @@ Object.assign(D, { 'Automata év': 'Auto year', 'ebben az évben mindent elvége
   'Évente egyszer költözhetsz.': 'You can move once a year.' });
 const EXTRA = [
   X(/^(\d+) ingyenes, biztonságos teendő egy gombnyomásra$/, m => m[1] + ' free, safe things to do with one tap'),
-  X(/^Automata év: (\d+) biztonságos teendő elvégezve\.$/, m => `Auto year: ${m[1]} safe activities done.`),
+  X(/^🤖 Automata tevékenységek kész: (\d+) tevékenység elvégezve\.$/, m => `🤖 Auto activities: ${m[1]} done.`),
   X(/^Jelenlegi városod: (.+?)\. A régi ismerőseiddel lazulhat a kapcsolat\. Évente egyszer költözhetsz\.$/, m => `Your current city: ${m[1]}. Ties with old acquaintances may loosen. You can move once a year.`),
   X(/^(.+?) \(lakhatás ×([\d.]+)\)$/, m => `${m[1]} (housing ×${m[2]})`),
   X(/^(\d+) éves$/, m => 'Age ' + m[1]), X(/^(\d+) éves vagy$/, m => 'You are ' + m[1]),

@@ -881,7 +881,7 @@ function invPanel() {
 function actPanel() {
   const a = p.age;
   const AU = autoPlan().length;
-  const autoBtn = `<button class="act" style="width:100%;margin-bottom:10px;outline:2px solid #3fbf5f" ${AU ? '' : 'disabled'} onclick="autoYear()"><b>🤖 Automata év</b><small>${AU ? AU + ' ingyenes, biztonságos teendő egy gombnyomásra' : 'ebben az évben mindent elvégeztél'}</small></button>`;
+  const autoBtn = `<button class="act" style="width:100%;margin-bottom:10px;outline:2px solid #3fbf5f" ${AU ? '' : 'disabled'} onclick="autoYear()"><b>🤖 Automata tevékenységek</b><small>${AU ? AU + ' teendő egy gombnyomásra · a fizetősekről te döntesz' : 'ebben az évben mindent elvégeztél'}</small></button>`;
   const top = autoBtn + (p.sick ? `<p class="lg bad">🤒 Betegség: ${p.sick}. Menj orvoshoz!</p>` : '') + (p.prison > 0 ? `<p class="lg bad">⛓️ Még ${p.prison} év börtön van hátra.</p>` : '');
   return top + '<div class="grid">' + CATS.filter(C => a >= C.m).map(C => {
     const l = catAvail(C.id), n = l.filter(x => !p.done[x.id]).length + (C.id == 'fun' && !p.done.trip ? 1 : 0) + (C.id == 'money' && a >= 18 ? 1 : 0) + (C.id == 'home' && a >= 6 && !p.pet ? 1 : 0) + (C.id == 'home' && a >= 20 && !p.done.mv ? 1 : 0);
@@ -936,25 +936,24 @@ const AUTO_ACT = ['vol', 'med', 'walk', 'rest', 'play', 'draw', 'read', 'run', '
 const AUTO_SCH = ['kplay', 'kdraw', 'ksong', 'knap', 'hw', 'brk', 'pe', 'ugrp'];
 function autoPlan() {
   const L = [], a = p.age; if (p.dead || p.prison > 0) return L;
-  ACT.forEach(x => { if (AUTO_ACT.includes(x.id) && !x.c && !x.rk && !x.k && !p.done[x.id] && catAvail(x.cat).includes(x)) L.push(() => doAct(x.id)); });
-  SCH.forEach(x => { if (AUTO_SCH.includes(x.id) && !x.c && a >= x.a[0] && a <= x.a[1] && (!x.u || p.uni) && !p.done['s' + x.id]) L.push(() => schoolDo(x.id)); });
+  const cs = x => a < 18 ? 0 : x.c || 0, add = (key, x, exec, extra = {}) => { const c = cs(x); L.push({ key, i: x.i, n: x.n, c, risk: c > 0 || !!x.rk, exec, ...extra }); };
+  // pénzbe kerülő / kockázatos tevékenységek is bekerülnek, de csak döntés alapján futnak
+  const SKIP = ['hair', 'clothes', 'surg', 'lot', 'scratch', 'bet', 'lic', 'doc', 'hosp'];
+  ACT.forEach(x => { if (x.k || SKIP.includes(x.id) || p.done[x.id] || !catAvail(x.cat).includes(x)) return; add('a' + x.id, x, () => doAct(x.id)); });
+  if (p.sick && !p.done.doc) { const x = ACT.find(q => q.id == 'doc'); if (x) add('adoc', x, () => doAct('doc')); }
+  SCH.forEach(x => { if (!AUTO_SCH.includes(x.id) || a < x.a[0] || a > x.a[1] || (x.u && !p.uni) || p.done['s' + x.id]) return; add('s' + x.id, x, () => schoolDo(x.id)); });
   const fl = p.rel.some(r => r.alive && ['Barát', 'Testvér', 'Párod', 'Házastárs', 'Osztálytárs'].includes(r.role));
-  if (p.prison <= 0 && a >= 4) Object.keys(p.hob || {}).forEach(id => { const x = HOB.find(q => q.id == id), h = p.hob[id]; if (!x || !h || x.c) return;
-    if (!p.done['h' + id]) L.push(() => hobPrac(id));
-    if (fl && !p.done['hf' + id]) L.push(() => hobFriend(id));
-    if (h.lv >= 60 && !p.done['ht' + id]) L.push(() => hobTeach(id)); });
-  if (p.pet) PACT.forEach(x => { if (!x.c && x.ok.includes(p.pet.k) && !p.done['pet' + x.k]) L.push(() => petAct(x.k)); });
-  p.rel.forEach((r, i) => { if (!r.alive || r.role == 'Riválisod' || r.age < 1) return;
-    if (!p.done['t' + i]) L.push(() => talk(i));
-    (r.kin || []).forEach((q, j) => { if (q.alive && !p.done['kt' + i + '_' + j]) L.push(() => kinDo(i, j, 't')); }); });
+  if (a >= 4) Object.keys(p.hob || {}).forEach(id => { const x = HOB.find(q => q.id == id), h = p.hob[id]; if (!x || !h) return;
+    if (!p.done['h' + id]) add('h' + id, x, () => hobPrac(id));
+    if (fl && !p.done['hf' + id]) add('hf' + id, x, () => hobFriend(id));
+    if (h.lv >= 60 && !p.done['ht' + id]) add('ht' + id, x, () => hobTeach(id)); });
+  if (p.pet) PACT.forEach(x => { if (x.ok.includes(p.pet.k) && !p.done['pet' + x.k]) add('p' + x.k, x, () => petAct(x.k)); });
+  // beszélgetés: csak család, kapcsolat és barátok (ismerősökkel és rokonokkal nincs automata)
+  p.rel.forEach((r, i) => { if (!r.alive || r.age < 1 || p.done['t' + i] || !['fam', 'love', 'friend'].includes(relCat(r))) return;
+    L.push({ key: 't' + i, i: '💬', n: 'Beszélgetés: ' + dn(r.n), c: 0, risk: false, rel: i, exec: () => talk(i) }); });
   return L;
 }
-function autoYear() {
-  if (!autoPlan().length) return;
-  const _r = render; let n = 0; render = () => { };
-  try { for (let k = 0; k < 4; k++) { const L = autoPlan(); if (!L.length) break; L.forEach(f => { try { f(); n++; } catch (e) { } }); } } finally { render = _r; }
-  lg(`🤖 Automata év: ${n} biztonságos teendő elvégezve.`, 'good'); render();
-}
+function autoYear() { if (autoPlan().length && window.runSteps) runSteps(autoPlan(), '🤖 Automata tevékenységek kész'); }
 
 // --- vagyon panel és részletek ---
 const asCost = (x, b, f) => Math.round((b + x.v * f) / 1e3) * 1e3;
