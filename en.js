@@ -7,7 +7,21 @@ const KIN = { Nagypapa: 'Grandfather', Nagymama: 'Grandmother', Nagynéni: 'Aunt
 const FAM = { 'szerény': 'modest', 'átlagos': 'average', 'tehetős': 'wealthy' };
 const g = x => { const s = tx(x); return KIN[s] || FAM[s] || s; };
 const X = (re, f) => [re, f];
+Object.assign(D, { 'Mennyit fektetsz be?': 'How much do you invest?', 'Befektetés': 'Invest', 'Mennyit veszel ki?': 'How much do you withdraw?', 'Kivét': 'Withdraw', 'Mindet kiveszem': 'Withdraw all',
+  'Mennyit teszel be?': 'How much do you deposit?', 'Betétbe teszem': 'Deposit', 'Nincs elég pénzed befektetni (legalább 100 e Ft kell).': 'Not enough money to invest (at least 100k HUF needed).',
+  'Nincs elég pénzed betétre (legalább 100 e Ft kell).': 'Not enough money for a deposit (at least 100k HUF needed).', 'Munkahely': 'Workplace', 'Végzettség': 'Education', 'Jogosítvány': 'Driving licence', 'Van': 'Yes', 'Nincs': 'No',
+  'Nyugdíjas vagy': 'You are retired', 'Menü': 'Menu', 'Állások': 'Jobs', 'Hobbik': 'Hobbies', 'Sima és különleges munkák': 'Regular and special jobs', 'Munkahelyi tevékenységek': 'Work activities', 'Büntetett előélet': 'Criminal record', 'Nyelvtudás': 'Language skills' });
+Object.assign(D, { 'Automata év': 'Auto year', 'ebben az évben mindent elvégeztél': 'you have done everything this year', 'Költözés': 'Moving', 'válassz új várost': 'pick a new city',
+  'Kisállat örökbefogadása': 'Adopt a pet', 'találd meg a társadat': 'find your companion', 'különleges lehetőség': 'special opportunity', 'belföldi és külföldi utak': 'domestic and international trips',
+  'Jótékonyság': 'Charity', 'Mennyit adományozol?': 'How much do you donate?', 'Adományozok': 'Donate', 'Adományozni legalább 100 e Ft-tal lehet.': 'You can donate from 100k HUF.',
+  'Évente az első adományod jó érzést ad, a nagyobb összeg a hírnevedet is növeli.': 'Your first donation each year feels good, and a bigger sum raises your reputation too.',
+  '20 éves korig a szüleiddel élsz, nem költözhetsz el.': 'You live with your parents until 20, so you cannot move out.', 'Ebben az évben már költöztél': 'You already moved this year', 'Nincs elég pénzed': 'Not enough money',
+  'Évente egyszer költözhetsz.': 'You can move once a year.' });
 const EXTRA = [
+  X(/^(\d+) ingyenes, biztonságos teendő egy gombnyomásra$/, m => m[1] + ' free, safe things to do with one tap'),
+  X(/^Automata év: (\d+) biztonságos teendő elvégezve\.$/, m => `Auto year: ${m[1]} safe activities done.`),
+  X(/^Jelenlegi városod: (.+?)\. A régi ismerőseiddel lazulhat a kapcsolat\. Évente egyszer költözhetsz\.$/, m => `Your current city: ${m[1]}. Ties with old acquaintances may loosen. You can move once a year.`),
+  X(/^(.+?) \(lakhatás ×([\d.]+)\)$/, m => `${m[1]} (housing ×${m[2]})`),
   X(/^(\d+) éves$/, m => 'Age ' + m[1]), X(/^(\d+) éves vagy$/, m => 'You are ' + m[1]),
   X(/^(.+?): elérted a\(z\) (.+?) szintet!$/, m => `${m[1]}: you reached the ${g(m[2])} level!`),
   X(/^Gyakoroltál: (.+)\.$/, m => `You practiced: ${g(m[1])}.`),
@@ -49,6 +63,11 @@ const EXTRA = [
   X(/^Törlesztettél (.+)-ot\. Hátralévő tartozás: (.+)\.$/, m => `You repaid ${m[1]}. Remaining debt: ${m[2]}.`),
   X(/^Elköltöztél ide: (.+)\. Új élet, új lehetőségek\.$/, m => `You moved to ${m[1]}. New life, new opportunities.`),
   X(/^előléptetéshez 75\+ kell, következő: (.+)$/, m => `75+ needed for promotion, next: ${g(m[1])}`),
+  X(/^Kivettél a befektetésedből: (.+)\.$/, m => `You withdrew from your investment: ${m[1]}.`),
+  X(/^Kivettél a betétedből: (.+)\.$/, m => `You withdrew from your deposit: ${m[1]}.`),
+  X(/^Jogosítvány vizsga \((.+)\)$/, m => `Driving test (${m[1]})`),
+  X(/^Nyugdíj: (.+) \/ év$/, m => `Pension: ${m[1]} / year`),
+  X(/^(\d+) ügy$/, m => `${m[1]} case(s)`),
   X(/^Cég eladása \((.+)\)$/, m => `Sell company (${m[1]})`),
   X(/^monetizáláshoz (.+) kell$/, m => `${m[1]} needed for monetization`),
   X(/^(.+) fiók nyitása$/, m => `Open ${m[1]} account`),

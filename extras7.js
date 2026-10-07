@@ -102,12 +102,20 @@
       + L.slice(0, 14).map(j => abtn({ i: '🧰', n: j.n, note: fmt(Math.round(j.pay * .4 / 1e3) * 1e3) + t([' / év', ' / year']), off: (p.done.sideN || 0) >= 2, fn: `applySide('${j.n.replace(/'/g, "\\'")}')` })).join('') + '</div>';
   }
 
-  // ---- panel hook ----
+  // ---- menü a Munka fülön ----
+  window.sideMenu = function () {
+    let h = '';
+    if (p.car && p.age >= 16) h += mcard('🧰', t(['Mellékállás', 'Side job']), p.side ? p.side.n + ' · ' + fmt(p.side.pay) + t([' / év', ' / year']) : t(['Kisebb munka a karrier mellé', 'A smaller job next to your career']), "go('side')");
+    if (!crCareer() && p.age >= 14 && (isBiz() || p.inf)) h += mcard('📱', t(['Influenszerkedés', 'Influencing']), p.inf ? t(['Csatorna: ', 'Channel: ']) + cNum(crTot(p.inf)) + ' ' + t(['követő', 'followers']) : t(['Ingyen reklám a cégednek', 'Free ads for your company']), "go('inf')");
+    return h;
+  };
   const _panel = panel;
   panel = function (tb) {
-    let h = _panel.apply(this, arguments);
-    try { if (tb == 'job' && !sub && p.age >= 14 && !p.dead) h += (!crCareer() ? infPanel() : '') + sidePanel(); } catch (e) { console.error(e); }
-    return h;
+    try {
+      if (tb == 'job' && sub == 'side') return bk() + sidePanel();
+      if (tb == 'job' && sub == 'inf') return bk() + infPanel();
+    } catch (e) { console.error(e); }
+    return _panel.apply(this, arguments);
   };
 
   // ---- évváltás ----

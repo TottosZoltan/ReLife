@@ -640,7 +640,7 @@ function up() {
 // ----- teendők -----
 const fr = () => { const g = P(['f', 'm']); return { ...person('Barát', R(5, 40), 45, g) }; };
 const ACT = [
-  { id: 'study', i: '📚', n: 'Tanulás', m: 6, c: 0, run: () => fxlog('Tanultál. Okosabb lettél, de fárasztó volt.', { sma: R(2, 5), hap: -2 }) },
+  { id: 'study', i: '📚', n: 'Tanulás', m: 6, c: 0, u: () => p.age >= 18 && !p.uni, run: () => fxlog('Tanultál. Okosabb lettél, de fárasztó volt.', { sma: R(2, 5), hap: -2 }) },
   { id: 'gym', i: '🏋️', n: 'Edzés', m: 12, c: 15e4, run: () => fxlog('Edzettél. Erősebbnek érzed magad.', { hea: R(4, 8), loo: R(2, 5) }) },
   { id: 'doc', i: '🏥', n: 'Orvos', m: 0, c: 4e5, run: () => { if (p.sick && Math.random() < .7) { lg(`Meggyógyultál: ${p.sick}.`, 'good'); p.sick = null; apply({ hea: 10, hap: 8 }); } else fxlog('Orvoshoz mentél, kikezeltek.', { hea: R(15, 25) }); } },
   { id: 'psy', i: '🛋️', n: 'Pszichológus', m: 10, c: 2e5, run: () => fxlog('Jót beszélgettél a pszichológussal.', { hap: R(8, 15) }) },
@@ -689,7 +689,7 @@ function abtn(x) {
   return `<button class="act${x.done ? ' dn' : ''}" ${x.done || x.off || !can(c) ? 'disabled' : ''} onclick="${x.fn}"><b>${x.i} ${x.n}</b>${sb ? `<small>${sb}</small>` : ''}</button>`;
 }
 function go(x) { sub = x; render(); $('#sbody').scrollTop = 0; }
-function goBack() { sub = ({ travel: 'c:fun', adopt: 'c:home', 'rc:past': 'rc:know', inv: tab == 'act' ? 'c:money' : null })[sub] || (tab == 'assets' && sub && sub.startsWith('a:') ? 'own' : null) || (tab == 'assets' && sub && (sub.startsWith('fin:') || sub.startsWith('shop:')) ? 'shop' : null) || (sub && sub.startsWith('h:') ? 'hobs' : null) || (sub && sub.startsWith('crstart:') ? 'jobs' : null) || (tab == 'rel' && sub && sub.startsWith('kin:') && p.rel[+sub.slice(4)] ? 'rc:' + relCat(p.rel[+sub.slice(4)]) : null); render(); $('#sbody').scrollTop = 0; }
+function goBack() { sub = ({ travel: 'c:fun', adopt: 'c:home', move: 'c:home', 'rc:past': 'rc:know', inv: tab == 'act' ? 'c:money' : null })[sub] || (tab == 'assets' && sub && sub.startsWith('a:') ? 'own' : null) || (tab == 'assets' && sub && (sub.startsWith('fin:') || sub.startsWith('shop:')) ? 'shop' : null) || (sub && sub.startsWith('h:') ? 'hobs' : null) || (sub && sub.startsWith('crstart:') ? 'jobs' : null) || (tab == 'rel' && sub && sub.startsWith('kin:') && p.rel[+sub.slice(4)] ? 'rc:' + relCat(p.rel[+sub.slice(4)]) : null); render(); $('#sbody').scrollTop = 0; }
 const bk = () => '<button class="ghost" onclick="goBack()">‹ Vissza</button>';
 function subTitle(t, sb, ro) {
   if (t == 'rel' && ro == 'pet') return p.pet ? p.pet.n : T(TT.rel);
@@ -698,9 +698,9 @@ function subTitle(t, sb, ro) {
   if (t == 'rel' && sb && sb.startsWith('rc:')) return (RCATS.find(x => x[0] == sb.slice(3)) || ['', 'Kapcsolatok'])[1].replace(/^\S+\s/, '');
   if (t == 'rel' && sb && sb.startsWith('kin:')) return 'Rokonok';
   if (t == 'rel') return ro != null && p.rel[ro] ? dn(p.rel[ro].n) : T(TT.rel);
-  if (t == 'act' && sb) { if (sb.startsWith('c:')) { const C = CATS.find(c => c.id == sb.slice(2)); return C ? C.n : T(TT.act); } return sb == 'travel' ? 'Utazás' : sb == 'adopt' ? 'Kisállat' : 'Befektetések'; }
+  if (t == 'act' && sb) { if (sb.startsWith('c:')) { const C = CATS.find(c => c.id == sb.slice(2)); return C ? C.n : T(TT.act); } return sb == 'travel' ? 'Utazás' : sb == 'adopt' ? 'Kisállat' : sb == 'move' ? 'Költözés' : 'Befektetések'; }
   if (t == 'assets' && sb) return sb.startsWith('a:') ? (p.assets[+sb.slice(2)] ? p.assets[+sb.slice(2)].n : T(TT.assets)) : FSUB[sb] || T(TT.assets);
-  if (t == 'job' && sb) { if (sb.startsWith('h:')) { const x = HOB.find(q => q.id == sb.slice(2)); return x ? x.n : T(TT.job); } if (sb.startsWith('crstart:')) return 'Platform választása'; if (sb == 'jobs') return 'Állások'; if (sb == 'hobs') return 'Hobbik'; if (sb == 'jwork') return 'Munkahelyi tevékenységek'; if (sb == 'school') return occ()[1]; }
+  if (t == 'job' && sb) { if (sb.startsWith('h:')) { const x = HOB.find(q => q.id == sb.slice(2)); return x ? x.n : T(TT.job); } if (sb.startsWith('crstart:')) return 'Platform választása'; if (sb == 'jobs') return 'Állások'; if (sb == 'hobs') return 'Hobbik'; if (sb == 'jwork') return 'Munkahelyi tevékenységek'; if (sb == 'school') return occ()[1]; if (sb == 'cur') return p.car ? CAR_BY[p.car.id].n : p.job ? p.job : T(['Munkahely', 'Workplace']); if (sb == 'side') return T(['Mellékállás', 'Side job']); if (sb == 'inf') return T(['Influenszerkedés', 'Influencing']); }
   if (t == 'job') return occ()[1];
   return T(TT[t]) || '';
 }
@@ -752,18 +752,14 @@ ACT.push(
   { id: 'host', cat: 'social', i: '🍷', n: 'Vendégség', m: 18, c: 8e4, r: ['hap', 'bond'], run: () => { p.rel.forEach(r => { if (r.alive && ['Barát', 'Szomszéd', 'Munkatárs', 'Testvér'].includes(r.role)) r.bond = cl(r.bond + 4); }); fxlog('Vendégeket láttál az otthonodban, jó hangulat volt.', { hap: R(4, 8) }); } },
   { id: 'family', cat: 'social', i: '👨‍👩‍👧', n: 'Családi program', m: 3, c: 0, r: ['hap', 'bond'], run: () => { p.rel.forEach(r => { if (r.alive && ['Anya', 'Apa', 'Testvér'].includes(r.role)) r.bond = cl(r.bond + R(4, 9)); }); fxlog('Együtt töltöttetek egy napot a családdal.', { hap: R(3, 6) }); } },
   { id: 'reunion', cat: 'social', i: '🎓', n: 'Osztálytalálkozó', m: 25, c: 5e4, r: ['hap', 'bond'], run: () => { p.rel.forEach(r => { if (r.alive && r.role == 'Osztálytárs') r.bond = cl(r.bond + R(5, 12)); }); fxlog('Felidéztétek a régi időket az osztálytalálkozón.', { hap: R(4, 9) }); } },
-  { id: 'charity', cat: 'social', i: '🎗️', n: 'Adományozás', m: 16, c: 1e5, r: ['hap'], run: () => fxlog('Adományoztál, jó érzés segíteni.', { hap: R(4, 8) }) },
   // pénz
   { id: 'scratch', cat: 'money', i: '🎟️', n: 'Kaparós sorsjegy', m: 18, c: 5e3, r: ['money'], rk: 1, run: () => roll(.15) ? fxlog('Nyertél a kaparóssal!', { money: R(2, 60) * 1e4, hap: 4 }) : fxlog('Nem nyertél a kaparóssal.', { hap: -1 }) },
   { id: 'bet', cat: 'money', i: '🎲', n: 'Sportfogadás', m: 18, c: 1e5, r: ['money'], rk: 1, run: () => roll(.42) ? fxlog('Bejött a tipped!', { money: 22e4, hap: 6 }) : fxlog('Nem jött be a fogadásod.', { hap: -3 }) },
-  { id: 'loan', cat: 'money', i: '🏦', n: 'Hitelfelvétel (500 e Ft)', m: 20, c: 0, r: ['money'], rk: 1, run: () => { p.debt = (p.debt || 0) + 55e4; fxlog('Felvettél egy hitelt, évi 12% kamattal.', { money: 5e5 }); } },
-  { id: 'repay', cat: 'money', i: '💳', n: 'Hiteltörlesztés', m: 18, c: 0, u: () => p.debt > 0, r: ['hap'], run: () => { const m = Math.min(p.debt, Math.max(0, p.money)); if (!m) return lg('Nincs miből törleszteni.', 'bad'); p.money -= m; p.debt -= m; fxlog(`Törlesztettél ${fmt(m)}-ot. Hátralévő tartozás: ${fmt(p.debt)}.`, { hap: 2 }); } },
   // otthon
   { id: 'cook', cat: 'home', i: '🍳', n: 'Főzés', m: 8, c: 0, r: ['hap', 'hea'], run: () => fxlog('Finomat főztél.', { hap: R(2, 4), hea: R(0, 2) }) },
   { id: 'clean', cat: 'home', i: '🧽', n: 'Takarítás', m: 8, c: 0, r: ['hap', 'bond'], run: () => { p.rel.forEach(r => { if (r.alive && r.par) r.bond = cl(r.bond + 2); }); fxlog('Kitakarítottál, tisztaság van.', { hap: R(1, 3) }); } },
   { id: 'garden', cat: 'home', i: '🌻', n: 'Kertészkedés', m: 10, c: 0, u: () => hasHouse(), r: ['hap', 'hea'], run: () => fxlog('Dolgoztál a kertben.', { hap: R(3, 6), hea: R(1, 3) }) },
   { id: 'diy', cat: 'home', i: '🔨', n: 'Barkácsolás', m: 12, c: 3e4, r: ['sma', 'hap'], run: () => roll(.75) ? fxlog('Összeraktál valami hasznosat.', { sma: 1, hap: 3 }) : fxlog('Elrontottad a barkácsolást.', { hap: -3 }) },
-  { id: 'move', cat: 'home', i: '📦', n: 'Költözés másik városba', m: 18, c: 4e5, r: ['hap'], rk: 1, run: () => { const old = p.city[0]; p.city = P(CITY.filter(c => c[0] != old)); p.rel.forEach(r => { if (r.alive && DRIFT.includes(r.role)) r.bond = cl(r.bond - R(3, 10)); }); fxlog(`Elköltöztél ide: ${p.city[0]}. Új élet, új lehetőségek.`, { hap: R(-3, 6) }); } },
   // törvénytelen
   { id: 'graff', cat: 'illegal', i: '🎨', n: 'Graffiti', m: 12, c: 0, k: 1, r: ['hap'], run: () => crime('Graffiti', .8, 0, 1) },
   { id: 'scam', cat: 'illegal', i: '🕵️', n: 'Csalás', m: 18, c: 0, k: 1, r: ['money'], run: () => crime('Csalás', .5, R(3, 10) * 1e5, R(1, 3)) },
@@ -864,6 +860,7 @@ function travel(id) {
 
 // --- befektetés, pénzügyek ---
 function invest(k, amt) { if (!can(amt) || p.age < 18) return; if (!parentGate(amt, 'befektetés')) return render(); p.money -= amt; p[k] = (p[k] || 0) + amt; lg(`${k == 'inv' ? '📈 Részvénybe' : '🪙 Kriptóba'} fektettél: ${fmt(amt)}.`); render(); }
+function cashOutAmt(k, amt) { const v = p[k] || 0; amt = Math.min(v, Math.max(0, Math.round(amt))); if (!amt) return; p[k] = v - amt; p.money += amt; lg(`Kivettél a befektetésedből: ${fmt(amt)}.`, 'good'); render(); }
 function cashOut(k) { const v = p[k] || 0; if (!v) return; p[k] = 0; p.money += v; lg(`Kivetted a befektetésed: ${fmt(v)}.`, 'good'); render(); }
 function moneyYear() {
   [['inv', '📈 Részvényeid', -18, 28, 1], ['cry', '🪙 Kriptód', -60, 120, 0]].forEach(([k, n, lo, hi, pl]) => { if (p[k] > 0) { const g = R(lo, hi); p[k] = Math.round(p[k] * (1 + g / 100)); p[k + 'g'] = g; lg(`${n} ${g >= 0 ? (pl ? 'nőttek' : 'nőtt') : (pl ? 'estek' : 'esett')} ${Math.abs(g)}%-ot: ${fmt(p[k])}.`, g >= 0 ? 'good' : 'bad'); } });
@@ -872,26 +869,22 @@ function moneyYear() {
 }
 function invPanel() {
   if (p.age < 18) return '<p class="empty">18 évesen fektethetsz be.</p>';
-  const one = (k, ic, n, d) => `<div class="card"><div class="top"><b>${ic} ${n}</b><small>${fmt(p[k] || 0)}</small></div><small>${d}${p[k + 'g'] != null ? ` · tavaly: ${p[k + 'g'] >= 0 ? '+' : ''}${p[k + 'g']}%` : ''}</small><div class="grid" style="margin-top:8px">${[1e5, 1e6, 5e6].map(m => abtn({ i: '➕', n: fmt(m), off: !can(m), fn: `invest('${k}',${m})` })).join('')}${abtn({ i: '💵', n: 'Kivét', off: !(p[k] > 0), r: ['money'], fn: `cashOut('${k}')` })}</div></div>`;
+  const stp = 1e5, buyMax = Math.floor(p.money / stp) * stp;
+  const one = (k, ic, n, d) => {
+    const have = p[k] || 0, sv = Math.min(have, Math.max(stp, Math.round(have / 2 / stp) * stp));
+    const buy = buyMax >= stp ? `<div class="top" style="margin-top:8px"><small>Mennyit fektetsz be?</small><small id="ib_${k}">${fmt(Math.min(buyMax, 1e6))}</small></div><input type="range" class="sl" id="ir_${k}" min="${stp}" max="${buyMax}" step="${stp}" value="${Math.min(buyMax, 1e6)}" oninput="document.getElementById('ib_${k}').textContent=fmt(+this.value)"><div class="btns"><button onclick="invest('${k}',+document.getElementById('ir_${k}').value)">➕ Befektetés</button></div>` : '<small>Nincs elég pénzed befektetni (legalább 100 e Ft kell).</small>';
+    const sell = have > 0 ? (have > stp ? `<div class="top" style="margin-top:8px"><small>Mennyit veszel ki?</small><small id="is_${k}">${fmt(sv)}</small></div><input type="range" class="sl" id="iq_${k}" min="${stp}" max="${Math.floor(have / stp) * stp}" step="${stp}" value="${sv}" oninput="document.getElementById('is_${k}').textContent=fmt(+this.value)"><div class="btns"><button onclick="cashOutAmt('${k}',+document.getElementById('iq_${k}').value)">💵 Kivét</button><button class="alt" onclick="cashOut('${k}')">Mindet kiveszem</button></div>` : `<div class="btns"><button onclick="cashOut('${k}')">💵 Mindet kiveszem</button></div>`) : '';
+    return `<div class="card"><div class="top"><b>${ic} ${n}</b><small>${fmt(have)}</small></div><small>${d}${p[k + 'g'] != null ? ` · tavaly: ${p[k + 'g'] >= 0 ? '+' : ''}${p[k + 'g']}%` : ''}</small>${buy}${sell}</div>`;
+  };
   return '<p class="empty">Az árfolyamok évente, öregedéskor frissülnek.</p>' + one('inv', '📈', 'Részvények', 'mérsékelt kockázat (−18% … +28% évente)') + one('cry', '🪙', 'Kripto', 'nagyon kockázatos (−60% … +120% évente)');
 }
-
-// --- teendők panel ---
-const catAvail = cid => ACT.filter(x => x.cat == cid && p.age >= x.m && (!x.M || p.age <= x.M) && (!x.u || x.u()));
-const actBtn = x => abtn({ i: x.i, n: x.n, c: p.age < 18 ? 0 : x.c || 0, r: x.r, risk: x.k || x.rk, done: p.done[x.id], fn: `doAct('${x.id}')` });
-const CATX = {
-  health: () => `<div class="card"><div class="top"><b>💪 Kondíció</b><small>${Math.round(p.fit == null ? 30 : p.fit)}/100</small></div><div class="tr"><i style="width:${p.fit == null ? 30 : p.fit}%"></i></div><small>A sport növeli, ha elhanyagolod, csökken. Jó kondícióval lassabban romlik az egészséged.</small></div>` + (p.sick ? `<p class="lg bad">🤒 Betegség: ${p.sick}. Menj orvoshoz vagy kórházba!</p>` : ''),
-  mind: () => `<div class="card"><div class="top"><b>🗣️ Nyelvtudás</b><small>${p.lang || 0}/5</small></div><small>Minden szint növeli az állásinterjúk esélyét.</small></div>`,
-  money: () => `<div class="card"><div class="top"><b>Pénzügyek</b><small>nettó ${fmt(netw())}</small></div><small>Készpénz ${fmt(p.money)} · Befektetés ${fmt((p.inv || 0) + (p.cry || 0))}${p.debt > 0 ? ` · Tartozás ${fmt(p.debt)}` : ''}</small></div>` + (p.age >= 18 ? `<div class="grid" style="margin-bottom:8px"><button class="act" onclick="go('inv')"><b>📈 Befektetések</b><small>részvény, kripto</small></button></div>` : ''),
-  fun: () => `<div class="grid" style="margin-bottom:8px"><button class="act" onclick="go('travel')"><b>✈️ Utazás</b><small>${Object.keys(p.trav || {}).length} hely eddig</small></button></div>`,
-  home: () => petBlock() + (!p.pet && p.age >= 6 ? `<div class="grid" style="margin-bottom:8px">${mcard('🐾', 'Kisállat örökbefogadása', p.offer ? 'különleges lehetőség!' : (adoptCost() ? fmt(adoptCost()) : 'ingyen'), "adSel=null;go('adopt')")}</div>` : ''),
-  illegal: () => '<p class="lg bad">⚠️ Ha elkapnak, pénzbüntetés vagy börtön jár. Börtönben nem dolgozhatsz.</p>'
-};
 function actPanel() {
   const a = p.age;
-  const top = (p.sick ? `<p class="lg bad">🤒 Betegség: ${p.sick}. Menj orvoshoz!</p>` : '') + (p.prison > 0 ? `<p class="lg bad">⛓️ Még ${p.prison} év börtön van hátra.</p>` : '');
+  const AU = autoPlan().length;
+  const autoBtn = `<button class="act" style="width:100%;margin-bottom:10px;outline:2px solid #3fbf5f" ${AU ? '' : 'disabled'} onclick="autoYear()"><b>🤖 Automata év</b><small>${AU ? AU + ' ingyenes, biztonságos teendő egy gombnyomásra' : 'ebben az évben mindent elvégeztél'}</small></button>`;
+  const top = autoBtn + (p.sick ? `<p class="lg bad">🤒 Betegség: ${p.sick}. Menj orvoshoz!</p>` : '') + (p.prison > 0 ? `<p class="lg bad">⛓️ Még ${p.prison} év börtön van hátra.</p>` : '');
   return top + '<div class="grid">' + CATS.filter(C => a >= C.m).map(C => {
-    const l = catAvail(C.id), n = l.filter(x => !p.done[x.id]).length + (C.id == 'fun' && !p.done.trip ? 1 : 0) + (C.id == 'money' && a >= 18 ? 1 : 0) + (C.id == 'home' && a >= 6 && !p.pet ? 1 : 0);
+    const l = catAvail(C.id), n = l.filter(x => !p.done[x.id]).length + (C.id == 'fun' && !p.done.trip ? 1 : 0) + (C.id == 'money' && a >= 18 ? 1 : 0) + (C.id == 'home' && a >= 6 && !p.pet ? 1 : 0) + (C.id == 'home' && a >= 20 && !p.done.mv ? 1 : 0);
     return `<button class="act" onclick="go('c:${C.id}')"><b>${C.i} ${C.n}</b><small>${n ? n + ' lehetőség' : 'ebben az évben kész'}</small></button>`;
   }).join('') + '</div>';
 }
@@ -902,8 +895,65 @@ function actSub(sb) {
     return `<div class="card"><div class="top"><b>🌍 Utazások</b><small>${Object.keys(p.trav || {}).length}/${DEST.length}</small></div><small>${vis || 'Még sehol sem jártál.'} Évente egy utat tehetsz.</small></div><div class="grid">` + l.map(d => abtn({ i: d.i, n: d.n, c: p.age < 18 ? 0 : d.c, r: ['hap', 'sma'], done: p.done.trip, fn: `travel('${d.id}')` })).join('') + '</div>';
   }
   if (sb == 'inv') return invPanel();
+  if (sb == 'move') return movePanel();
   const cid = sb.slice(2), l = catAvail(cid);
   return (CATX[cid] ? CATX[cid]() : '') + (l.length ? '<div class="grid">' + l.map(actBtn).join('') + '</div>' : '<p class="empty">Most nincs elérhető teendő.</p>');
+}
+
+// --- kategóriák listái, gombok, belépő kártyák ---
+const catAvail = cid => { const C = CATS.find(c => c.id == cid); return ACT.filter(x => x.cat == cid && (!C || p.age >= C.m) && p.age >= x.m && (x.M == null || p.age <= x.M) && (!x.u || x.u())); };
+function actBtn(x) { return abtn({ i: x.i, n: x.n, c: p.age < 18 ? 0 : x.c || 0, r: x.r, risk: x.rk || x.k, done: p.done[x.id], off: !!(x.k && p.prison > 0), fn: `doAct('${x.id}')` }); }
+const CATX = {
+  fun: () => '<div class="grid" style="margin-bottom:8px">' + mcard('🌍', 'Utazás', p.done.trip ? 'ebben az évben kész' : 'belföldi és külföldi utak', "go('travel')") + '</div>',
+  money: () => p.age >= 18 ? '<div class="grid" style="margin-bottom:8px">' + mcard('📈', 'Befektetések', 'részvény, kripto', "go('inv')") + '</div>' : '',
+  home: () => {
+    const c = (p.age >= 6 && !p.pet ? mcard('🐾', 'Kisállat örökbefogadása', p.offer ? 'különleges lehetőség' : 'találd meg a társadat', "go('adopt')") : '')
+      + (p.age >= 20 ? mcard('📦', 'Költözés', p.done.mv ? 'ebben az évben kész' : 'válassz új várost', "go('move')") : '');
+    return c ? '<div class="grid" style="margin-bottom:8px">' + c + '</div>' : '';
+  }
+};
+
+// --- költözés: egyetlen hely, legördülő városválasztóval ---
+function movePanel() {
+  if (p.age < 20) return '<p class="empty">20 éves korig a szüleiddel élsz, nem költözhetsz el.</p>';
+  const cur = p.city[0], c = 3e5;
+  const opts = CITY.filter(q => q[0] != cur).map(q => `<option value="${q[0]}">${q[0]}${window.cityMult ? ' (lakhatás ×' + cityMult(q[0]) + ')' : ''}</option>`).join('');
+  return `<div class="card"><div class="top"><b>📦 Költözés</b><small>${fmt(c)}</small></div><small>Jelenlegi városod: ${cur}. A régi ismerőseiddel lazulhat a kapcsolat. Évente egyszer költözhetsz.</small>`
+    + `<select id="mvc" style="width:100%;margin:10px 0 0;font:inherit;font-size:16px;font-weight:600;border:1px solid #b8c4bc;border-radius:10px;padding:10px;background:var(--card);color:var(--ink)">${opts}</select>`
+    + `<div class="btns"><button ${p.done.mv || !can(c) ? 'disabled' : ''} onclick="moveTo(document.getElementById('mvc').value)">${p.done.mv ? 'Ebben az évben már költöztél' : can(c) ? 'Költözés' : 'Nincs elég pénzed'}</button></div></div>`;
+}
+
+// --- jótékonyság: a bankban, csúszkával ---
+function charityBlock() {
+  const stp = 1e5, mx = Math.floor(p.money / stp) * stp;
+  if (mx < stp) return '<h3>Jótékonyság</h3><p class="empty">Adományozni legalább 100 e Ft-tal lehet.</p>';
+  const v = Math.min(mx, 5e5);
+  return `<h3>Jótékonyság</h3><div class="card"><div class="top"><b>🎗️ Mennyit adományozol?</b><small id="chv">${fmt(v)}</small></div><input type="range" class="sl" id="chr" min="${stp}" max="${mx}" step="${stp}" value="${v}" oninput="document.getElementById('chv').textContent=fmt(+this.value)"><small>Évente az első adományod jó érzést ad, a nagyobb összeg a hírnevedet is növeli.</small><div class="btns"><button onclick="donate(+document.getElementById('chr').value)">Adományozok</button></div></div>`;
+}
+
+// --- automata év: minden ingyenes, kockázatmentes, nem negatív teendő egy gombbal ---
+const AUTO_ACT = ['vol', 'med', 'walk', 'rest', 'play', 'draw', 'read', 'run', 'chore', 'yoga', 'code', 'club', 'diary', 'community', 'family', 'cook', 'clean', 'garden'];
+const AUTO_SCH = ['kplay', 'kdraw', 'ksong', 'knap', 'hw', 'brk', 'pe', 'ugrp'];
+function autoPlan() {
+  const L = [], a = p.age; if (p.dead || p.prison > 0) return L;
+  ACT.forEach(x => { if (AUTO_ACT.includes(x.id) && !x.c && !x.rk && !x.k && !p.done[x.id] && catAvail(x.cat).includes(x)) L.push(() => doAct(x.id)); });
+  SCH.forEach(x => { if (AUTO_SCH.includes(x.id) && !x.c && a >= x.a[0] && a <= x.a[1] && (!x.u || p.uni) && !p.done['s' + x.id]) L.push(() => schoolDo(x.id)); });
+  const fl = p.rel.some(r => r.alive && ['Barát', 'Testvér', 'Párod', 'Házastárs', 'Osztálytárs'].includes(r.role));
+  if (p.prison <= 0 && a >= 4) Object.keys(p.hob || {}).forEach(id => { const x = HOB.find(q => q.id == id), h = p.hob[id]; if (!x || !h || x.c) return;
+    if (!p.done['h' + id]) L.push(() => hobPrac(id));
+    if (fl && !p.done['hf' + id]) L.push(() => hobFriend(id));
+    if (h.lv >= 60 && !p.done['ht' + id]) L.push(() => hobTeach(id)); });
+  if (p.pet) PACT.forEach(x => { if (!x.c && x.ok.includes(p.pet.k) && !p.done['pet' + x.k]) L.push(() => petAct(x.k)); });
+  p.rel.forEach((r, i) => { if (!r.alive || r.role == 'Riválisod' || r.age < 1) return;
+    if (!p.done['t' + i]) L.push(() => talk(i));
+    (r.kin || []).forEach((q, j) => { if (q.alive && !p.done['kt' + i + '_' + j]) L.push(() => kinDo(i, j, 't')); }); });
+  return L;
+}
+function autoYear() {
+  if (!autoPlan().length) return;
+  const _r = render; let n = 0; render = () => { };
+  try { for (let k = 0; k < 4; k++) { const L = autoPlan(); if (!L.length) break; L.forEach(f => { try { f(); n++; } catch (e) { } }); } } finally { render = _r; }
+  lg(`🤖 Automata év: ${n} biztonságos teendő elvégezve.`, 'good'); render();
 }
 
 // --- vagyon panel és részletek ---
@@ -951,7 +1001,14 @@ const FGRP = { 'fin:house': ['house'], 'fin:veh': ['car', 'bike'], 'fin:item': [
 function loanTake(m) { if (!(m > 0) || p.age < 20 || (p.debt || 0) + m * 1.1 > 1e7) return; p.debt = (p.debt || 0) + Math.round(m * 1.1); fxlog('Hitelt vettél fel, évi 12% kamattal.', { money: m }); render(); }
 function repayAll() { const m = Math.min(p.debt || 0, Math.max(0, p.money)); if (m <= 0) return; p.money -= m; p.debt -= m; lg(`Törlesztettél ${fmt(m)}-ot.` + (p.debt > 0 ? ` Hátralévő tartozás: ${fmt(p.debt)}.` : ' Már nincs tartozásod!'), 'good'); render(); }
 function deposit(m) { if (p.age < 18 || !can(m)) return; p.money -= m; p.sav = (p.sav || 0) + m; lg(`Betétbe tettél ${fmt(m)}-ot.`); render(); }
+function withdrawAmt(m) { const v = p.sav || 0; m = Math.min(v, Math.max(0, Math.round(m))); if (!m) return; p.sav = v - m; p.money += m; lg(`Kivettél a betétedből: ${fmt(m)}.`, 'good'); render(); }
 function withdraw() { const v = p.sav || 0; if (!v) return; p.sav = 0; p.money += v; lg(`Kivetted a betétedet: ${fmt(v)}.`, 'good'); render(); }
+function savSliders() {
+  const stp = 1e5, dm = Math.floor(p.money / stp) * stp, have = p.sav || 0, sv = Math.min(have, Math.max(stp, Math.round(have / 2 / stp) * stp));
+  const put = dm >= stp ? `<div class="card"><div class="top"><b>💰 Mennyit teszel be?</b><small id="sdv">${fmt(Math.min(dm, 1e6))}</small></div><input type="range" class="sl" id="sdr" min="${stp}" max="${dm}" step="${stp}" value="${Math.min(dm, 1e6)}" oninput="document.getElementById('sdv').textContent=fmt(+this.value)"><div class="btns"><button onclick="deposit(+document.getElementById('sdr').value)">Betétbe teszem</button></div></div>` : '<small>Nincs elég pénzed betétre (legalább 100 e Ft kell).</small>';
+  const out = have > 0 ? (have > stp ? `<div class="card"><div class="top"><b>🏧 Mennyit veszel ki?</b><small id="swv">${fmt(sv)}</small></div><input type="range" class="sl" id="swr" min="${stp}" max="${Math.floor(have / stp) * stp}" step="${stp}" value="${sv}" oninput="document.getElementById('swv').textContent=fmt(+this.value)"><div class="btns"><button onclick="withdrawAmt(+document.getElementById('swr').value)">Kivét</button><button class="alt" onclick="withdraw()">Mindet kiveszem</button></div></div>` : `<div class="btns"><button onclick="withdraw()">🏧 Mindet kiveszem</button></div>`) : '';
+  return put + out;
+}
 function bankPanel() {
   if (p.age < 18) return '<p class="empty">18 évesen mehetsz a bankba.</p>';
   const d = p.debt || 0, max = Math.max(0, Math.floor((1e7 - d) / 1.1 / 1e5) * 1e5), v = Math.min(max, 5e5);
@@ -960,13 +1017,13 @@ function bankPanel() {
     : max < 1e5 ? '<h3>Hitel</h3><p class="empty">Elérted a hitelkeretedet.</p>'
     : `<h3>Hitel</h3><div class="card"><div class="top"><b>💸 Mennyit vennél fel?</b><small id="loanv">${fmt(v)}</small></div><input type="range" class="sl" id="loanr" min="100000" max="${max}" step="100000" value="${v}" oninput="document.getElementById('loanv').textContent=fmt(+this.value)"><small>Évi 12% kamat és 10% kezelési díj. Legfeljebb ${fmt(max)}.</small><div class="btns"><button onclick="loanTake(+document.getElementById('loanr').value)">Hitelt veszek fel</button></div></div>`;
   return info + loan + '<div class="grid" style="margin-top:8px">' + abtn({ i: '💳', n: 'Törlesztés', off: !(d > 0 && p.money > 0), r: ['hap'], fn: 'repayAll()' }) + '</div>'
-    + '<h3>Megtakarítás</h3><div class="grid">' + [1e5, 1e6].map(m => abtn({ i: '💰', n: 'Betét ' + fmt(m), off: !can(m), fn: `deposit(${m})` })).join('') + abtn({ i: '🏧', n: 'Kivét', off: !(p.sav > 0), fn: 'withdraw()' }) + '</div>';
+    + '<h3>Megtakarítás</h3>' + savSliders() + charityBlock();
 }
 const SHOP = {
-  'shop:style': ['Ruházat és szépség', [{ id: 'cl1', i: '👕', n: 'Divatos ruha', c: 6e4, fx: { loo: 3, hap: 2 } }, { id: 'cl2', i: '👟', n: 'Márkás cipő', c: 9e4, fx: { loo: 2, hap: 3 } }, { id: 'cl3', i: '💇', n: 'Fodrász', c: 4e4, fx: { loo: 4 } }, { id: 'cl4', i: '💄', n: 'Szépségápolás', c: 8e4, fx: { loo: 5, hap: 1 } }, { id: 'cl5', i: '🕶️', n: 'Designer napszemüveg', c: 2.5e5, fx: { loo: 5, hap: 3 } }, { id: 'cl6', i: '🤵', n: 'Öltöny, estélyi', c: 4e5, fx: { loo: 7, hap: 3 } }]],
-  'shop:fun': ['Élmények', [{ id: 'f1', i: '🍽️', n: 'Étterem', c: 5e4, fx: { hap: 4 } }, { id: 'f2', i: '🎟️', n: 'Koncertjegy', c: 8e4, fx: { hap: 6 } }, { id: 'f3', i: '🎬', n: 'Mozi és popcorn', c: 2e4, fx: { hap: 3 } }, { id: 'f4', i: '🎢', n: 'Vidámpark', c: 6e4, fx: { hap: 5 } }, { id: 'f5', i: '🍾', n: 'Luxusvacsora', c: 3e5, fx: { hap: 8 } }]],
-  'shop:edu': ['Tanulás', [{ id: 'e1', i: '📚', n: 'Könyvek', c: 3e4, fx: { sma: 3 } }, { id: 'e2', i: '🎓', n: 'Online tanfolyam', c: 1.2e5, fx: { sma: 5 } }, { id: 'e3', i: '🧑‍🏫', n: 'Magántanár', c: 2.5e5, fx: { sma: 6, hap: 1 } }]],
-  'shop:care': ['Egészség', [{ id: 'h1', i: '💊', n: 'Vitaminok', c: 3e4, fx: { hea: 3 } }, { id: 'h2', i: '🏋️', n: 'Edzőterem-bérlet', c: 1.5e5, fx: { hea: 4, hap: 2 } }, { id: 'h3', i: '💆', n: 'Masszázs, wellness', c: 1e5, fx: { hea: 2, hap: 5 } }, { id: 'h4', i: '🩺', n: 'Magán-szűrővizsgálat', c: 2e5, fx: { hea: 6 } }]]
+  'shop:style': ['Ruházat és szépség', [{ id: 'cl2', i: '👟', n: 'Márkás cipő', c: 9e4, fx: { loo: 2, hap: 3 } }, { id: 'cl5', i: '🕶️', n: 'Designer napszemüveg', c: 2.5e5, fx: { loo: 5, hap: 3 } }, { id: 'cl6', i: '🤵', n: 'Öltöny, estélyi', c: 4e5, fx: { loo: 7, hap: 3 } }]],
+  'shop:fun': ['Élmények', [{ id: 'f5', i: '🍾', n: 'Luxusvacsora', c: 3e5, fx: { hap: 8 } }]],
+  'shop:edu': ['Tanulás', [{ id: 'e1', i: '📚', n: 'Könyvek', c: 3e4, fx: { sma: 3 } }, { id: 'e3', i: '🧑‍🏫', n: 'Magántanár', c: 2.5e5, fx: { sma: 6, hap: 1 } }]],
+  'shop:care': ['Egészség', [{ id: 'h1', i: '💊', n: 'Vitaminok', c: 3e4, fx: { hea: 3 } }, ]]
 };
 function shopBuy(id) {
   let x = null; Object.values(SHOP).forEach(g => g[1].forEach(q => { if (q.id == id) x = q; })); if (!x || p.done['sh' + id] || p.done['shn' + id] || p.age < 6) return;
@@ -1121,22 +1178,33 @@ function jobsScreen() {
   else b = a < 16 ? '<p class="empty">16 éves kortól vállalhatsz állást.</p>' : p.uni ? '<p class="empty">Az egyetem mellett most nem dolgozol.</p>' : jobList();
   return `<div class="seg"><button class="${sp ? '' : 'on'}" onclick="setJt('n')">💼 Sima munkák</button><button class="${sp ? 'on' : ''}" onclick="setJt('s')">⭐ Különleges</button></div>` + b;
 }
+function curPanel() {
+  const a = p.age;
+  if (p.prison > 0) return '<p class="empty">Börtönben nem dolgozhatsz.</p>';
+  if (p.car) return carPanel();
+  if (p.job) return row(p.job, `${JR[p.jr || 0]} · ${p.yrs}. éve`, `<p>Fizetés: ${fmt(p.pay)} / év</p><div class="btns"><button class="alt" onclick="quit()">Felmondok</button></div>`);
+  if (inSchool()) return schoolPanel();
+  if (a >= 65) return `<p class="empty">Nyugdíjas vagy: ${fmt(p.pension)} / év.</p>`;
+  if (a >= 18) return '<div class="card"><div class="top"><b>🔍 Munkanélküli vagy</b></div><small>Nézz szét az állások között, vagy indíts különleges karriert.</small></div>';
+  if (a < 3) return '<p class="empty">Még csecsemő vagy, a család gondoskodik rólad.</p>';
+  return '';
+}
 function jobPanel() {
   const a = p.age;
-  const h = row('Végzettség', T(EDU[p.edu]) + (p.uni ? ' (egyetemista)' : ''), '') + (a >= 17 ? row('Jogosítvány', p.lic ? 'Van' : 'Nincs', '') : '') + (p.crim ? row('Büntetett előélet', p.crim + ' ügy', '') : '') + (p.lang ? row('Nyelvtudás', p.lang + '/5', '') : '');
-  const hob = a >= 4 && p.prison <= 0 ? mcard('🎨', 'Hobbik', `${hobN()}/3 hobbi`, "go('hobs')") : '';
-  const sch = inSchool() && (p.job || p.car) ? mcard(a < 6 ? '🧸' : p.uni ? '🎓' : '🏫', sName(), 'Tanulmányok, barátok', "go('school')") : '';
+  const licBtn = !p.lic && a >= 18 ? `<div class="btns"><button ${can(15e4) && !p.done.lic ? '' : 'disabled'} onclick="doAct('lic')">🪪 Jogosítvány vizsga (${fmt(15e4)})</button></div>` : '';
+  const h = row('Végzettség', T(EDU[p.edu]) + (p.uni ? ' (egyetemista)' : ''), '') + (a >= 17 ? row('Jogosítvány', p.lic ? 'Van' : 'Nincs', licBtn) : '') + (p.crim ? row('Büntetett előélet', p.crim + ' ügy', '') : '') + (p.lang ? row('Nyelvtudás', p.lang + '/5', '') : '');
   const G = x => x ? '<h3>Menü</h3><div class="grid">' + x + '</div>' : '';
   if (p.prison > 0) return h + '<p class="empty">Börtönben nem dolgozhatsz.</p>';
-  if (p.car) return h + carPanel() + G(sch + hob);
-  let top = '';
-  if (p.job) top = row(p.job, `${JR[p.jr || 0]} · ${p.yrs}. éve`, `<p>Fizetés: ${fmt(p.pay)} / év</p><div class="btns"><button class="alt" onclick="quit()">Felmondok</button></div>`);
-  else if (inSchool()) top = schoolPanel();
-  else if (a >= 65) top = `<p class="empty">Nyugdíjas vagy: ${fmt(p.pension)} / év.</p>`;
-  else if (a >= 18) top = '<div class="card"><div class="top"><b>🔍 Munkanélküli vagy</b></div><small>Nézz szét az állások között, vagy indíts különleges karriert.</small></div>';
-  else if (a < 3) top = '<p class="empty">Még csecsemő vagy, a család gondoskodik rólad.</p>';
-  const menu = (a >= 14 && (a < 65 || p.job) ? mcard('💼', 'Állások', 'Sima és különleges munkák', "go('jobs')") : '') + (p.job ? mcard('📋', 'Munkahelyi tevékenységek', 'Megítélés, túlóra, emelés', "go('jwork')") : '') + sch + hob;
-  return h + top + G(menu);
+  const C = p.car ? CAR_BY[p.car.id] : null;
+  const curSub = C ? `${C.ranks[p.car.rank][0]} · ${p.car.yrs}. éve` : p.job ? `${p.job} · ${fmt(p.pay)} / év` : a >= 65 ? `Nyugdíj: ${fmt(p.pension || 0)} / év` : a >= 18 && !inSchool() ? 'Munkanélküli vagy' : inSchool() ? sName() : '';
+  const cur = (p.car || p.job || (a >= 18 && !inSchool()) || a >= 65) ? mcard(C ? C.i : '💼', C ? C.n : p.job ? 'Munkahely' : 'Munkahely', curSub, "go('cur')") : '';
+  const jobs = !p.car && a >= 14 && (a < 65 || p.job) ? mcard('🔎', 'Állások', 'Sima és különleges munkák', "go('jobs')") : '';
+  const jw = p.job ? mcard('📋', 'Munkahelyi tevékenységek', 'Megítélés, túlóra, emelés', "go('jwork')") : '';
+  const side = window.sideMenu ? sideMenu() : '';
+  const hob = a >= 4 && p.prison <= 0 ? mcard('🎨', 'Hobbik', `${hobN()}/3 hobbi`, "go('hobs')") : '';
+  const sch = inSchool() && (p.job || p.car) ? mcard(a < 6 ? '🧸' : p.uni ? '🎓' : '🏫', sName(), 'Tanulmányok, barátok', "go('school')") : '';
+  const sc = inSchool() && !p.job && !p.car ? curPanel() : '';
+  return h + sc + G(cur + jobs + jw + side + sch + hob);
 }
 
 // --- karrier: fejlesztések ---
@@ -1420,6 +1488,7 @@ function panel(t) {
   if (t == 'job' && sub && sub.startsWith('h:')) return bk() + hobbyDetail(sub.slice(2));
   if (t == 'rel' && sub && sub.startsWith('kin:')) return bk() + kinPanel(+sub.slice(4));
   if (t == 'job' && sub && sub.startsWith('crstart:')) return bk() + crStart(sub.slice(8));
+  if (t == 'job' && sub == 'cur') return bk() + curPanel();
   if (t == 'job' && sub == 'jobs') return bk() + jobsScreen();
   if (t == 'job' && sub == 'hobs') return bk() + hobbyPanel();
   if (t == 'job' && sub == 'jwork') return bk() + jobActs();
