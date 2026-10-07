@@ -5,20 +5,32 @@
   const mult = () => MULT[p.city && p.city[0]] || 1;
   const adult = () => p.age >= 18 && !p.uni && !(p.prison > 0);
   const kidsN = () => p.rel.filter(r => r.role == 'Gyerek' && r.alive && r.age < 18).length;
-  function budget() {
+  function living() {
     const house = p.assets.some(x => x.t == 'house'), cars = p.assets.filter(x => x.t == 'car').length;
-    const inc = p.job ? p.pay : p.pension || 0, tax = p.job ? Math.round(inc * .08) : 0;
-    const home = Math.round((house ? 8e5 : 2e6 * mult())), car = cars * 3e5, kid = kidsN() * 6e5, ins = p.assets.filter(x => x.ins).reduce((s, x) => s + Math.round(x.v * .025), 0), intr = Math.round((p.debt || 0) * .12);
-    return { inc, tax, home, car, kid, ins, intr, net: inc - tax - home - car - kid - ins };
+    const util = house ? 4.5e5 : 3e5, rent = house ? 0 : Math.round(1.2e6 * mult()), food = 5e5, car = cars * 3e5, kid = kidsN() * 6e5;
+    return { util, rent, food, car, kid, total: util + rent + food + car + kid };
   }
-  const m = n => (window.fmt || (x => x))(Math.round(n / 12));
+  window.livingCost = living;
+  function budget() {
+    const L = living(), inc = window.yearIncome ? window.yearIncome() : (p.job ? p.pay : p.pension || 0), tax = (p.job || p.side) ? Math.round(inc * .08) : 0;
+    const ins = p.assets.filter(x => x.ins).reduce((s, x) => s + Math.round(x.v * .025), 0), intr = Math.round((p.debt || 0) * .12);
+    return { inc, tax, ...L, ins, intr, net: inc - tax - L.total - ins };
+  }
+  const m = n => fmt(Math.round(n));
   function card() {
-    const b = budget(), simple = document.body.dataset.view == 'simple', rows = [[t(['Bevétel', 'Income']), b.inc], [t(['Adó (8%)', 'Tax (8%)']), -b.tax], [t(['Lakhatás', 'Housing']), -b.home], [t(['Autók', 'Cars']), -b.car], [t(['Gyerekek', 'Children']), -b.kid], [t(['Biztosítás', 'Insurance']), -b.ins], [t(['Hitelkamat', 'Loan interest']), -b.intr]].filter(r => r[1]);
-    let h = `<h3 style="margin:12px 0 6px">📊 ${t(['Havi költségvetés', 'Monthly budget'])}</h3><div class="card"><div class="top"><b>${t(['Havi egyenleg', 'Monthly balance'])}</b><small>${m(b.net - b.intr)}</small></div>`;
-    if (!simple) h += rows.map(r => `<div class="top"><small>${r[0]}</small><small>${m(r[1])}</small></div>`).join('');
+    const b = budget(), simple = document.body.dataset.view == 'simple';
+    const rows = [[t(['Bevétel (munka, nyugdíj)', 'Income (job, pension)']), b.inc], [t(['Adó (8%)', 'Tax (8%)']), -b.tax], [t(['Rezsi', 'Utilities']), -b.util]];
+    if (b.rent) rows.push([t(['Lakhatás (bérleti díj)', 'Housing (rent)']), -b.rent]);
+    rows.push([t(['Éves élelem', 'Food (yearly)']), -b.food]);
+    if (b.car) rows.push([t(['Autók', 'Cars']), -b.car]);
+    if (b.kid) rows.push([t(['Gyerekek', 'Children']), -b.kid]);
+    if (b.ins) rows.push([t(['Biztosítás', 'Insurance']), -b.ins]);
+    let h = `<h3 style="margin:12px 0 6px">📊 ${t(['Éves költségvetés', 'Yearly budget'])}</h3><div class="card"><div class="top"><b>${t(['Éves egyenleg', 'Yearly balance'])}</b><small>${m(b.net - b.intr)}</small></div>`;
+    if (!simple) h += rows.map(r => `<div class="top"><small>${r[0]}</small><small>${m(r[1])}</small></div>`).join('') + (b.intr ? `<div class="top"><small>${t(['Hitelkamat (becsült)', 'Loan interest (est.)'])}</small><small>${m(-b.intr)}</small></div>` : '');
+    h += `<small>${t(['A rezsit, a lakhatást és az élelmet minden évben ki kell fizetned. A cég- és alkotói bevétel külön számolódik.', 'Utilities, housing and food must be paid every year. Business and creator income is counted separately.'])}</small>`;
     h += `<small>🏙 ${p.city[0]} · ${t(['lakhatási szorzó', 'housing factor'])} ×${mult()}</small></div>`;
-    if (p.age >= 20) h += `<div class="card"><b>🚚 ${t(['Költözés (300 e Ft)', 'Move (300k)'])}</b><div class="grid" style="margin-top:8px">${Object.keys(MULT).filter(c => c != p.city[0]).map(c => `<button onclick="moveTo('${c}')">${c}</button>`).join('')}</div></div>`
-      + `<div class="card"><b>🎗 ${t(['Jótékonyság', 'Charity'])}</b><div class="grid" style="margin-top:8px"><button onclick="donate(1e6)">1 M Ft</button><button onclick="donate(5e6)">5 M Ft</button></div></div>`;
+    if (p.age >= 20) h += `<div class="card"><b>🚚 ${t(['Költözés (300 e Ft)', 'Move (300k HUF)'])}</b><div class="grid" style="margin-top:8px">${Object.keys(MULT).filter(c => c != p.city[0]).map(c => `<button onclick="moveTo('${c}')" ${p.done.mv || p.money < 3e5 ? 'disabled' : ''}>${c}</button>`).join('')}</div></div>`;
+    h += `<div class="card"><b>🎗 ${t(['Jótékonyság', 'Charity'])}</b><div class="grid" style="margin-top:8px"><button onclick="donate(1e6)">1 M Ft</button><button onclick="donate(5e6)">5 M Ft</button></div></div>`;
     return h;
   }
   window.moveTo = c => {
@@ -40,8 +52,8 @@
     _up.apply(this, arguments);
     try {
       if (p.dead || !adult()) return;
-      const b = budget(), extra = Math.round(2e6 * (mult() - 1)) * (p.assets.some(x => x.t == 'house') ? 0 : 1);
-      p.money -= b.tax + extra; if (b.tax) lg(`🧾 ${t(['Adó: −', 'Tax: −'])}${fmt(b.tax)}.`);
+      const b = budget();
+      p.money -= b.tax; if (b.tax) lg(`🧾 ${t(['Adó: −', 'Tax: −'])}${fmt(b.tax)}.`);
       const r = Math.random();
       if (r < .05) { p.inv = Math.round((p.inv || 0) * .75); p.cry = Math.round((p.cry || 0) * .6); p.money = Math.round(p.money * .97); lg('📉 ' + t(['Gazdasági válság: a befektetések esnek.', 'Economic crisis: investments drop.']), 'bad'); }
       else if (r < .09) { p.money = Math.round(p.money * .96); lg('💸 ' + t(['Infláció: minden drágább lett.', 'Inflation: everything got pricier.']), 'bad'); }
