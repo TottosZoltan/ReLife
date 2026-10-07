@@ -339,3 +339,14 @@ body[data-th=dark] .ov .box .chip.on{background:#14665f;border-color:#5ee0c5;col
 .sdog .tear{animation:tr 1.8s ease-in infinite}.sdog .t2{animation-delay:.9s}
 @keyframes tr{0%{transform:translateY(0);opacity:1}100%{transform:translateY(26px);opacity:0}}
 #mb.hid{opacity:0;pointer-events:none}#mb{transition:opacity .4s}
+
+/* ===== extras9: stúdió ===== */
+.mood{display:none!important}
+#stu .box{max-width:420px}
+.stp{width:150px;height:165px;margin:0 auto 10px;border-radius:18px;overflow:hidden;background:var(--ink2,#2b3a46);box-shadow:0 4px 14px #0004}
+.stp svg{width:100%;height:100%;display:block}
+.stt{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:8px}
+.stt button{flex:none;font-size:13px;padding:7px 11px;border-radius:99px;border:1px solid #b8c4bc;background:transparent;color:inherit}
+.stt button.on{background:#3fbf5f;color:#fff;border-color:#3fbf5f}
+.stc{max-height:34vh;overflow-y:auto;margin-bottom:12px}
+.stb{display:flex;flex-direction:column;gap:8px}

@@ -8,8 +8,8 @@
   const snap = (k, e, txt) => { p.snap = p.snap || {}; if (p.snap[k]) return; p.snap[k] = 1; album().push({ a: p.age, e, t: txt }); };
   function tag() {
     const av = $('#av'); if (!av) return; av.style.position = 'relative';
-    let b = av.querySelector('.mood'); if (!b) { b = document.createElement('span'); b.className = 'mood'; av.append(b); }
-    b.textContent = mood(); $('#app').dataset.season = p.age % 4;
+    let b = av.querySelector('.mood'); if (!b) { b = document.createElement('span'); }
+    b.remove(); $('#app').dataset.season = p.age % 4;
   }
   function photos() {
     if (p.rel.some(r => r.role == 'Házastárs')) snap('wed', '💍', t(['Az esküvőd napja', 'Your wedding day']));

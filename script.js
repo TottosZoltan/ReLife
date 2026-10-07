@@ -510,7 +510,7 @@ function newLife(o = {}) {
   p = { g, skin, trait, name: `${sn} ${fn}`, age: 0, money: 0, hap: R(75, 95), hea: R(80, 100), sma: R(25, 75), loo: R(20, 85),
     edu: 0, uni: false, job: null, pay: 0, yrs: 0, pension: 0, fam: [1, 2, 3].includes(+o.fam) ? +o.fam : R(1, 3), dead: false, done: {}, logs: [], rel: [], assets: [], lic: false, hob: {}, car: null, jp: 30, fit: 30, lang: 0, trav: {}, inv: 0, cry: 0, debt: 0, jr: 0, pet: null, crim: 0, prison: 0, sick: null, city };
   p[gk] = cl(p[gk] + 15);
-  p.look = { g, sk: skin, hs: pk(o.hs, () => rndHs(g)), hc: pk(o.hc, () => R(0, 4)), oc: pk(o.oc, () => R(0, 7)), bd: pk(o.bd, rndBd), ot: pk(o.ot, rndOt), ht: pk(o.ht, rndHt), ea: pk(o.ea, rndEa), gl: pk(o.gl, rndGl), nc: pk(o.nc, rndNc), xc: pk(o.xc, () => R(0, 7)) };
+  p.look = { g, sk: skin, hs: pk(o.hs, () => rndHs(g)), hc: pk(o.hc, () => rndHc()), oc: pk(o.oc, () => rndOc()), bd: pk(o.bd, rndBd), ot: pk(o.ot, rndOt), ht: pk(o.ht, rndHt), ea: pk(o.ea, rndEa), gl: pk(o.gl, rndGl), nc: pk(o.nc, rndNc), xc: pk(o.xc, () => rndXc()) };
   const m = { ...person('Anya', R(22, 38), R(60, 90), 'f'), par: 1 }, f = { ...person('Apa', R(23, 42), R(55, 90), 'm'), par: 1 };
   m.n = `${sn} ${P(NF)}`; f.n = `${sn} ${P(NM)}`;
   m.kin = genKin(m); f.kin = genKin(f);
@@ -1544,14 +1544,14 @@ function confetti(n = 70) {
 // ----- megjelenítés -----
 const SKIN = ['', '\u{1F3FB}', '\u{1F3FC}', '\u{1F3FD}', '\u{1F3FE}', '\u{1F3FF}'], SKINC = ['', '#f8dcc6', '#e9bd96', '#c98f62', '#9a6240', '#5e3a24'];
 
-const HC = ['#24180f', '#6b4226', '#e0b24a', '#b5381f', '#8a8f9a', '#d96a9f'], OC = ['#e4572e', '#1f8a83', '#3a6fd8', '#f0b429', '#7a5cc7', '#3b3b46', '#e86a9a', '#4a9d4a'], XC = ['#e4572e', '#1f8a83', '#3a6fd8', '#f0b429', '#7a5cc7', '#3b3b46', '#e86a9a', '#f4f4f4'], SW = { skin: SKINC, hc: HC, oc: OC, xc: XC };
+const HC = ['#24180f', '#6b4226', '#e0b24a', '#b5381f', '#8a8f9a', '#d96a9f', '#3b2616', '#9a6b3e', '#efe3b8', '#8c3b1f', '#c2a878', '#3a6fd8', '#7a5cc7', '#1f8a83'], OC = ['#e4572e', '#1f8a83', '#3a6fd8', '#f0b429', '#7a5cc7', '#3b3b46', '#e86a9a', '#4a9d4a', '#8c1d2f', '#0f3d6e', '#2f5d3a', '#9aa3ad', '#f4f4f0', '#c9a27a', '#f48a3c', '#7fc4e8', '#b6e08a', '#f2a6c0', '#6e4a2f', '#a8d5c2', '#c9b6ea', '#e8d05a', '#1c1c24', '#d94f4f'], XC = ['#e4572e', '#1f8a83', '#3a6fd8', '#f0b429', '#7a5cc7', '#3b3b46', '#e86a9a', '#f4f4f4', '#8c1d2f', '#0f3d6e', '#2f5d3a', '#f48a3c', '#7fc4e8', '#f2a6c0', '#c9a27a', '#1c1c24'], SW = { skin: SKINC, hc: HC, oc: OC, xc: XC };
 const HSN = [['rövid', 'short'], ['hosszú', 'long'], ['feltűzött', 'tied-up'], ['nagyon rövid', 'buzzed'], ['göndör', 'curly'], ['félhosszú', 'bob'], ['lófarkas', 'ponytail'], ['tüskés', 'spiky'], ['copfos', 'pigtail'], ['kopasz', 'bald'],
   ['afro', 'afro'], ['frufrus bubi', 'bob with bangs'], ['oldalra fésült', 'side-swept'], ['feltupírozott', 'quiff'], ['magas konty', 'top bun'], ['két konty', 'space buns'], ['magas lófarok', 'high ponytail'], ['két fonat', 'twin braids'], ['oldalfonat', 'side braid'], ['hullámos hosszú', 'long wavy'], ['hosszú frufruval', 'long with bangs'], ['tarajos', 'mohawk'], ['kopaszodó', 'receding'], ['középen elválasztott', 'curtains'], ['pixie', 'pixie']];
 const TALL = [2, 4, 7, 10, 13, 14, 15, 16, 21], FULLHAT = [1, 2, 3, 4, 5, 9];
 const BDN = [['átlagos', 'average'], ['karcsú', 'slim'], ['nyurga', 'lanky'], ['izmos', 'muscular'], ['atletikus', 'athletic'], ['telt', 'curvy'], ['nagydarab', 'heavyset'], ['zömök', 'stocky'], ['körte formájú', 'pear-shaped'], ['apró', 'petite']];
-const HCN = [['fekete', 'black'], ['barna', 'brown'], ['szőke', 'blond'], ['vörös', 'red'], ['ősz', 'gray'], ['rózsaszín', 'pink']];
-const OCN = [['piros', 'red'], ['kékeszöld', 'teal'], ['kék', 'blue'], ['sárga', 'yellow'], ['lila', 'purple'], ['sötét', 'dark'], ['rózsaszín', 'pink'], ['zöld', 'green']];
-const OTN = [['póló', 't-shirt'], ['pulcsi', 'sweater'], ['kapucnis pulcsi', 'hoodie'], ['márkás polo', 'branded polo'], ['garbó', 'turtleneck'], ['kardigán', 'cardigan'], ['trikó', 'tank top'], ['csíkos póló', 'striped tee'], ['ing', 'shirt'], ['blézer', 'blazer'], ['melegítőfelső', 'track jacket'], ['sportmez', 'jersey'], ['kantáros nadrág', 'dungarees'], ['farmerdzseki', 'denim jacket'], ['bőrdzseki', 'leather jacket'], ['mellény', 'puffer vest']];
+const HCN = [['fekete', 'black'], ['barna', 'brown'], ['szőke', 'blond'], ['vörös', 'red'], ['ősz', 'gray'], ['rózsaszín', 'pink'], ['sötétbarna', 'dark brown'], ['világosbarna', 'light brown'], ['platinaszőke', 'platinum'], ['gesztenye', 'auburn'], ['hamvasszőke', 'ash blond'], ['kék', 'blue'], ['lila', 'purple'], ['türkiz', 'teal']];
+const OCN = [['piros', 'red'], ['kékeszöld', 'teal'], ['kék', 'blue'], ['sárga', 'yellow'], ['lila', 'purple'], ['sötét', 'dark'], ['rózsaszín', 'pink'], ['zöld', 'green'], ['bordó', 'burgundy'], ['tengerészkék', 'navy'], ['erdőzöld', 'forest green'], ['szürke', 'gray'], ['fehér', 'white'], ['bézs', 'beige'], ['narancs', 'orange'], ['égkék', 'sky blue'], ['lime', 'lime'], ['pasztellrózsaszín', 'pastel pink'], ['barna', 'brown'], ['menta', 'mint'], ['levendula', 'lavender'], ['mustár', 'mustard'], ['fekete', 'black'], ['korall', 'coral']];
+const OTN = [['póló', 't-shirt'], ['pulcsi', 'sweater'], ['kapucnis pulcsi', 'hoodie'], ['márkás polo', 'branded polo'], ['garbó', 'turtleneck'], ['kardigán', 'cardigan'], ['trikó', 'tank top'], ['csíkos póló', 'striped tee'], ['ing', 'shirt'], ['blézer', 'blazer'], ['melegítőfelső', 'track jacket'], ['sportmez', 'jersey'], ['kantáros nadrág', 'dungarees'], ['farmerdzseki', 'denim jacket'], ['bőrdzseki', 'leather jacket'], ['mellény', 'puffer vest'], ['henley felső', 'henley'], ['virágos póló', 'floral tee'], ['kockás flanelling', 'plaid flannel'], ['steppelt kabát', 'puffer jacket'], ['egyetemi dzseki', 'varsity jacket'], ['hawaii ing', 'hawaiian shirt'], ['pöttyös felső', 'polka-dot top'], ['pántos nyári ruha', 'sundress'], ['kabát', 'coat'], ['színblokkos pulcsi', 'color-block sweater']];
 const HTN = [['nincs', 'none'], ['baseball sapka', 'cap'], ['kötött sapka', 'beanie'], ['halászsapka', 'bucket hat'], ['kalap', 'fedora'], ['szalmakalap', 'straw hat'], ['fejpánt', 'headband'], ['masni', 'hair bow'], ['virágkoszorú', 'flower crown'], ['bandana', 'bandana'], ['macskafül', 'cat ears'], ['korona', 'crown']];
 const EAN = [['nincs', 'none'], ['fejhallgató', 'headphones'], ['fülhallgató', 'earbuds'], ['headset', 'headset'], ['fülbevaló', 'earrings']];
 const GLN = [['nincs', 'none'], ['kerek szemüveg', 'round glasses'], ['szögletes szemüveg', 'square glasses'], ['napszemüveg', 'sunglasses']];
@@ -1560,9 +1560,10 @@ const pk = (v, f) => v != null && v !== 'r' ? +v : f();
 const chance = (p, n) => () => Math.random() < p ? R(1, n) : 0;
 const rndHs = g => P(g == 'f' ? [1, 2, 0, 4, 5, 6, 8, 5, 6, 10, 11, 14, 15, 16, 17, 18, 19, 20, 23, 24, 11, 19] : [0, 3, 4, 7, 0, 3, 7, 9, 10, 12, 13, 21, 22, 23, 12, 13]);
 const rndBd = () => P([0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
-const rndOt = () => P([0, 0, 0, 1, 1, 2, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]);
-const rndHt = chance(.22, 11), rndEa = chance(.15, 4), rndGl = chance(.2, 3), rndNc = chance(.18, 4);
-const mkLook = (g, sk) => ({ g, sk: sk || R(1, 5), hs: rndHs(g), hc: R(0, 4), oc: R(0, 7), bd: rndBd(), ot: rndOt(), ht: rndHt(), ea: rndEa(), gl: rndGl(), nc: rndNc(), xc: R(0, 7) });
+const BASIC_OT = [0, 1, 2, 8, 7], rndOt = () => Math.random() < .9 ? P(BASIC_OT) : P([3, 4, 5, 6, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]);
+const rndHc = () => Math.random() < .03 ? P([5, 11, 12, 13]) : P([0, 0, 0, 1, 1, 1, 6, 7, 7, 2, 2, 10, 8, 3, 9, 4]), rndOc = () => R(0, OC.length - 1), rndXc = () => R(0, XC.length - 1);
+const rndHt = chance(.03, 11), rndEa = chance(.02, 4), rndGl = chance(.05, 3), rndNc = chance(.02, 4);
+const mkLook = (g, sk) => ({ g, sk: sk || R(1, 5), hs: rndHs(g), hc: rndHc(), oc: rndOc(), bd: rndBd(), ot: rndOt(), ht: rndHt(), ea: rndEa(), gl: rndGl(), nc: rndNc(), xc: rndXc() });
 const lk = r => r.look || (r.look = mkLook(NF.includes(r.n.split(' ')[1]) || r.role == 'Anya' ? 'f' : 'm'));
 const desc = l => { const h = l.hs == 9 ? T(HSN[9]) : `${T(HCN[l.hc])} ${T(HSN[l.hs])} ${T(['haj', 'hair'])}`, ot = +l.ot || 0;
   const x = [[HTN, l.ht], [EAN, l.ea], [GLN, l.gl], [NCN, l.nc]].filter(([, v]) => +v > 0).map(([A, v]) => T(A[+v]));
@@ -1662,6 +1663,34 @@ function avSvg(l, a, dead, vb) {
       const vc = shade(oc, -.55); O.fill = vc;
       O.pre = sleeves(oc) + `<path d="M${50 - tw} ${sy + 8}Q50 ${sy + 12} ${50 + tw} ${sy + 8}M${50 - tw} ${sy + 19}Q50 ${sy + 23} ${50 + tw} ${sy + 19}M${50 - tw} ${sy + 30}Q50 ${sy + 34} ${50 + tw} ${sy + 30}" ${th(1.3)} opacity=".4"/><path d="M50 ${y0 + 6}V114" ${th(1.5)}/>`;
       O.nk = 'none'; O.post = stand(vc, 1) + `<path d="M50 ${y0 - 12}V${y0 + 7}" ${th(1.4)}/>`; break; }
+    case 16: // henley
+      O.post = `<path d="M50 ${y0 + 9}V${y0 + 27}" ${th(1.4)}/>${btn(50, y0 + 14)}${btn(50, y0 + 20)}${btn(50, y0 + 26)}`; break;
+    case 17: case 21: case 22: { // virágos póló / hawaii ing / pöttyös
+      let d = ''; const pts = []; for (let yy = y0 + 4, r = 0; yy < 114; yy += 11, r++) for (let xx = 8 + (r % 2) * 8; xx < 96; xx += 16) pts.push([xx, yy]);
+      d = ot == 22 ? pts.map(q => `<circle cx="${q[0]}" cy="${q[1]}" r="2.6" fill="#fff" opacity=".88"/>`).join('')
+        : pts.map((q, i) => `<g transform="translate(${q[0]} ${q[1]})"><circle cx="0" cy="-2.6" r="2" fill="${i % 2 ? '#fff' : '#ffd1dc'}"/><circle cx="2.6" cy="0" r="2" fill="${i % 2 ? '#fff' : '#ffd1dc'}"/><circle cx="0" cy="2.6" r="2" fill="${i % 2 ? '#fff' : '#ffd1dc'}"/><circle cx="-2.6" cy="0" r="2" fill="${i % 2 ? '#fff' : '#ffd1dc'}"/><circle r="1.5" fill="#f0b429"/></g>`).join('');
+      O.pre = d;
+      if (ot == 21) { O.nk = 'v'; O.vd = 9; O.post = `<path d="M50 ${y0 + 9}V114" ${th(1.4)}/>${flaps(oL, 11)}${btn(50, y0 + 17)}${btn(50, y0 + 27)}${btn(50, y0 + 37)}`; } break; }
+    case 18: { // kockás flanel
+      let st = ''; for (let x = 4; x < 100; x += 11) st += `<rect x="${x}" y="40" width="4.6" height="80" fill="${oD}" opacity=".5"/>`; for (let y = y0; y < 114; y += 11) st += `<rect x="0" y="${y}" width="100" height="4.6" fill="#fff" opacity=".28"/>`;
+      O.nk = 'v'; O.vd = 9; O.pre = st; O.post = `<path d="M50 ${y0 + 9}V114" ${th(1.4)}/>${flaps(oL, 11)}${btn(50, y0 + 17)}${btn(50, y0 + 27)}${btn(50, y0 + 37)}`; break; }
+    case 19: { // steppelt kabát
+      let q = ''; for (let y = y0 + 8; y < 114; y += 11) q += `M${SL - 4} ${y}Q50 ${y + 4} ${SR + 4} ${y}`;
+      O.nk = 'none'; O.pre = `<path d="${q}" ${th(1.8, oD)} opacity=".65"/><path d="${q}" ${th(1, '#fff')} opacity=".25" transform="translate(0 1.6)"/>`;
+      O.post = stand(oc, 3) + `<path d="M50 ${y0 - 12}V114" ${th(1.6)}/><path d="M${nwl - 2} ${y0 - 6}H${nwr + 2}" ${th(1, oD)} opacity=".5"/>`; break; }
+    case 20: // egyetemi dzseki
+      O.nk = 'none'; O.pre = sleeves(cream) + `<path d="M${50 - tw - 1} ${sy + 24}H${50 + tw + 1}" ${th(0)}/><text x="${50 - 13}" y="${y0 + 33}" font-family="Arial,Helvetica,sans-serif" font-size="17" font-weight="900" fill="#fff" stroke="${OL}" stroke-width=".8" paint-order="stroke">R</text>`;
+      O.post = stand(oD, 1) + `<path d="M50 ${y0 - 12}V114" ${th(1.4)}/>${btn(50, y0 + 6)}${btn(50, y0 + 16)}${btn(50, y0 + 26)}<path d="M${50 - tw} ${sy + 8}H${50 - tw + 5}M${50 + tw - 5} ${sy + 8}H${50 + tw}" ${th(2.4, oc)}/>`; break;
+    case 23: // pántos nyári ruha
+      O.nk = 'scoop'; O.pre = sleeves(sk) + `<path d="M${BL} ${sy + 24}H${BR}" ${th(2.2, oD)} opacity=".7"/><path d="M${BL} ${sy + 24}L${BL - 3} 114M${BR} ${sy + 24}L${BR + 3} 114" ${th(1, oD)} opacity=".35"/>`;
+      O.post = `<path d="M${nwl - 3} ${y0 - 3}V${y0 + 6}M${nwr + 3} ${y0 - 3}V${y0 + 6}" ${th(3, oc)}/>`; break;
+    case 24: { // kabát
+      O.nk = 'v'; O.vd = 9; O.pre = `<path d="M${nwl - 1} ${y0 - 3}L50 ${y0 + 30}L${nwr + 1} ${y0 - 3}Z" fill="${cream}"/>`;
+      const lp = s => `<path d="M${X(s, nw + 10)} ${y0 - 3}L${X(s, nw)} ${y0}L${X(s, 1)} ${y0 + 30}L${X(s, 9)} ${y0 + 36}L${X(s, 17)} ${y0 + 22}L${X(s, 12)} ${y0 + 16}L${X(s, nw + 15)} ${y0 + 8}Z" fill="${oL}" ${kw(1.4)}/>`;
+      O.post = lp(-1) + lp(1) + `<path d="M${BL} ${sy + 24}Q50 ${sy + 28} ${BR} ${sy + 24}" ${th(4, oD)}/><rect x="${50 - 4}" y="${sy + 21.5}" width="8" height="6" rx="1" fill="none" ${kw(1.2)}/>${btn(50 - 3, y0 + 40, oD)}`; break; }
+    case 25: // színblokkos pulcsi
+      O.pre = `<rect x="0" y="${sy + 18}" width="100" height="60" fill="${oD}"/><rect x="0" y="${sy + 18}" width="100" height="2.6" fill="#fff" opacity=".9"/><rect x="0" y="${sy + 22}" width="100" height="1.4" fill="#fff" opacity=".7"/>`;
+      O.post = `<path d="M${nwl - 1} ${y0 - 1}Q50 ${y0 + 10} ${nwr + 1} ${y0 - 1}" ${th(5.4, OL)}/><path d="M${nwl - 1} ${y0 - 1}Q50 ${y0 + 10} ${nwr + 1} ${y0 - 1}" ${th(3.8, '#fff')}/>`; break;
   }
   const nkP = {
     crew: [`M${nwl - 1} ${y0 - 1}L${nwr + 1} ${y0 - 1}Q50 ${y0 + 10} ${nwl - 1} ${y0 - 1}Z`, `M${nwl - 1} ${y0 - 1}Q50 ${y0 + 10} ${nwr + 1} ${y0 - 1}`],
@@ -1675,7 +1704,7 @@ function avSvg(l, a, dead, vb) {
     + `<path d="M${50 - nw} 62H${50 + nw}V74Q50 80 ${50 - nw} 74Z" fill="#000" opacity=".14"/>`
     + `<clipPath id="${id}t"><path d="${torso}"/></clipPath><path d="${torso}" fill="${O.fill}"/><g clip-path="url(#${id}t)">${O.pre}<rect x="50" y="60" width="60" height="60" fill="#000" opacity=".1"/></g>`
     + `<path d="${pL}" ${k} fill="none"/><path d="${pR}" ${k} fill="none"/>`
-    + `<path d="M${50 - ax} ${sy + 12}Q${50 - ax - 1.5} ${sy + 24} ${50 - ax} 112M${50 + ax} ${sy + 12}Q${50 + ax + 1.5} ${sy + 24} ${50 + ax} 112" ${th()} opacity="${ot == 6 || ot == 15 ? 0 : .22}"/>${ot == 0 || ot == 1 || ot == 7 ? musc : ''}${adultF ? bust : ''}`
+    + `<path d="M${50 - ax} ${sy + 12}Q${50 - ax - 1.5} ${sy + 24} ${50 - ax} 112M${50 + ax} ${sy + 12}Q${50 + ax + 1.5} ${sy + 24} ${50 + ax} 112" ${th()} opacity="${ot == 6 || ot == 15 || ot == 23 ? 0 : .22}"/>${ot == 0 || ot == 1 || ot == 7 ? musc : ''}${adultF ? bust : ''}`
     + (nkP[0] ? `<path d="${nkP[0]}" fill="${sk}"/><path d="${nkP[1]}" ${th(1.7)}/>` : '') + O.post;
   // ---- csecsemő: pólya ----
   const sw0 = shade(oc, .62), sw1 = shade(oc, .42);
@@ -1893,14 +1922,14 @@ const cfg = () => [
   { ap: 1, k: 'skin', l: T(['Bőrszín', 'Skin tone']), o: [[1, ''], [2, ''], [3, ''], [4, ''], [5, ''], ['r', '🎲']] },
   { ap: 1, k: 'hs', pv: 'hair', l: T(['Frizura', 'Hairstyle']), o: [...HSN.keys()].map(i => [i, T(HSN[i])]).concat([['r', '🎲']]) },
   { ap: 1, k: 'bd', pv: 'body', l: T(['Testalkat', 'Body shape']), o: [...BDN.keys()].map(i => [i, T(BDN[i])]).concat([['r', '🎲']]) },
-  { ap: 1, k: 'hc', l: T(['Hajszín', 'Hair color']), o: [[0, ''], [1, ''], [2, ''], [3, ''], [4, ''], [5, ''], ['r', '🎲']] },
+  { ap: 1, k: 'hc', l: T(['Hajszín', 'Hair color']), o: [...HC.keys()].map(i => [i, '']).concat([['r', '🎲']]) },
   { ap: 1, k: 'ot', pv: 'body', l: T(['Ruha típusa', 'Outfit']), o: [...OTN.keys()].map(i => [i, T(OTN[i])]).concat([['r', '🎲']]) },
-  { ap: 1, k: 'oc', l: T(['Ruha színe', 'Outfit color']), o: [[0, ''], [1, ''], [2, ''], [3, ''], [4, ''], [5, ''], [6, ''], [7, ''], ['r', '🎲']] },
+  { ap: 1, k: 'oc', l: T(['Ruha színe', 'Outfit color']), o: [...OC.keys()].map(i => [i, '']).concat([['r', '🎲']]) },
   { ap: 1, k: 'ht', pv: 'hair', nv: 1, l: T(['Fejfedő', 'Headwear']), o: [...HTN.keys()].map(i => [i, T(HTN[i])]).concat([['r', '🎲']]) },
   { ap: 1, k: 'ea', pv: 'hair', nv: 1, l: T(['Fejhallgató, fülhallgató', 'Headphones & earbuds']), o: [...EAN.keys()].map(i => [i, T(EAN[i])]).concat([['r', '🎲']]) },
   { ap: 1, k: 'gl', pv: 'hair', nv: 1, l: T(['Szemüveg', 'Glasses']), o: [...GLN.keys()].map(i => [i, T(GLN[i])]).concat([['r', '🎲']]) },
   { ap: 1, k: 'nc', pv: 'neck', nv: 1, l: T(['Nyakra', 'Neckwear']), o: [...NCN.keys()].map(i => [i, T(NCN[i])]).concat([['r', '🎲']]) },
-  { ap: 1, k: 'xc', l: T(['Kiegészítők színe', 'Accessory color']), o: [[0, ''], [1, ''], [2, ''], [3, ''], [4, ''], [5, ''], [6, ''], [7, ''], ['r', '🎲']] },
+  { ap: 1, k: 'xc', l: T(['Kiegészítők színe', 'Accessory color']), o: [...XC.keys()].map(i => [i, '']).concat([['r', '🎲']]) },
   { k: 'city', l: T(['Szülőváros', 'Hometown']), o: CITY.map(c => [c[0], c[0]]).concat([['r', '🎲']]) },
   { k: 'fam', l: T(['Család', 'Family']), o: [[1, T(['Szerény', 'Modest'])], [2, T(['Átlagos', 'Average'])], [3, T(['Tehetős', 'Wealthy'])], ['r', '🎲']] },
   { k: 'gift', l: T(['Tehetség (+15)', 'Talent (+15)']), o: [['hap', '😊 ' + T(['Vidám', 'Cheerful'])], ['hea', '❤️ ' + T(['Egészséges', 'Healthy'])], ['sma', '🧠 ' + T(['Okos', 'Smart'])], ['loo', '✨ ' + T(['Szép', 'Attractive'])], ['r', '🎲']] },
