@@ -46,7 +46,7 @@
   const box = document.createElement('div'); box.className = 'ov'; box.hidden = true; box.style.zIndex = 52; box.innerHTML = '<div class="box" id="trb"></div>'; $('#app').append(box);
   const bar = (n, v) => `<div class="top"><small>${n}</small><small>${Math.round(v)}</small></div><div class="tr"><i style="width:${v}%"></i></div>`;
   function open() {
-    if (!window.p) { alert(t(['Előbb kezdj egy életet.', 'Start a life first.'])); return; }
+    if (!(typeof p !== "undefined" && p)) { alert(t(['Előbb kezdj egy életet.', 'Start a life first.'])); return; }
     const T_ = tr(), slots = [1, 2, 3].map(i => { let s = null; try { s = JSON.parse(localStorage.getItem('relife_slot' + i)); } catch (e) { } return `<div class="card" style="margin:6px 0"><b>${t(['Hely', 'Slot'])} ${i}: ${s ? s.name + ' (' + s.age + ')' : t(['üres', 'empty'])}</b><div class="grid" style="margin-top:6px"><button data-sv="${i}">💾 ${t(['Mentés', 'Save'])}</button><button data-ld="${i}" ${s ? '' : 'disabled'}>📂 ${t(['Betöltés', 'Load'])}</button></div></div>`; }).join('');
     $('#trb').innerHTML = `<h2>🧬 ${t(['Jellem és egészség', 'Traits & health'])}</h2>${bar(t(['Kitartás', 'Grit']), T_.grit)}${bar(t(['Empátia', 'Empathy']), T_.emp)}${bar(t(['Kreativitás', 'Creativity']), T_.cre)}${bar(t(['Stressz', 'Stress']), p.stress || 20)}<p style="margin-top:10px">${t(['Év', 'Year'])}: ${T0() + p.age}</p><h3>${t(['Mentési helyek', 'Save slots'])}</h3>${slots}<button id="trx">${t(['Bezár', 'Close'])}</button>`;
     box.hidden = false;

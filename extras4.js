@@ -38,7 +38,7 @@
   // ----- fotóalbum + életkártya -----
   const box = document.createElement('div'); box.id = 'alb'; box.className = 'ov'; box.hidden = true; box.style.zIndex = 51; box.innerHTML = '<div class="box" id="albb"></div>'; $('#app').append(box);
   function open() {
-    if (!window.p) { alert(t(['Előbb kezdj egy életet.', 'Start a life first.'])); return; }
+    if (!(typeof p !== "undefined" && p)) { alert(t(['Előbb kezdj egy életet.', 'Start a life first.'])); return; }
     const al = album();
     $('#albb').innerHTML = `<h2>📷 ${t(['Fotóalbum', 'Photo album'])}</h2>` + (al.length ? al.map(x => `<div class="card" style="margin:6px 0"><b>${x.e} ${x.t}</b><br><small>${x.a} ${t(['évesen', 'years old'])}</small></div>`).join('') : `<p>${t(['Még nincsenek emlékeid.', 'No memories yet.'])}</p>`)
       + `<div style="display:grid;gap:8px"><button id="albc">🖼 ${t(['Életkártya megosztása', 'Share life card'])}</button><button id="albx">${t(['Bezár', 'Close'])}</button></div>`;

@@ -12,7 +12,7 @@
   // napi jutalom
   setTimeout(() => {
     try {
-      if (!window.p || p.dead || p.age < 3) return; const d = new Date().toDateString(), k = 'relife_daily';
+      if (!(typeof p !== "undefined" && p) || p.dead || p.age < 3) return; const d = new Date().toDateString(), k = 'relife_daily';
       if (localStorage.getItem(k) == d) return; localStorage.setItem(k, d);
       const m = p.age >= 18 ? 5e5 : 0; p.money += m; p.hap = Math.min(100, p.hap + 3);
       popup('🎁 ' + t(['Napi jutalom', 'Daily reward']), t(['+3 boldogság', '+3 happiness']) + (m ? ' · ' + fmt(m) : ''), [[t(['Köszi!', 'Thanks!']), null]]);

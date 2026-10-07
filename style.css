@@ -1,4 +1,4 @@
-:root{--ink:#16232e;--ink2:#22394a;--paper:#e9efe9;--card:#fff;--pap:#e4572e;--lake:#1f8a83;--sun:#f0b429;--mut:#6b7c86;--dock:calc(78px + env(safe-area-inset-bottom,0px))}
+:root{--ink:#16232e;--ink2:#22394a;--paper:#e9efe9;--card:#fff;--pap:#e4572e;--lake:#1f8a83;--sun:#f0b429;--mut:#55656f;--dock:calc(78px + env(safe-area-inset-bottom,0px))}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;overscroll-behavior:none}
 body{font:500 15px/1.4 'Bricolage Grotesque',system-ui,sans-serif;background:#0b141b;color:var(--ink);display:flex;justify-content:center;align-items:center;touch-action:manipulation;-webkit-user-select:none;user-select:none}
@@ -247,12 +247,58 @@ footer button{color:#3a4a40}footer button.on{color:#2e9f4f}#up b,#up span{color:
 .pd .pav{width:72px;height:79px;font-size:46px}
 .card.pc .pav{flex:none}
 
-/* extras */
+/* extras: méret, nehézség, nézet */
 body[data-fs=s] #app{zoom:.92}body[data-fs=l] #app{zoom:1.12}
-body[data-th=dark] #app{--paper:#101a22;--card:#1c2b36;--mut:#9fb0ba;color:#e6edf0}
-body[data-th=dark] .box,body[data-th=dark] .box p,body[data-th=dark] .card{color:#e6edf0}
 body[data-diff=hard] #revive{display:none!important}
-body[data-view=simple] #bars .tr+.vn,body[data-view=simple] .card small{opacity:.8}
-#cfg .chip.on{background:var(--lake);color:#fff}#cfg .box{max-height:90%}
+body[data-view=simple] .card small{opacity:.85}
 .mood{position:absolute;right:-4px;bottom:-4px;font-size:18px;line-height:1;background:#fffd;border-radius:50%;padding:2px}
-#app[data-season="0"]{--paper:#e6f1e4}#app[data-season="1"]{--paper:#f3efd8}#app[data-season="2"]{--paper:#f1e5d6}#app[data-season="3"]{--paper:#e3ecf3}
+/* világos felületek: saját panelek olvashatósága */
+.ov .box{color:var(--ink)}
+.ov .box h2,.ov .box h3{margin-bottom:8px}
+.ov .box .chip{background:#e4ebe6;border:1px solid #bccabf;color:var(--ink)}
+.ov .box .chip.on{background:#14665f;border-color:#14665f;color:#fff}
+.ov .box .ghost{color:#14665f;border-color:#14665f;font-size:14px;padding:6px 14px;margin-bottom:8px}
+.ov .box .tr{height:8px;border-radius:6px;overflow:hidden;background:#dde5df;margin:3px 0 8px}
+.ov .box .tr i{display:block;height:100%;background:var(--lake)}
+.ov .box .top{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.ov .box .card{border:1px solid #e0e7e2}
+.ov .box input[type=checkbox]{width:22px;height:22px;accent-color:var(--lake)}
+.ov .box button.big{display:none}
+body[data-th=light] #app[data-season="0"]{--paper:#e6f1e4}body[data-th=light] #app[data-season="1"]{--paper:#f3efd8}body[data-th=light] #app[data-season="2"]{--paper:#f1e5d6}body[data-th=light] #app[data-season="3"]{--paper:#e3ecf3}
+/* sötét téma */
+body[data-th=dark] #app{--paper:#0e171e;--card:#1b2b37;--mut:#a9bac4;color:#e8eff2}
+body[data-th=dark] button{background:#2f4a5e;color:#fff}
+body[data-th=dark] header,body[data-th=dark] #bars{color:#fff}
+body[data-th=dark] #mo,body[data-th=dark] #revive,body[data-th=dark] .btns button.alt,body[data-th=dark] .big{color:#16232e}
+body[data-th=dark] .btns button.alt,body[data-th=dark] .big{color:#fff}
+body[data-th=dark] .act,body[data-th=dark] .mrow,body[data-th=dark] .lg,body[data-th=dark] .card,body[data-th=dark] .box,body[data-th=dark] .box p,body[data-th=dark] .ov .box{color:#e8eff2}
+body[data-th=dark] .act small,body[data-th=dark] .card small,body[data-th=dark] .lg small{color:#a9bac4}
+body[data-th=dark] .lg{border-left-color:#44586a}
+body[data-th=dark] .lg.death{background:#000;color:#fff}
+body[data-th=dark] h3::after,body[data-th=dark] .mrow{border-color:#2c3f4d;background-color:#1b2b37}
+body[data-th=dark] h3::after{background:#2c3f4d}
+body[data-th=dark] .card .tr,body[data-th=dark] .ov .box .tr,body[data-th=dark] .seg{background:#2c3f4d}
+body[data-th=dark] .seg button{color:#c9d6dd;background:transparent}
+body[data-th=dark] .seg button.on{background:#3d586c;color:#fff;box-shadow:none}
+body[data-th=dark] footer{background:#14212a;border-top:1px solid #2c3f4d}
+body[data-th=dark] footer button{color:#b5c4cc;background:transparent}
+body[data-th=dark] footer button.on{color:#5ee0c5;background:#1b2b37}
+body[data-th=dark] footer button.on::after{background:#5ee0c5}
+body[data-th=dark] .mrow em{color:#7f93a0}
+body[data-th=dark] .pav{background:#243846}
+body[data-th=dark] .cs{color:#f0b429}body[data-th=dark] .cs.no{color:#ff8a7a}
+body[data-th=dark] .ov .box .chip{background:#2c3f4d;border-color:#46607a;color:#e8eff2}
+body[data-th=dark] .ov .box .chip.on{background:var(--lake);border-color:#5ee0c5;color:#fff}
+body[data-th=dark] .ov .box .ghost{color:#5ee0c5;border-color:#5ee0c5}
+body[data-th=dark] .ov .box .card{border-color:#2c3f4d}
+body[data-th=dark] .mood{background:#1b2b37e6}
+/* jobb olvashatóság: fókusz és letiltott gombok */
+button:disabled{opacity:.45}
+/* kontraszt-javítások (ellenőrzés után): kis szövegek min. 4,5:1 */
+#up{background:#1a7f3f!important;box-shadow:0 5px 0 #11582b,0 8px 18px rgba(26,127,63,.4)}
+#up:active:not(:disabled){box-shadow:0 1px 0 #11582b}
+#up::before{border-color:#1a7f3f}
+#mb button,#again,.btns button{background:#17706a}
+body:not([data-th=dark]) footer button.on{color:#1b6b34}
+body:not([data-th=dark]) footer button.on::after{background:#1b6b34}
+body[data-th=dark] .ov .box .chip.on{background:#14665f;border-color:#5ee0c5;color:#fff}

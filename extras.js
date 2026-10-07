@@ -1,4 +1,4 @@
-// ReLife extras: Beállítások, nehézség, tartalomszűrő, achievementek, életcélok, Életek könyvtár
+// ReLife extras: Beállítások, nehézség, tartalomszűrő, eredmények, életcélok, Életek könyvtár
 (function () {
   const L = k => { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } };
   const S = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
@@ -8,7 +8,7 @@
   function applySet() {
     const b = document.body; b.dataset.diff = st.diff; b.dataset.fs = st.fs;
     b.dataset.th = st.th == 'auto' ? (matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light') : st.th;
-    b.dataset.view = st.view; S('relife_set', st);
+    b.dataset.view = st.view; const mt = document.querySelector('meta[name=theme-color]'); if (mt) mt.content = b.dataset.th == 'dark' ? '#0e171e' : '#16232e'; S('relife_set', st);
   }
   // ----- nehézség: negatív hatások skálázása -----
   const _apply = apply;
@@ -23,7 +23,7 @@
     try { const s = fill(T(ev.t)) + ' ' + fill(T(ev.d)); for (const k in FR) if (st[k] && FR[k].test(s)) { pend = null; return render(); } } catch (e) {}
     return _ask.call(this, ev);
   };
-  // ----- achievementek -----
+  // ----- eredmények -----
   const nw = () => { try { return netw(); } catch (e) { return p.money; } };
   const kids = () => p.rel.filter(r => r.role == 'Gyerek').length;
   const AC = [
@@ -110,7 +110,7 @@
     } catch (e) { }
   };
   // ----- rövid tutorial -----
-  setTimeout(() => { if (!st.tut) { st.tut = 1; applySet(); popup(t(['Üdv a ReLife-ban!', 'Welcome to ReLife!']), t(['Tipp: a „Kor” gomb lépteti az évet. A fülekkel (💼💰👥🎯) dönthetsz. Cél és achievementek a ⚙️ Beállításokban.', 'Tip: the Age button advances a year. Use the tabs (💼💰👥🎯) to decide. Goals and achievements live in ⚙️ Settings.']), [[t(['Értem', 'Got it']), () => {}]]); } }, 800);
+  setTimeout(() => { if (!st.tut) { st.tut = 1; applySet(); popup(t(['Üdv a ReLife-ban!', 'Welcome to ReLife!']), t(['Tipp: a „Kor” gomb lépteti az évet. A fülekkel (💼💰👥🎯) dönthetsz. Cél és eredmények a ⚙️ Beállításokban.', 'Tip: the Age button advances a year. Use the tabs (💼💰👥🎯) to decide. Goals and achievements live in ⚙️ Settings.']), [[t(['Értem', 'Got it']), () => {}]]); } }, 800);
   // ----- Beállítások / Achievement / Életek képernyő -----
   const box = el('<div id="cfg" class="ov" hidden style="z-index:50"><div class="box" id="cfgb"></div></div>');
   $('#app').append(box);
@@ -123,18 +123,18 @@
       <b>${t(['Nehézség', 'Difficulty'])}</b>${seg('diff', [['easy', ['Könnyű', 'Easy']], ['normal', ['Normál', 'Normal']], ['hard', ['Valósághű', 'Realistic']]])}
       <b>${t(['Téma', 'Theme'])}</b>${seg('th', [['auto', ['Auto', 'Auto']], ['light', ['Világos', 'Light']], ['dark', ['Sötét', 'Dark']]])}
       <b>${t(['Betűméret', 'Font size'])}</b>${seg('fs', [['s', ['Kicsi', 'Small']], ['m', ['Közepes', 'Medium']], ['l', ['Nagy', 'Large']]])}
-      <b>${t(['Kihívás-mód (új életnél)', 'Challenge mode (new life)'])}</b>${seg('mode', [['none', ['Nincs', 'None']], ['poor', ['Szegény start', 'Poor start']], ['hermit', ['Remete', 'Hermit']], ['fast', ['Gyors élet', 'Fast life']]])}
+      <b>${t(['Kihívásmód (új életnél)', 'Challenge mode (new life)'])}</b>${seg('mode', [['none', ['Nincs', 'None']], ['poor', ['Szegény start', 'Poor start']], ['hermit', ['Remete', 'Hermit']], ['fast', ['Gyors élet', 'Fast life']]])}
       <b>${t(['Nézet', 'View'])}</b>${seg('view', [['simple', ['Egyszerű', 'Simple']], ['full', ['Részletes', 'Detailed']]])}
       <b>${t(['Tartalomszűrő', 'Content filter'])}</b>${tog('fPr', ['Börtön / bűnözés kikapcsolása', 'Hide prison / crime'])}${tog('fAl', ['Alkohol kikapcsolása', 'Hide alcohol'])}${tog('fDe', ['Halálesetes események kikapcsolása', 'Hide death events'])}
       ${tog('vib', ['Rezgés', 'Vibration'])}${tog('snd', ['Hangok', 'Sounds'])}${tog('ntf', ['Értesítések', 'Notifications'])}
-      <div style="display:grid;gap:8px;margin-top:10px"><button data-v2="ach">🏆 ${t(['Achievementek', 'Achievements'])}</button><button data-v2="lives">📚 ${t(['Életek könyvtára', 'Lives library'])}</button>
+      <div style="display:grid;gap:8px;margin-top:10px"><button data-v2="ach">🏆 ${t(['Eredmények', 'Achievements'])}</button><button data-v2="lives">📚 ${t(['Életek könyvtára', 'Lives library'])}</button>
       <button data-a="exp">📤 ${t(['Mentés exportálása', 'Export save'])}</button><button data-a="imp">📥 ${t(['Mentés importálása', 'Import save'])}</button><button data-a="del">🗑 ${t(['Adatok törlése', 'Delete data'])}</button><button data-v2="about">ℹ️ ${t(['Névjegy / Változásnapló', 'About / Changelog'])}</button><button data-a="x">${t(['Bezár', 'Close'])}</button></div>`;
     if (v == 'ach') { const have = L('relife_ach') || {}, n = Object.keys(have).length;
       h = `${back}<h2>🏆 ${n}/${AC.length} (${Math.round(n / AC.length * 100)}%)</h2><div class="tr"><i style="width:${n / AC.length * 100}%"></i></div>` + AC.map(a => { const o = have[a[0]], hid = a[4] == 'secret' && !o;
-        return `<div class="card" style="margin:8px 0;opacity:${o ? 1 : .55};border-left:5px solid ${RC[a[4]]}"><b>${hid ? '🔒 ???' : a[1] + ' ' + t(a[2])}</b><br><small>${hid ? t(['Titkos achievement', 'Secret achievement']) : t(a[3])} · ${a[4]}</small></div>`; }).join(''); }
+        return `<div class="card" style="margin:8px 0;opacity:${o ? 1 : .55};border-left:5px solid ${RC[a[4]]}"><b>${hid ? '🔒 ???' : a[1] + ' ' + t(a[2])}</b><br><small>${hid ? t(['Titkos eredmény', 'Secret achievement']) : t(a[3])} · ${a[4]}</small></div>`; }).join(''); }
     if (v == 'lives') { const lv = (L('relife_lives') || []).slice().reverse(), top = lv.slice().sort((a, b) => b.s - a.s)[0];
       h = `${back}<h2>📚 ${t(['Életek', 'Lives'])}</h2>` + (top ? `<p>👑 Hall of Fame: ${top.n} – ${top.s} ⭐</p>` : `<p>${t(['Még nincs lezárt élet.', 'No finished lives yet.'])}</p>`) + lv.map(x => `<div class="card" style="margin:6px 0"><b>${x.n}</b> · ${x.a} ${t(['év', 'yr'])}<br><small>⭐ ${x.s}${x.d ? ' 🎯' : ''}</small></div>`).join(''); }
-    if (v == 'about') h = `${back}<h2>ℹ️ ReLife</h2><p>v1.1: ${t(['Beállítások, nehézség, tartalomszűrő, achievementek, életcélok, életpontszám, életek könyvtára, téma, betűméret, mentés export/import.', 'Settings, difficulty, content filter, achievements, life goals, life score, lives library, theme, font size, save export/import.'])}</p>`;
+    if (v == 'about') h = `${back}<h2>ℹ️ ReLife</h2><p>v1.1: ${t(['Beállítások, nehézség, tartalomszűrő, eredmények, életcélok, életpontszám, életek könyvtára, téma, betűméret, mentés export/import.', 'Settings, difficulty, content filter, achievements, life goals, life score, lives library, theme, font size, save export/import.'])}</p>`;
     $('#cfgb').innerHTML = h; box.hidden = false;
   }
   box.addEventListener('click', e => {
@@ -150,5 +150,6 @@
   const tb = el(`<button class="big alt" id="tset">⚙️ ${t(['Beállítások', 'Settings'])}</button>`);
   tb.onclick = () => showCfg(); $('#title').append(tb);
   const old = document.querySelector('#title .lang'); if (old) $('#title').insertBefore(tb, old);
+  try { matchMedia('(prefers-color-scheme:dark)').addEventListener('change', applySet); } catch (x) { }
   applySet();
 })();
