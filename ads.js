@@ -8,7 +8,7 @@
   if (!AdMob) return;
 
   const CFG = {
-    isTesting: true,
+    isTesting: false,
     rewardedId: 'ca-app-pub-3289948892121330/4544949853',      // a SAJÁT jutalmazott hirdetési egységed
     testRewardedId: 'ca-app-pub-3940256099942544/5224354917',  // Google teszt egység (Android)
     bannerId: 'ca-app-pub-3289948892121330/6277843087',        // a SAJÁT szalaghirdetési egységed
@@ -70,7 +70,7 @@
     if (v > 0) firstTs = v; else localStorage.setItem('relife_first', String(firstTs));
   } catch (e) {}
   const eligible = () => Date.now() - firstTs >= CFG.bannerAfterMinutes * 60000;
-  const inGame = () => { const t = document.getElementById('title'), c = document.getElementById('create'); return !!t && !!c && t.hidden && c.hidden; };
+  const inGame = () => { const t = document.getElementById('title'), c = document.getElementById('create'), r = document.getElementById('traits'); return !!t && !!c && t.hidden && c.hidden && (!r || r.hidden); };
 
   let bannerOn = false, bannerBusy = false, listening = false;
   async function showBanner() {
@@ -98,12 +98,30 @@
   function updateBanner() { (eligible() && inGame()) ? showBanner() : hideBanner(); }
 
   // képernyőváltáskor (főmenü / karakterkészítő / játék) azonnal frissítünk
-  ['title', 'create'].forEach(id => { const el = document.getElementById(id); if (el) new MutationObserver(updateBanner).observe(el, { attributes: true, attributeFilter: ['hidden'] }); });
+  ['title', 'create', 'traits'].forEach(id => { const el = document.getElementById(id); if (el) new MutationObserver(updateBanner).observe(el, { attributes: true, attributeFilter: ['hidden'] }); });
   // ha még nem telt el az idő, akkor a lejáratkor ellenőrzünk újra
   if (!eligible()) setTimeout(updateBanner, CFG.bannerAfterMinutes * 60000 - (Date.now() - firstTs) + 1000);
 
+  async function requestConsent() {
+    try {
+      let info = await AdMob.requestConsentInfo();
+      if (info && info.isConsentFormAvailable && info.status === 'REQUIRED') {
+        info = await AdMob.showConsentForm();
+      }
+      return !!(info && info.canRequestAds);
+    } catch (e) {
+      return false;
+    }
+  }
+
+  window.ReLifeAdPrivacyOptions = async function () {
+    try { await AdMob.showPrivacyOptionsForm(); } catch (e) {}
+  };
+
   (async function init() {
-    try { await AdMob.initialize({ initializeForTesting: CFG.isTesting }); } catch (e) {}
+    const canRequestAds = await requestConsent();
+    if (!canRequestAds) return;
+    try { await AdMob.initialize({ initializeForTesting: CFG.isTesting }); } catch (e) { return; }
     updateBanner();
     try { AdMob.addListener('onRewardedVideoAdReward', () => { rewarded = true; }); } catch (e) {}
     try { AdMob.addListener('onRewardedVideoAdDismissed', () => { setTimeout(prepare, 300); }); } catch (e) {}

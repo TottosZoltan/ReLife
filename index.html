@@ -40,14 +40,28 @@
   <div id="modal" class="ov" hidden><div class="box"><h2 id="mt"></h2><p id="md"></p><div id="mb"></div></div></div>
   <div id="end" class="ov" hidden><div class="box"><h2 data-i="endt"></h2><p id="es"></p><button id="revive" class="rv" hidden></button><button id="again" data-i="again"></button></div></div>
 
-  <div id="title" class="scr">
-    <div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div>
-    <h1 id="logo" aria-label="ReLife"><span style="--i:0">R</span><span style="--i:1">e</span><span style="--i:2">L</span><span style="--i:3">i</span><span style="--i:4">f</span><span style="--i:5">e</span></h1>
-    <p class="tag" data-i="tag"></p>
-    <div class="tl"><i></i></div>
-    <button id="tnew" class="big" data-i="start"></button>
-    <button id="tcont" class="big alt" hidden data-i="cont"></button>
-    <div class="lang"><small data-i="lang"></small><button class="chip" data-l="hu">Magyar</button><button class="chip" data-l="en">English</button></div>
+  <div id="title" class="scr intro">
+    <div class="sky"><i class="sun"></i><i class="stars"></i></div>
+    <svg class="hills" viewBox="0 0 400 520" preserveAspectRatio="none" aria-hidden="true">
+      <path d="M0 250 Q70 170 150 225 T290 200 T400 235 V520 H0Z" fill="#14283b"/>
+      <path d="M0 300 Q90 235 180 285 T400 270 V520 H0Z" fill="#0f2030"/>
+      <path d="M170 262 L230 262 L330 520 L70 520Z" fill="#0a1520"/>
+      <path class="dash" d="M200 266 L200 520" stroke="#f0b429" stroke-width="4" stroke-dasharray="10 16" fill="none" opacity=".85"/>
+    </svg>
+    <div class="road" aria-hidden="true">
+      <span class="ms" style="--x:-34%;--d:0s">🍼</span><span class="ms" style="--x:30%;--d:-1.3s">🎒</span><span class="ms" style="--x:-22%;--d:-2.6s">🎓</span><span class="ms" style="--x:36%;--d:-3.9s">💼</span><span class="ms" style="--x:-30%;--d:-5.2s">💍</span><span class="ms" style="--x:24%;--d:-6.5s">🏡</span><span class="ms" style="--x:-8%;--d:-7.8s">🌟</span>
+    </div>
+    <button id="tgear" aria-label="Beállítások"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+    <div class="thero">
+      <h1 id="logo" aria-label="ReLife"><span style="--i:0">R</span><span style="--i:1">e</span><span style="--i:2">L</span><span style="--i:3">i</span><span style="--i:4">f</span><span style="--i:5">e</span></h1>
+      <p class="tag" data-i="tag"></p>
+      <div class="tlw"><b id="tage">0</b><div class="tl"><i></i></div></div>
+    </div>
+    <div class="tmenu">
+      <button id="tcont" class="tb" hidden><span data-i="cont"></span><small id="tcs"></small></button>
+      <button id="tnew" class="tb pri"><span data-i="start"></span></button>
+      <button id="tlang" class="tb"><span>🌐 <span data-i="lng"></span> · <b id="tlv"></b></span></button>
+    </div>
   </div>
 
   <div id="create" class="scr" hidden>
@@ -62,16 +76,35 @@
       </div>
       <button id="cback" class="ghost" data-i="back"></button>
       <div id="copts"></div>
-      <div class="cbtns"><button id="crand" data-i="ra"></button><button id="cgo" data-i="go"></button></div>
+      <div class="cbtns"><button id="crand" data-i="ra"></button><button id="cgo" data-i="next"></button></div>
     </div>
   </div>
 
+  <div id="traits" class="scr" hidden>
+    <div class="cwrap">
+      <div class="cstick"><div id="tav"></div></div>
+      <button id="tback" class="ghost" data-i="back"></button>
+      <h2 class="sth" data-i="ttl"></h2>
+      <p class="sub" data-i="tsub"></p>
+      <div id="tsl"></div>
+      <div class="cg"><small data-i="mode"></small><div class="chips" id="tmode"></div><p class="hint" id="tmd"></p></div>
+      <div class="cbtns"><button id="trand" data-i="rj"></button><button id="tgo" data-i="go"></button></div>
+    </div>
+  </div>
+
+  <div id="lsel" class="ov" hidden style="z-index:60"><div class="box"><h2>🌐 <span data-i="lng"></span></h2><div class="chips"><button class="chip" data-l="hu">Magyar</button><button class="chip" data-l="en">English</button></div></div></div>
+  <div id="pk" class="ov" hidden style="z-index:60"><div class="box"><h2 id="pkt"></h2><div id="pkb"></div></div></div>
   <div id="flash"></div>
   <canvas id="cv"></canvas>
 </div>
 <script src="script.js"></script>
 <script src="extras.js"></script>
-<script src="en.js"></script>
+<script src="extras2.js"></script>
+<script src="extras3.js"></script>
+<script src="extras4.js"></script>
+<script src="extras5.js"></script>
+<script src="extras6.js"></script>
+<script src="extras7.js"></script>
 <script src="ads.js"></script>
 </body>
 </html>
