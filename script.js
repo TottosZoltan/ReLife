@@ -17,7 +17,7 @@ const NF = ['Anna', 'Hanna', 'Lili', 'Zsófia', 'Emma', 'Nóra', 'Boglárka', 'D
 const NM = ['Bence', 'Máté', 'Levente', 'Dániel', 'Marcell', 'Ádám', 'Zalán', 'Patrik', 'Balázs', 'Gergő', 'Olivér', 'Kristóf', 'Milán', 'Tamás', 'Noel', 'Barnabás'];
 const SN = ['Kovács', 'Tóth', 'Szabó', 'Németh', 'Farkas', 'Horváth', 'Varga', 'Kiss', 'Molnár', 'Balogh', 'Papp', 'Takács', 'Juhász', 'Lakatos', 'Mészáros', 'Simon'];
 const ST = { hap: ['😊', ['Boldog', 'Happy']], hea: ['❤️', ['Egészség', 'Health']], sma: ['🧠', ['Okos', 'Smart']], loo: ['✨', ['Kinézet', 'Looks']] };
-const fmt = n => { const a = Math.abs(n), en = LANG == 'en'; return (n < 0 ? '−' : '') + (a >= 1e6 ? (a / 1e6).toFixed(1).replace('.', en ? '.' : ',') + ' M Ft' : Math.round(a / 1e3) + (en ? ' k Ft' : ' e Ft')); };
+const fmt = n => { const a = Math.abs(n), en = LANG == 'en'; return (n < 0 ? '−' : '') + (a >= 1e6 ? (a / 1e6).toFixed(1).replace('.', en ? '.' : ',') + (en ? ' M HUF' : ' M Ft') : Math.round(a / 1e3) + (en ? ' k HUF' : ' e Ft')); };
 const EDU = [['Általános', 'Primary'], ['Érettségi', 'High school'], ['Diploma', 'Degree']];
 let p, tab = null, relOpen = null, sub = null, lastPlace = null, goAdopt = false, adSel = null;
 const hasCar = () => p.assets.some(x => x.t == 'car'), hasHouse = () => p.assets.some(x => x.t == 'house'), kidsU = () => kids().filter(k => k.age < 18);
@@ -108,7 +108,7 @@ CH.push(
     [['Szólok a tanárnak', 'Tell the teacher'], [[1, ['A tanár beszélt vele, de {n} haragszik rád.', 'The teacher talked to {n}, who is now angry with you.'], { hap: -3, npc: ['Riválisod', 15] }]]],
     [['Leülök beszélgetni vele', 'Sit down and talk'], [[2, ['Kiderült, hogy {n} otthon nehéz helyzetben van. Megértettétek egymást.', 'It turned out {n} had problems at home. You understood each other.'], { hap: 6, npc: ['Barát', 50] }], [1, ['A beszélgetés nem sokat ért.', 'The talk did not help much.'], { hap: -2, npc: ['Osztálytárs', 30] }]]]] },
   { a: [8, 17], np: { role: 'Riválisod', r: [-1, 2] }, t: ['Kigúnyolás', 'Mocking'], d: ['{n} a folyosón mindenki előtt kigúnyol.', '{n} mocks you in the hallway in front of everyone.'], o: [
-    [['Visszaszólok', 'Talk back'], [[2, ['Mindenki nevetett, de {n} többet nem kötött beléd.', 'Everyone laughed, and {n} never bothered you again.'], { hap: 5, npc: ['Riválisod', 20] }], [1, ['Verekedés lett belőle. Igazgatói intőt kaptál.', 'It turned into a fight. You got a detention.'], { hap: -10, hea: -4, npc: ['Riválisod', 5] }]]],
+    [['Visszaszólok', 'Talk back'], [[2, ['Mindenki nevetett, de {n} többet nem kötött beléd.', 'Everyone laughed, and {n} never bothered you again.'], { hap: 5, npc: ['Riválisod', 20] }], [1, ['Verekedés lett belőle. Igazgatói intőt kaptál.', 'It turned into a fight. You got a principal\'s warning.'], { hap: -10, hea: -4, npc: ['Riválisod', 5] }]]],
     [['Nem törődöm vele', 'Ignore it'], [[1, ['Nem adtál neki okot a nevetésre, és {n} hamar megunta.', 'You gave no reaction, and {n} soon got bored.'], { sma: 2 }]]],
     [['Szólok a tanárnak', 'Tell the teacher'], [[1, ['{n} figyelmeztetést kapott, de a többiek besúgónak tartanak.', '{n} got a warning, but others now call you a snitch.'], { hap: -3, npc: ['Riválisod', 10] }]]]] },
   { a: [4, 12], np: { role: 'Szomszéd', r: [-2, 2] }, t: ['Új szomszéd', 'New neighbor'], d: ['Egy új gyerek költözött a szomszédba: {n}. A kertben látod meg.', 'A new kid, {n}, moved in next door. You spot them in the garden.'], o: [
@@ -148,11 +148,11 @@ CH.push(
   { a: [18, 24], u: () => p.uni, np: { role: 'Osztálytárs', r: [-1, 3] }, t: ['Közös tanulás', 'Study group'], d: ['{n} egyetemi csoporttársad együtt tanulna veled a vizsgára.', 'Your classmate {n} wants to study with you for the exam.'], o: [
     [['Igen', 'Yes'], [[2, ['Együtt sokkal könnyebb volt!', 'Studying together made it much easier!'], { sma: 5, hap: 3, npc: ['Barát', 55] }], [1, ['Többet beszélgettetek, mint tanultatok.', 'You talked more than you studied.'], { sma: 1, hap: 6, npc: ['Barát', 50] }]]],
     [['Egyedül tanulok', 'Study alone'], [[1, ['Csendben haladtál, de magányos volt.', 'You made quiet progress, but it felt lonely.'], { sma: 4, hap: -3 }]]]] },
-  { a: [20, 80], ex: 'Barát', u: () => exl('Barát').length, t: ['Kölcsön', 'A loan'], d: ['A barátod, {n} 200 e Ft kölcsönt kér tőled.', 'Your friend {n} asks to borrow 200k Ft.'], o: [
-    [['Kölcsönadom (200 e Ft)', 'Lend it (200k Ft)'], [[2, ['{n} időben visszaadta. Erősebb lett a barátságotok.', '{n} paid it back on time. Your friendship grew stronger.'], { hap: 4, bond: 12 }], [1, ['{n} sosem adta vissza a pénzt.', '{n} never paid you back.'], { money: -2e5, hap: -6, bond: -25 }]], 2e5],
+  { a: [20, 80], ex: 'Barát', u: () => exl('Barát').length, t: ['Kölcsön', 'A loan'], d: ['A barátod, {n} 200 e Ft kölcsönt kér tőled.', 'Your friend {n} asks to borrow 200k HUF.'], o: [
+    [['Kölcsönadom (200 e Ft)', 'Lend it (200k HUF)'], [[2, ['{n} időben visszaadta. Erősebb lett a barátságotok.', '{n} paid it back on time. Your friendship grew stronger.'], { hap: 4, bond: 12 }], [1, ['{n} sosem adta vissza a pénzt.', '{n} never paid you back.'], { money: -2e5, hap: -6, bond: -25 }]], 2e5],
     [['Nemet mondok', 'Say no'], [[1, ['{n} megsértődött, de megértette.', '{n} was offended but understood.'], { hap: -2, bond: -15 }]]]] },
   { a: [22, 60], ex: 'Barát', u: () => exl('Barát').length, t: ['Esküvői meghívó', 'Wedding invitation'], d: ['A barátod, {n} esküvőre hív.', 'Your friend {n} invites you to a wedding.'], o: [
-    [['Megyek (80 e Ft)', 'Go (80k Ft)'], [[1, ['Gyönyörű esküvő volt, sokat táncoltatok!', 'A beautiful wedding, and you danced a lot!'], { money: -8e4, hap: 10, bond: 10 }]], 8e4],
+    [['Megyek (80 e Ft)', 'Go (80k HUF)'], [[1, ['Gyönyörű esküvő volt, sokat táncoltatok!', 'A beautiful wedding, and you danced a lot!'], { money: -8e4, hap: 10, bond: 10 }]], 8e4],
     [['Nem megyek', 'Skip it'], [[1, ['Elfoglalt voltál, {n} csalódott.', 'You were busy, and {n} was disappointed.'], { hap: -2, bond: -15 }]]]] }
 
 );
@@ -182,7 +182,7 @@ CH.push(
   { a: [18, 80], u: () => driver(), t: 'Kilyukadt a gumi', d: 'Defektet kaptál az úton.', o: [
     ['Kicserélem a pótkerékre', [[3, 'Gyorsan megoldottad.', { hap: 1, sma: 1 }], [1, 'Nem ment simán, elkéstél.', { hap: -3 }]]],
     ['Autómentőt hívok (80 e Ft)', [[1, 'Az autómentő gyorsan jött.', { money: -8e4 }]], 8e4]] },
-  { a: [18, 80], u: () => driver(), t: 'Közúti baleset', d: 'Egy keresztezésben összeütköztél egy másik autóval.', o: [
+  { a: [18, 80], u: () => driver(), t: 'Közúti baleset', d: 'Egy kereszteződésben összeütköztél egy másik autóval.', o: [
     ['Rendőrt hívok', [[2, 'Kisebb koccanás volt, a biztosító rendezte.', { hap: -5, money: -5e4, ins: 'car' }], [1, 'Súlyos baleset, az autód totálkáros.', { hea: -25, hap: -15, crash: 1 }]]],
     ['Megegyezünk egymás közt (150 e Ft)', [[1, 'Kifizetted a kárt, és mentetek tovább.', { money: -15e4, hap: -4 }]], 15e4]] },
   { a: [19, 60], u: () => driver(), t: 'Buli után', d: 'Éjjel van, ittál is, és az autód ott áll a ház előtt.', o: [
@@ -212,7 +212,7 @@ CH.push(
     ['Elmegyek megnézni', [[1, 'Nagyon büszke voltál rá.', { hap: 8 }]]],
     ['Nem érek rá', [[1, 'A gyerek szomorú volt.', { hap: -5 }]]]] },
   { a: [22, 60], u: () => p.job, t: 'Béremelés kérése', d: 'Úgy érzed, többet érdemelnél a jelenlegi fizetésednél.', o: [
-    ['Elkérem a béremelést', [[2, 'Megkaptad!', { raise: .08, hap: 5 }], [1, 'Nemet mondtak.', { hap: -5 }]]],
+    ['Kérek béremelést', [[2, 'Megkaptad!', { raise: .08, hap: 5 }], [1, 'Nemet mondtak.', { hap: -5 }]]],
     ['Még várok', [[1, 'Egyelőre maradt minden.', { hap: 0 }]]]] },
   { a: [18, 25], u: () => p.uni, t: 'Ösztöndíj', d: 'Kiírtak egy ösztöndíjpályázatot az egyetemen.', o: [
     ['Pályázom', [[1, 'Megnyerted az ösztöndíjat!', { money: 3e5, hap: 6 }], [1, 'Most nem nyertél.', { hap: -3 }]]],
@@ -349,8 +349,8 @@ function startCar(id) {
   const C = CAR_BY[id]; if (p.car || carUnmet(C).length || p.age < C.age || (C.max && p.age > C.max) || !can(C.cost || 0)) return;
   if (!parentGate(C.cost || 0, C.n)) return render();
   if (p.job && !confirm(`Ehhez otthagyod a mostani munkád (${p.job}). Biztos vagy benne?`)) return;
-  if (p.job) lg(`Felmondtál (${p.job}).`);
-  p.job = null; p.pay = 0; p.money -= C.cost || 0; p.car = { id, rank: 0, perf: 35, yrs: 0 }; if (C.cr) { const k = crPl && C.pl.includes(crPl) ? crPl : C.pl[0]; p.car.acc = { [k]: newAcc() }; p.car.sel = k; } p.done.job = 1;
+  if (p.job) { if (window.leaveJob) leaveJob(); lg(`Felmondtál (${p.job}).`); }
+  p.job = null; p.pay = 0; p.money -= C.cost || 0; p.car = { id, rank: 0, perf: 35, yrs: 0 }; if (C.cr) { const k = crPl && C.pl.includes(crPl) ? crPl : C.pl[0]; p.car.acc = { [k]: newAcc() }; p.car.sel = k; } p.done.jobN = (p.done.jobN || 0) + 1;
   fxlog(`Új karrier: ${C.i} ${C.n} (${C.ranks[0][0]}).`, { hap: 10 }); render();
 }
 function quitCar() { if (!p.car) return; const C = CAR_BY[p.car.id]; if (!confirm(`Biztosan felhagysz ezzel: ${C.n}?`)) return; lg(`Felhagytál a karrierrel: ${C.n}.`); p.car = null; render(); }
@@ -375,7 +375,7 @@ function carYear() {
   const c = p.car; if (!c) return; const C = CAR_BY[c.id], a = p.age; c.yrs++;
   if (a >= (C.max || 65)) { p.pension = Math.max(p.pension || 0, rk(C.ranks[c.rank][1] * .35)); lg(`Visszavonultál (${C.ranks[c.rank][0]}). Nyugdíj: ${fmt(p.pension)} / év.`, 'good'); p.car = null; return; }
   if (C.cr) return crYear(c, C);
-  const v = C.v ? R(C.v[0], C.v[1]) / 100 : 1, inc = rk(C.ranks[c.rank][1] * (.6 + c.perf / 125) * v * (1 + .15 * pkn(c, 'inc'))); p.money += inc;
+  const v = C.v ? R(C.v[0], C.v[1]) / 100 : 1, inc = rk(C.ranks[c.rank][1] * (.6 + c.perf / 125) * v * (1 + .15 * pkn(c, 'inc')) * (window.infBoost ? infBoost() : 1)); p.money += inc;
   if (C.v && v < .55) lg(`${C.i} Gyenge év volt a karrieredben, kevesebb bevétel.`, 'bad'); else if (C.v && v > 1.6) lg(`${C.i} Kiváló év volt, bőven keresett!`, 'good');
   if (c.perf >= 75 && c.rank < C.ranks.length - 1 && Math.random() < .65) { c.rank++; c.perf = 45; fxlog(`Előléptél: ${C.i} ${C.ranks[c.rank][0]}!`, { hap: 10 }); return; }
   c.perf = cl(c.perf - Math.max(2, R(8, 16) - 3 * pkn(c, 'dec')));
@@ -458,7 +458,7 @@ CH.push(
     [['Bemegyek', 'Go in'], [[1, ['A menhelyen sok kedves állatot láttál, választhatsz magadnak egyet.', 'You met lots of lovely animals at the shelter, and you can pick one.'], { hap: 3, adopt: 3e4 }]]],
     [['Most nem', 'Not now'], [[1, ['Továbbmentél.', 'You walked on.'], { hap: 0 }]]]] },
   { a: [8, 80], u: () => !p.pet, t: ['Kóbor állat', 'Stray animal'], d: ['Egy éhes kóbor állat követ hazáig. Befogadod?', 'A hungry stray follows you all the way home. Take it in?'], o: [
-    [['Befogadom', 'Take it in'], [[1, ['Befogadtad, most már te vagy a gazdija. Megnézheted, milyen állat, és el is nevezheted.', 'You took it in. You can check what animal it is and name it.'], { hap: 5, adopt: 0 }]]],
+    [['Befogadom', 'Take it in'], [[1, ['Befogadtad, most már te vagy a gazdája. Megnézheted, milyen állat, és el is nevezheted.', 'You took it in. You can check what animal it is and name it.'], { hap: 5, adopt: 0 }]]],
     [['Nem tudom megtartani', 'I cannot keep it'], [[1, ['Szomorúan továbbmentél, de egy menhelyet értesítettél.', 'You walked on sadly, but called a shelter.'], { hap: -2 }]]]] }
 );
 const CITY = [['Budapest', 'Budapesten'], ['Debrecen', 'Debrecenben'], ['Szeged', 'Szegeden'], ['Pécs', 'Pécsett'], ['Győr', 'Győrben'], ['Miskolc', 'Miskolcon']];
@@ -542,7 +542,7 @@ function newLife(o = {}) {
   p = { g, skin, tr: mkTr(o.tr), name: `${sn} ${fn}`, age: 0, money: 0, hap: R(75, 95), hea: R(80, 100), sma: R(25, 75), loo: R(20, 85),
     edu: 0, uni: false, job: null, pay: 0, yrs: 0, pension: 0, fam: [1, 2, 3].includes(+o.fam) ? +o.fam : R(1, 3), dead: false, done: {}, logs: [], rel: [], assets: [], lic: false, hob: {}, car: null, jp: 30, fit: 30, lang: 0, trav: {}, inv: 0, cry: 0, debt: 0, jr: 0, pet: null, crim: 0, prison: 0, sick: null, city };
   p[gk] = cl(p[gk] + 15);
-  p.look = { g, sk: skin, hs: pk(o.hs, () => rndHs(g)), hc: pk(o.hc, () => R(0, 4)), oc: pk(o.oc, () => R(0, 7)), bd: pk(o.bd, rndBd), ot: pk(o.ot, rndOt), ht: pk(o.ht, rndHt), ea: pk(o.ea, rndEa), gl: pk(o.gl, rndGl), nc: pk(o.nc, rndNc), xc: pk(o.xc, () => R(0, 7)) };
+  p.look = { g, sk: skin, hs: pk(o.hs, () => rndHs(g)), hc: pk(o.hc, () => rndHc()), oc: pk(o.oc, () => rndOc()), bd: pk(o.bd, rndBd), ot: pk(o.ot, rndOt), ht: pk(o.ht, rndHt), ea: pk(o.ea, rndEa), gl: pk(o.gl, rndGl), nc: pk(o.nc, rndNc), xc: pk(o.xc, () => rndXc()) };
   const m = { ...person('Anya', R(22, 38), R(60, 90), 'f'), par: 1 }, f = { ...person('Apa', R(23, 42), R(55, 90), 'm'), par: 1 };
   m.n = `${sn} ${P(NF)}`; f.n = `${sn} ${P(NM)}`;
   m.kin = genKin(m); f.kin = genKin(f);
@@ -564,8 +564,8 @@ function apply(fx) {
     else if (k == 'nolic') p.lic = false;
     else if (k == 'crash') { const j = p.assets.findIndex(x => x.t == 'car'); if (j >= 0) { const x = p.assets[j]; if (x.ins) { const pay = Math.round(x.v * .6); p.money += pay; o.push('🛡️ +' + fmt(pay)); } p.assets.splice(j, 1); Object.keys(p.done).forEach(q => q.startsWith('as') && delete p.done[q]); } }
     else if (k == 'sportcar') p.assets.push({ n: 'Sportautó', t: 'car', i: '🏎️', v: 1e7 });
-    else if (k == 'fol') { if (p.car && p.car.acc) { Object.values(p.car.acc).forEach(a => { a.f = Math.max(0, Math.round(a.f * (1 + v / 100))); }); o.push((v > 0 ? '+' : '') + v + '% követő'); } }
-    else if (k == 'ban') { if (p.car && p.car.acc) { const l = Object.values(p.car.acc).filter(a => !a.ban); if (l.length) { P(l).ban = v; o.push('⛔ fiók felfüggesztve'); } } }
+    else if (k == 'fol') { const _c = crO(); if (_c && _c.acc) { Object.values(_c.acc).forEach(a => { a.f = Math.max(0, Math.round(a.f * (1 + v / 100))); }); o.push((v > 0 ? '+' : '') + v + '% követő'); } }
+    else if (k == 'ban') { const _c = crO(); if (_c && _c.acc) { const l = Object.values(_c.acc).filter(a => !a.ban); if (l.length) { P(l).ban = v; o.push('⛔ fiók felfüggesztve'); } } }
     else if (k == 'perf') { if (p.car) p.car.perf = cl(p.car.perf + v); }
     else if (k == 'rank') { p.jr = Math.min(6, (p.jr || 0) + v); }
     else if (k == 'hob') { const ks = Object.keys(p.hob || {}); if (ks.length) { const h = p.hob[P(ks)]; h.lv = cl(h.lv + 4); } }
@@ -611,7 +611,7 @@ function up() {
   // pénz
   if (a >= 18 && !p.uni && !jail) {
     const house = p.assets.some(x => x.t == 'house'), cars = p.assets.filter(x => x.t == 'car').length;
-    const inc = p.job ? p.pay : p.pension, cost = (house ? 8e5 : 2e6) + cars * 3e5 + kids().filter(k => k.age < 18).length * 6e5;
+    const inc = window.yearIncome ? yearIncome() : (p.job ? p.pay : p.pension), cost = window.livingCost ? livingCost().total : ((house ? 8e5 : 2e6) + cars * 3e5 + kids().filter(k => k.age < 18).length * 6e5);
     p.money += inc - cost;
     if (p.money < 0) { if (a < 20) { p.money = 0; lg('A szüleid kisegítettek, így nem adósodtál el.', 'good'); } else { lg('Eladósodtál, ez nagyon stresszes.', 'bad'); apply({ hap: -5 }); } }
   }
@@ -672,7 +672,7 @@ function up() {
 // ----- teendők -----
 const fr = () => { const g = P(['f', 'm']); return { ...person('Barát', R(5, 40), 45, g) }; };
 const ACT = [
-  { id: 'study', i: '📚', n: 'Tanulás', m: 6, c: 0, run: () => fxlog('Tanultál. Okosabb lettél, de fárasztó volt.', { sma: R(2, 5), hap: -2 }) },
+  { id: 'study', i: '📚', n: 'Tanulás', m: 6, c: 0, u: () => p.age >= 18 && !p.uni, run: () => fxlog('Tanultál. Okosabb lettél, de fárasztó volt.', { sma: R(2, 5), hap: -2 }) },
   { id: 'gym', i: '🏋️', n: 'Edzés', m: 12, c: 15e4, run: () => fxlog('Edzettél. Erősebbnek érzed magad.', { hea: R(4, 8), loo: R(2, 5) }) },
   { id: 'doc', i: '🏥', n: 'Orvos', m: 0, c: 4e5, run: () => { if (p.sick && Math.random() < .7) { lg(`Meggyógyultál: ${p.sick}.`, 'good'); p.sick = null; apply({ hea: 10, hap: 8 }); } else fxlog('Orvoshoz mentél, kikezeltek.', { hea: R(15, 25) }); } },
   { id: 'psy', i: '🛋️', n: 'Pszichológus', m: 10, c: 2e5, run: () => fxlog('Jót beszélgettél a pszichológussal.', { hap: R(8, 15) }) },
@@ -680,7 +680,7 @@ const ACT = [
   { id: 'vol', i: '🤝', n: 'Önkéntes munka', m: 14, c: 0, run: () => fxlog('Önkénteskedtél, jó érzés segíteni.', { hap: R(4, 8), sma: 1 }) },
   { id: 'surg', i: '💉', n: 'Plasztikai műtét', m: 18, c: 2e6, run: () => Math.random() < .85 ? fxlog('A műtét jól sikerült!', { loo: R(12, 22), hea: -4 }) : fxlog('A műtét félresikerült...', { loo: -15, hea: -10, hap: -15 }) },
   { id: 'med', i: '🧘', n: 'Meditálás', m: 10, c: 0, run: () => fxlog('Meditáltál, lenyugodtál.', { hap: R(3, 7) }) },
-  { id: 'fr', i: '🎬', n: 'Haverok', m: 8, c: 5e4, run: () => { fxlog('Jót töltél a barátaiddal.', { hap: R(4, 9) }); if (p.rel.filter(r => r.alive && r.role == 'Barát').length < 4 && Math.random() < .5) { const f = fr(); p.rel.push(f); lg(`Új barátod lett: ${f.n}.`, 'good'); } } },
+  { id: 'fr', i: '🎬', n: 'Haverok', m: 8, c: 5e4, run: () => { fxlog('Jól töltötted az időt a barátaiddal.', { hap: R(4, 9) }); if (p.rel.filter(r => r.alive && r.role == 'Barát').length < 4 && Math.random() < .5) { const f = fr(); p.rel.push(f); lg(`Új barátod lett: ${f.n}.`, 'good'); } } },
   { id: 'trip', i: '✈️', n: 'Utazás', m: 16, c: 12e5, run: () => fxlog('Elutaztál, feltöltődtél.', { hap: R(10, 18), loo: 2 }) },
   { id: 'lot', i: '🎰', n: 'Lottó', m: 18, c: 2e4, run: () => Math.random() < .01 ? fxlog('MEGNYERTED A LOTTÓ FŐNYEREMÉNYÉT!', { money: 5e7, hap: 30 }) : fxlog('Nem nyertél a lottón.', { hap: -1 }) },
   { id: 'pt', i: '🧾', n: 'Diákmunka', m: 14, c: 0, run: () => fxlog('Diákmunkáztál.', { money: R(300, 600) * 1e3, hap: -3 }) },
@@ -721,7 +721,7 @@ function abtn(x) {
   return `<button class="act${x.done ? ' dn' : ''}" ${x.done || x.off || !can(c) ? 'disabled' : ''} onclick="${x.fn}"><b>${x.i} ${x.n}</b>${sb ? `<small>${sb}</small>` : ''}</button>`;
 }
 function go(x) { sub = x; render(); $('#sbody').scrollTop = 0; }
-function goBack() { sub = ({ travel: 'c:fun', adopt: 'c:home', 'rc:past': 'rc:know', inv: tab == 'act' ? 'c:money' : null })[sub] || (tab == 'assets' && sub && sub.startsWith('a:') ? 'own' : null) || (tab == 'assets' && sub && (sub.startsWith('fin:') || sub.startsWith('shop:')) ? 'shop' : null) || (sub && sub.startsWith('h:') ? 'hobs' : null) || (sub && sub.startsWith('crstart:') ? 'jobs' : null) || (tab == 'rel' && sub && sub.startsWith('kin:') && p.rel[+sub.slice(4)] ? 'rc:' + relCat(p.rel[+sub.slice(4)]) : null); render(); $('#sbody').scrollTop = 0; }
+function goBack() { sub = ({ travel: 'c:fun', adopt: 'c:home', move: 'c:home', 'rc:past': 'rc:know', inv: tab == 'act' ? 'c:money' : null })[sub] || (tab == 'assets' && sub && sub.startsWith('a:') ? 'own' : null) || (tab == 'assets' && sub && (sub.startsWith('fin:') || sub.startsWith('shop:')) ? 'shop' : null) || (sub && sub.startsWith('h:') ? 'hobs' : null) || (sub && sub.startsWith('crstart:') ? 'jobs' : null) || (tab == 'rel' && sub && sub.startsWith('kin:') && p.rel[+sub.slice(4)] ? 'rc:' + relCat(p.rel[+sub.slice(4)]) : null); render(); $('#sbody').scrollTop = 0; }
 const bk = () => '<button class="ghost" onclick="goBack()">‹ Vissza</button>';
 function subTitle(t, sb, ro) {
   if (t == 'rel' && ro == 'pet') return p.pet ? p.pet.n : T(TT.rel);
@@ -730,9 +730,9 @@ function subTitle(t, sb, ro) {
   if (t == 'rel' && sb && sb.startsWith('rc:')) return (RCATS.find(x => x[0] == sb.slice(3)) || ['', 'Kapcsolatok'])[1].replace(/^\S+\s/, '');
   if (t == 'rel' && sb && sb.startsWith('kin:')) return 'Rokonok';
   if (t == 'rel') return ro != null && p.rel[ro] ? dn(p.rel[ro].n) : T(TT.rel);
-  if (t == 'act' && sb) { if (sb.startsWith('c:')) { const C = CATS.find(c => c.id == sb.slice(2)); return C ? C.n : T(TT.act); } return sb == 'travel' ? 'Utazás' : sb == 'adopt' ? 'Kisállat' : 'Befektetések'; }
+  if (t == 'act' && sb) { if (sb.startsWith('c:')) { const C = CATS.find(c => c.id == sb.slice(2)); return C ? C.n : T(TT.act); } return sb == 'travel' ? 'Utazás' : sb == 'adopt' ? 'Kisállat' : sb == 'move' ? 'Költözés' : 'Befektetések'; }
   if (t == 'assets' && sb) return sb.startsWith('a:') ? (p.assets[+sb.slice(2)] ? p.assets[+sb.slice(2)].n : T(TT.assets)) : FSUB[sb] || T(TT.assets);
-  if (t == 'job' && sb) { if (sb.startsWith('h:')) { const x = HOB.find(q => q.id == sb.slice(2)); return x ? x.n : T(TT.job); } if (sb.startsWith('crstart:')) return 'Platform választása'; if (sb == 'jobs') return 'Állások'; if (sb == 'hobs') return 'Hobbik'; if (sb == 'jwork') return 'Munkahelyi tevékenységek'; if (sb == 'school') return occ()[1]; }
+  if (t == 'job' && sb) { if (sb.startsWith('h:')) { const x = HOB.find(q => q.id == sb.slice(2)); return x ? x.n : T(TT.job); } if (sb.startsWith('crstart:')) return 'Platform választása'; if (sb == 'jobs') return 'Állások'; if (sb == 'hobs') return 'Hobbik'; if (sb == 'jwork') return 'Munkahelyi tevékenységek'; if (sb == 'school') return occ()[1]; if (sb == 'cur') return p.car ? CAR_BY[p.car.id].n : p.job ? p.job : T(['Munkahely', 'Workplace']); if (sb == 'side') return T(['Mellékállás', 'Side job']); if (sb == 'inf') return T(['Influenszerkedés', 'Influencing']); }
   if (t == 'job') return occ()[1];
   return T(TT[t]) || '';
 }
@@ -759,7 +759,7 @@ ACT.push(
   { id: 'hike', cat: 'health', i: '🥾', n: 'Túrázás', m: 8, c: 2e4, r: ['hea', 'hap', 'fit'], fit: [4, 8], run: () => fxlog('Nagy túrát tettél a hegyekben.', { hea: R(2, 4), hap: R(4, 8) }) },
   { id: 'swim', cat: 'health', i: '🏊', n: 'Úszás', m: 5, c: 3e4, r: ['hea', 'fit'], fit: [4, 8], run: () => fxlog('Úsztál egy jót.', { hea: R(2, 5), hap: 2 }) },
   { id: 'team', cat: 'health', i: '🏀', n: 'Csapatsport', m: 8, c: 0, r: ['hea', 'hap', 'fit'], fit: [3, 7], run: () => { fxlog('Csapatsportoltál a barátaiddal.', { hea: R(1, 4), hap: R(3, 6) }); if (roll(.12)) fxlog('Megsérültél a játék közben.', { hea: -R(4, 9) }); } },
-  { id: 'checkup', cat: 'health', i: '🩺', n: 'Szűrővizsgálat', m: 16, c: 15e4, r: ['hea'], run: () => { p.prot = true; fxlog('Átvizsgáltak, így nagyobb eséllyel előzöd meg a bajt.', { hea: R(2, 5) }); } },
+  { id: 'checkup', cat: 'health', i: '🩺', n: 'Szűrővizsgálat', m: 16, c: 15e4, r: ['hea'], run: () => { p.prot = true; fxlog('Átvizsgáltak, így nagyobb eséllyel előzed meg a bajt.', { hea: R(2, 5) }); } },
   { id: 'hosp', cat: 'health', i: '🏨', n: 'Kórházi kezelés', m: 0, c: 12e5, u: () => p.sick, r: ['hea'], run: () => { if (roll(.9)) { lg(`Kigyógyultál: ${p.sick}.`, 'good'); p.sick = null; apply({ hea: 15, hap: 10 }); } else fxlog('A kezelés most nem sokat segített.', { hea: 4 }); } },
   { id: 'diet', cat: 'health', i: '🥗', n: 'Egészséges étkezés', m: 10, c: 5e4, r: ['hea', 'fit'], fit: [1, 3], run: () => fxlog('Tudatosan étkeztél.', { hea: R(2, 4) }) },
   // külső
@@ -784,18 +784,14 @@ ACT.push(
   { id: 'host', cat: 'social', i: '🍷', n: 'Vendégség', m: 18, c: 8e4, r: ['hap', 'bond'], run: () => { p.rel.forEach(r => { if (r.alive && ['Barát', 'Szomszéd', 'Munkatárs', 'Testvér'].includes(r.role)) r.bond = cl(r.bond + 4); }); fxlog('Vendégeket láttál az otthonodban, jó hangulat volt.', { hap: R(4, 8) }); } },
   { id: 'family', cat: 'social', i: '👨‍👩‍👧', n: 'Családi program', m: 3, c: 0, r: ['hap', 'bond'], run: () => { p.rel.forEach(r => { if (r.alive && ['Anya', 'Apa', 'Testvér'].includes(r.role)) r.bond = cl(r.bond + R(4, 9)); }); fxlog('Együtt töltöttetek egy napot a családdal.', { hap: R(3, 6) }); } },
   { id: 'reunion', cat: 'social', i: '🎓', n: 'Osztálytalálkozó', m: 25, c: 5e4, r: ['hap', 'bond'], run: () => { p.rel.forEach(r => { if (r.alive && r.role == 'Osztálytárs') r.bond = cl(r.bond + R(5, 12)); }); fxlog('Felidéztétek a régi időket az osztálytalálkozón.', { hap: R(4, 9) }); } },
-  { id: 'charity', cat: 'social', i: '🎗️', n: 'Adományozás', m: 16, c: 1e5, r: ['hap'], run: () => fxlog('Adományoztál, jó érzés segíteni.', { hap: R(4, 8) }) },
   // pénz
   { id: 'scratch', cat: 'money', i: '🎟️', n: 'Kaparós sorsjegy', m: 18, c: 5e3, r: ['money'], rk: 1, run: () => roll(.15) ? fxlog('Nyertél a kaparóssal!', { money: R(2, 60) * 1e4, hap: 4 }) : fxlog('Nem nyertél a kaparóssal.', { hap: -1 }) },
   { id: 'bet', cat: 'money', i: '🎲', n: 'Sportfogadás', m: 18, c: 1e5, r: ['money'], rk: 1, run: () => roll(.42) ? fxlog('Bejött a tipped!', { money: 22e4, hap: 6 }) : fxlog('Nem jött be a fogadásod.', { hap: -3 }) },
-  { id: 'loan', cat: 'money', i: '🏦', n: 'Hitelfelvétel (500 e Ft)', m: 20, c: 0, r: ['money'], rk: 1, run: () => { p.debt = (p.debt || 0) + 55e4; fxlog('Felvettél egy hitelt, évi 12% kamattal.', { money: 5e5 }); } },
-  { id: 'repay', cat: 'money', i: '💳', n: 'Hiteltörlesztés', m: 18, c: 0, u: () => p.debt > 0, r: ['hap'], run: () => { const m = Math.min(p.debt, Math.max(0, p.money)); if (!m) return lg('Nincs miből törleszteni.', 'bad'); p.money -= m; p.debt -= m; fxlog(`Törlesztettél ${fmt(m)}-ot. Hátralévő tartozás: ${fmt(p.debt)}.`, { hap: 2 }); } },
   // otthon
   { id: 'cook', cat: 'home', i: '🍳', n: 'Főzés', m: 8, c: 0, r: ['hap', 'hea'], run: () => fxlog('Finomat főztél.', { hap: R(2, 4), hea: R(0, 2) }) },
   { id: 'clean', cat: 'home', i: '🧽', n: 'Takarítás', m: 8, c: 0, r: ['hap', 'bond'], run: () => { p.rel.forEach(r => { if (r.alive && r.par) r.bond = cl(r.bond + 2); }); fxlog('Kitakarítottál, tisztaság van.', { hap: R(1, 3) }); } },
   { id: 'garden', cat: 'home', i: '🌻', n: 'Kertészkedés', m: 10, c: 0, u: () => hasHouse(), r: ['hap', 'hea'], run: () => fxlog('Dolgoztál a kertben.', { hap: R(3, 6), hea: R(1, 3) }) },
   { id: 'diy', cat: 'home', i: '🔨', n: 'Barkácsolás', m: 12, c: 3e4, r: ['sma', 'hap'], run: () => roll(.75) ? fxlog('Összeraktál valami hasznosat.', { sma: 1, hap: 3 }) : fxlog('Elrontottad a barkácsolást.', { hap: -3 }) },
-  { id: 'move', cat: 'home', i: '📦', n: 'Költözés másik városba', m: 18, c: 4e5, r: ['hap'], rk: 1, run: () => { const old = p.city[0]; p.city = P(CITY.filter(c => c[0] != old)); p.rel.forEach(r => { if (r.alive && DRIFT.includes(r.role)) r.bond = cl(r.bond - R(3, 10)); }); fxlog(`Elköltöztél ide: ${p.city[0]}. Új élet, új lehetőségek.`, { hap: R(-3, 6) }); } },
   // törvénytelen
   { id: 'graff', cat: 'illegal', i: '🎨', n: 'Graffiti', m: 12, c: 0, k: 1, r: ['hap'], run: () => crime('Graffiti', .8, 0, 1) },
   { id: 'scam', cat: 'illegal', i: '🕵️', n: 'Csalás', m: 18, c: 0, k: 1, r: ['money'], run: () => crime('Csalás', .5, R(3, 10) * 1e5, R(1, 3)) },
@@ -896,6 +892,7 @@ function travel(id) {
 
 // --- befektetés, pénzügyek ---
 function invest(k, amt) { if (!can(amt) || p.age < 18) return; if (!parentGate(amt, 'befektetés')) return render(); p.money -= amt; p[k] = (p[k] || 0) + amt; lg(`${k == 'inv' ? '📈 Részvénybe' : '🪙 Kriptóba'} fektettél: ${fmt(amt)}.`); render(); }
+function cashOutAmt(k, amt) { const v = p[k] || 0; amt = Math.min(v, Math.max(0, Math.round(amt))); if (!amt) return; p[k] = v - amt; p.money += amt; lg(`Kivettél a befektetésedből: ${fmt(amt)}.`, 'good'); render(); }
 function cashOut(k) { const v = p[k] || 0; if (!v) return; p[k] = 0; p.money += v; lg(`Kivetted a befektetésed: ${fmt(v)}.`, 'good'); render(); }
 function moneyYear() {
   [['inv', '📈 Részvényeid', -18, 28, 1], ['cry', '🪙 Kriptód', -60, 120, 0]].forEach(([k, n, lo, hi, pl]) => { if (p[k] > 0) { const g = R(lo, hi); p[k] = Math.round(p[k] * (1 + g / 100)); p[k + 'g'] = g; lg(`${n} ${g >= 0 ? (pl ? 'nőttek' : 'nőtt') : (pl ? 'estek' : 'esett')} ${Math.abs(g)}%-ot: ${fmt(p[k])}.`, g >= 0 ? 'good' : 'bad'); } });
@@ -904,26 +901,22 @@ function moneyYear() {
 }
 function invPanel() {
   if (p.age < 18) return '<p class="empty">18 évesen fektethetsz be.</p>';
-  const one = (k, ic, n, d) => `<div class="card"><div class="top"><b>${ic} ${n}</b><small>${fmt(p[k] || 0)}</small></div><small>${d}${p[k + 'g'] != null ? ` · tavaly: ${p[k + 'g'] >= 0 ? '+' : ''}${p[k + 'g']}%` : ''}</small><div class="grid" style="margin-top:8px">${[1e5, 1e6, 5e6].map(m => abtn({ i: '➕', n: fmt(m), off: !can(m), fn: `invest('${k}',${m})` })).join('')}${abtn({ i: '💵', n: 'Kivét', off: !(p[k] > 0), r: ['money'], fn: `cashOut('${k}')` })}</div></div>`;
+  const stp = 1e5, buyMax = Math.floor(p.money / stp) * stp;
+  const one = (k, ic, n, d) => {
+    const have = p[k] || 0, sv = Math.min(have, Math.max(stp, Math.round(have / 2 / stp) * stp));
+    const buy = buyMax >= stp ? `<div class="top" style="margin-top:8px"><small>Mennyit fektetsz be?</small><small id="ib_${k}">${fmt(Math.min(buyMax, 1e6))}</small></div><input type="range" class="sl" id="ir_${k}" min="${stp}" max="${buyMax}" step="${stp}" value="${Math.min(buyMax, 1e6)}" oninput="document.getElementById('ib_${k}').textContent=fmt(+this.value)"><div class="btns"><button onclick="invest('${k}',+document.getElementById('ir_${k}').value)">➕ Befektetés</button></div>` : '<small>Nincs elég pénzed befektetni (legalább 100 e Ft kell).</small>';
+    const sell = have > 0 ? (have > stp ? `<div class="top" style="margin-top:8px"><small>Mennyit veszel ki?</small><small id="is_${k}">${fmt(sv)}</small></div><input type="range" class="sl" id="iq_${k}" min="${stp}" max="${Math.floor(have / stp) * stp}" step="${stp}" value="${sv}" oninput="document.getElementById('is_${k}').textContent=fmt(+this.value)"><div class="btns"><button onclick="cashOutAmt('${k}',+document.getElementById('iq_${k}').value)">💵 Kivét</button><button class="alt" onclick="cashOut('${k}')">Mindet kiveszem</button></div>` : `<div class="btns"><button onclick="cashOut('${k}')">💵 Mindet kiveszem</button></div>`) : '';
+    return `<div class="card"><div class="top"><b>${ic} ${n}</b><small>${fmt(have)}</small></div><small>${d}${p[k + 'g'] != null ? ` · tavaly: ${p[k + 'g'] >= 0 ? '+' : ''}${p[k + 'g']}%` : ''}</small>${buy}${sell}</div>`;
+  };
   return '<p class="empty">Az árfolyamok évente, öregedéskor frissülnek.</p>' + one('inv', '📈', 'Részvények', 'mérsékelt kockázat (−18% … +28% évente)') + one('cry', '🪙', 'Kripto', 'nagyon kockázatos (−60% … +120% évente)');
 }
-
-// --- teendők panel ---
-const catAvail = cid => ACT.filter(x => x.cat == cid && p.age >= x.m && (!x.M || p.age <= x.M) && (!x.u || x.u()));
-const actBtn = x => abtn({ i: x.i, n: x.n, c: p.age < 18 ? 0 : x.c || 0, r: x.r, risk: x.k || x.rk, done: p.done[x.id], fn: `doAct('${x.id}')` });
-const CATX = {
-  health: () => `<div class="card"><div class="top"><b>💪 Kondíció</b><small>${Math.round(p.fit == null ? 30 : p.fit)}/100</small></div><div class="tr"><i style="width:${p.fit == null ? 30 : p.fit}%"></i></div><small>A sport növeli, ha elhanyagolod, csökken. Jó kondícióval lassabban romlik az egészséged.</small></div>` + (p.sick ? `<p class="lg bad">🤒 Betegség: ${p.sick}. Menj orvoshoz vagy kórházba!</p>` : ''),
-  mind: () => `<div class="card"><div class="top"><b>🗣️ Nyelvtudás</b><small>${p.lang || 0}/5</small></div><small>Minden szint növeli az állásinterjúk esélyét.</small></div>`,
-  money: () => `<div class="card"><div class="top"><b>Pénzügyek</b><small>nettó ${fmt(netw())}</small></div><small>Készpénz ${fmt(p.money)} · Befektetés ${fmt((p.inv || 0) + (p.cry || 0))}${p.debt > 0 ? ` · Tartozás ${fmt(p.debt)}` : ''}</small></div>` + (p.age >= 18 ? `<div class="grid" style="margin-bottom:8px"><button class="act" onclick="go('inv')"><b>📈 Befektetések</b><small>részvény, kripto</small></button></div>` : ''),
-  fun: () => `<div class="grid" style="margin-bottom:8px"><button class="act" onclick="go('travel')"><b>✈️ Utazás</b><small>${Object.keys(p.trav || {}).length} hely eddig</small></button></div>`,
-  home: () => petBlock() + (!p.pet && p.age >= 6 ? `<div class="grid" style="margin-bottom:8px">${mcard('🐾', 'Kisállat örökbefogadása', p.offer ? 'különleges lehetőség!' : (adoptCost() ? fmt(adoptCost()) : 'ingyen'), "adSel=null;go('adopt')")}</div>` : ''),
-  illegal: () => '<p class="lg bad">⚠️ Ha elkapnak, pénzbüntetés vagy börtön jár. Börtönben nem dolgozhatsz.</p>'
-};
 function actPanel() {
   const a = p.age;
-  const top = (p.sick ? `<p class="lg bad">🤒 Betegség: ${p.sick}. Menj orvoshoz!</p>` : '') + (p.prison > 0 ? `<p class="lg bad">⛓️ Még ${p.prison} év börtön van hátra.</p>` : '');
+  const AU = autoPlan().length;
+  const autoBtn = `<button class="act" style="width:100%;margin-bottom:10px;outline:2px solid #3fbf5f" ${AU ? '' : 'disabled'} onclick="autoYear()"><b>🤖 Automata tevékenységek</b><small>${AU ? AU + ' teendő egy gombnyomásra · a fizetősekről te döntesz' : 'ebben az évben mindent elvégeztél'}</small></button>`;
+  const top = autoBtn + (p.sick ? `<p class="lg bad">🤒 Betegség: ${p.sick}. Menj orvoshoz!</p>` : '') + (p.prison > 0 ? `<p class="lg bad">⛓️ Még ${p.prison} év börtön van hátra.</p>` : '');
   return top + '<div class="grid">' + CATS.filter(C => a >= C.m).map(C => {
-    const l = catAvail(C.id), n = l.filter(x => !p.done[x.id]).length + (C.id == 'fun' && !p.done.trip ? 1 : 0) + (C.id == 'money' && a >= 18 ? 1 : 0) + (C.id == 'home' && a >= 6 && !p.pet ? 1 : 0);
+    const l = catAvail(C.id), n = l.filter(x => !p.done[x.id]).length + (C.id == 'fun' && !p.done.trip ? 1 : 0) + (C.id == 'money' && a >= 18 ? 1 : 0) + (C.id == 'home' && a >= 6 && !p.pet ? 1 : 0) + (C.id == 'home' && a >= 20 && !p.done.mv ? 1 : 0);
     return `<button class="act" onclick="go('c:${C.id}')"><b>${C.i} ${C.n}</b><small>${n ? n + ' lehetőség' : 'ebben az évben kész'}</small></button>`;
   }).join('') + '</div>';
 }
@@ -934,9 +927,65 @@ function actSub(sb) {
     return `<div class="card"><div class="top"><b>🌍 Utazások</b><small>${Object.keys(p.trav || {}).length}/${DEST.length}</small></div><small>${vis || 'Még sehol sem jártál.'} Évente egy utat tehetsz.</small></div><div class="grid">` + l.map(d => abtn({ i: d.i, n: d.n, c: p.age < 18 ? 0 : d.c, r: ['hap', 'sma'], done: p.done.trip, fn: `travel('${d.id}')` })).join('') + '</div>';
   }
   if (sb == 'inv') return invPanel();
+  if (sb == 'move') return movePanel();
   const cid = sb.slice(2), l = catAvail(cid);
   return (CATX[cid] ? CATX[cid]() : '') + (l.length ? '<div class="grid">' + l.map(actBtn).join('') + '</div>' : '<p class="empty">Most nincs elérhető teendő.</p>');
 }
+
+// --- kategóriák listái, gombok, belépő kártyák ---
+const catAvail = cid => { const C = CATS.find(c => c.id == cid); return ACT.filter(x => x.cat == cid && (!C || p.age >= C.m) && p.age >= x.m && (x.M == null || p.age <= x.M) && (!x.u || x.u())); };
+function actBtn(x) { return abtn({ i: x.i, n: x.n, c: p.age < 18 ? 0 : x.c || 0, r: x.r, risk: x.rk || x.k, done: p.done[x.id], off: !!(x.k && p.prison > 0), fn: `doAct('${x.id}')` }); }
+const CATX = {
+  fun: () => '<div class="grid" style="margin-bottom:8px">' + mcard('🌍', 'Utazás', p.done.trip ? 'ebben az évben kész' : 'belföldi és külföldi utak', "go('travel')") + '</div>',
+  money: () => p.age >= 18 ? '<div class="grid" style="margin-bottom:8px">' + mcard('📈', 'Befektetések', 'részvény, kripto', "go('inv')") + '</div>' : '',
+  home: () => {
+    const c = (p.age >= 6 && !p.pet ? mcard('🐾', 'Kisállat örökbefogadása', p.offer ? 'különleges lehetőség' : 'találd meg a társadat', "go('adopt')") : '')
+      + (p.age >= 20 ? mcard('📦', 'Költözés', p.done.mv ? 'ebben az évben kész' : 'válassz új várost', "go('move')") : '');
+    return c ? '<div class="grid" style="margin-bottom:8px">' + c + '</div>' : '';
+  }
+};
+
+// --- költözés: egyetlen hely, legördülő városválasztóval ---
+function movePanel() {
+  if (p.age < 20) return '<p class="empty">20 éves korig a szüleiddel élsz, nem költözhetsz el.</p>';
+  const cur = p.city[0], c = 3e5;
+  const opts = CITY.filter(q => q[0] != cur).map(q => `<option value="${q[0]}">${q[0]}${window.cityMult ? ' (lakhatás ×' + cityMult(q[0]) + ')' : ''}</option>`).join('');
+  return `<div class="card"><div class="top"><b>📦 Költözés</b><small>${fmt(c)}</small></div><small>Jelenlegi városod: ${cur}. A régi ismerőseiddel lazulhat a kapcsolat. Évente egyszer költözhetsz.</small>`
+    + `<select id="mvc" style="width:100%;margin:10px 0 0;font:inherit;font-size:16px;font-weight:600;border:1px solid #b8c4bc;border-radius:10px;padding:10px;background:var(--card);color:var(--ink)">${opts}</select>`
+    + `<div class="btns"><button ${p.done.mv || !can(c) ? 'disabled' : ''} onclick="moveTo(document.getElementById('mvc').value)">${p.done.mv ? 'Ebben az évben már költöztél' : can(c) ? 'Költözés' : 'Nincs elég pénzed'}</button></div></div>`;
+}
+
+// --- jótékonyság: a bankban, csúszkával ---
+function charityBlock() {
+  const stp = 1e5, mx = Math.floor(p.money / stp) * stp;
+  if (mx < stp) return '<h3>Jótékonyság</h3><p class="empty">Adományozni legalább 100 e Ft-tal lehet.</p>';
+  const v = Math.min(mx, 5e5);
+  return `<h3>Jótékonyság</h3><div class="card"><div class="top"><b>🎗️ Mennyit adományozol?</b><small id="chv">${fmt(v)}</small></div><input type="range" class="sl" id="chr" min="${stp}" max="${mx}" step="${stp}" value="${v}" oninput="document.getElementById('chv').textContent=fmt(+this.value)"><small>Évente az első adományod jó érzést ad, a nagyobb összeg a hírnevedet is növeli.</small><div class="btns"><button onclick="donate(+document.getElementById('chr').value)">Adományozok</button></div></div>`;
+}
+
+// --- automata év: minden ingyenes, kockázatmentes, nem negatív teendő egy gombbal ---
+const AUTO_ACT = ['vol', 'med', 'walk', 'rest', 'play', 'draw', 'read', 'run', 'chore', 'yoga', 'code', 'club', 'diary', 'community', 'family', 'cook', 'clean', 'garden'];
+const AUTO_SCH = ['kplay', 'kdraw', 'ksong', 'knap', 'hw', 'brk', 'pe', 'ugrp'];
+function autoPlan() {
+  const L = [], a = p.age; if (p.dead || p.prison > 0) return L;
+  const cs = x => a < 18 ? 0 : x.c || 0, add = (key, x, exec, extra = {}) => { const c = cs(x); L.push({ key, i: x.i, n: x.n, c, risk: c > 0 || !!x.rk, exec, ...extra }); };
+  // pénzbe kerülő / kockázatos tevékenységek is bekerülnek, de csak döntés alapján futnak
+  const SKIP = ['hair', 'clothes', 'surg', 'lot', 'scratch', 'bet', 'lic', 'doc', 'hosp'];
+  ACT.forEach(x => { if (x.k || SKIP.includes(x.id) || p.done[x.id] || !catAvail(x.cat).includes(x)) return; add('a' + x.id, x, () => doAct(x.id)); });
+  if (p.sick && !p.done.doc) { const x = ACT.find(q => q.id == 'doc'); if (x) add('adoc', x, () => doAct('doc')); }
+  SCH.forEach(x => { if (!AUTO_SCH.includes(x.id) || a < x.a[0] || a > x.a[1] || (x.u && !p.uni) || p.done['s' + x.id]) return; add('s' + x.id, x, () => schoolDo(x.id)); });
+  const fl = p.rel.some(r => r.alive && ['Barát', 'Testvér', 'Párod', 'Házastárs', 'Osztálytárs'].includes(r.role));
+  if (a >= 4) Object.keys(p.hob || {}).forEach(id => { const x = HOB.find(q => q.id == id), h = p.hob[id]; if (!x || !h) return;
+    if (!p.done['h' + id]) add('h' + id, x, () => hobPrac(id));
+    if (fl && !p.done['hf' + id]) add('hf' + id, x, () => hobFriend(id));
+    if (h.lv >= 60 && !p.done['ht' + id]) add('ht' + id, x, () => hobTeach(id)); });
+  if (p.pet) PACT.forEach(x => { if (x.ok.includes(p.pet.k) && !p.done['pet' + x.k]) add('p' + x.k, x, () => petAct(x.k)); });
+  // beszélgetés: csak család, kapcsolat és barátok (ismerősökkel és rokonokkal nincs automata)
+  p.rel.forEach((r, i) => { if (!r.alive || r.age < 1 || p.done['t' + i] || !['fam', 'love', 'friend'].includes(relCat(r))) return;
+    L.push({ key: 't' + i, i: '💬', n: 'Beszélgetés: ' + dn(r.n), c: 0, risk: false, rel: i, exec: () => talk(i) }); });
+  return L;
+}
+function autoYear() { if (autoPlan().length && window.runSteps) runSteps(autoPlan(), '🤖 Automata tevékenységek kész'); }
 
 // --- vagyon panel és részletek ---
 const asCost = (x, b, f) => Math.round((b + x.v * f) / 1e3) * 1e3;
@@ -983,7 +1032,14 @@ const FGRP = { 'fin:house': ['house'], 'fin:veh': ['car', 'bike'], 'fin:item': [
 function loanTake(m) { if (!(m > 0) || p.age < 20 || (p.debt || 0) + m * 1.1 > 1e7) return; p.debt = (p.debt || 0) + Math.round(m * 1.1); fxlog('Hitelt vettél fel, évi 12% kamattal.', { money: m }); render(); }
 function repayAll() { const m = Math.min(p.debt || 0, Math.max(0, p.money)); if (m <= 0) return; p.money -= m; p.debt -= m; lg(`Törlesztettél ${fmt(m)}-ot.` + (p.debt > 0 ? ` Hátralévő tartozás: ${fmt(p.debt)}.` : ' Már nincs tartozásod!'), 'good'); render(); }
 function deposit(m) { if (p.age < 18 || !can(m)) return; p.money -= m; p.sav = (p.sav || 0) + m; lg(`Betétbe tettél ${fmt(m)}-ot.`); render(); }
+function withdrawAmt(m) { const v = p.sav || 0; m = Math.min(v, Math.max(0, Math.round(m))); if (!m) return; p.sav = v - m; p.money += m; lg(`Kivettél a betétedből: ${fmt(m)}.`, 'good'); render(); }
 function withdraw() { const v = p.sav || 0; if (!v) return; p.sav = 0; p.money += v; lg(`Kivetted a betétedet: ${fmt(v)}.`, 'good'); render(); }
+function savSliders() {
+  const stp = 1e5, dm = Math.floor(p.money / stp) * stp, have = p.sav || 0, sv = Math.min(have, Math.max(stp, Math.round(have / 2 / stp) * stp));
+  const put = dm >= stp ? `<div class="card"><div class="top"><b>💰 Mennyit teszel be?</b><small id="sdv">${fmt(Math.min(dm, 1e6))}</small></div><input type="range" class="sl" id="sdr" min="${stp}" max="${dm}" step="${stp}" value="${Math.min(dm, 1e6)}" oninput="document.getElementById('sdv').textContent=fmt(+this.value)"><div class="btns"><button onclick="deposit(+document.getElementById('sdr').value)">Betétbe teszem</button></div></div>` : '<small>Nincs elég pénzed betétre (legalább 100 e Ft kell).</small>';
+  const out = have > 0 ? (have > stp ? `<div class="card"><div class="top"><b>🏧 Mennyit veszel ki?</b><small id="swv">${fmt(sv)}</small></div><input type="range" class="sl" id="swr" min="${stp}" max="${Math.floor(have / stp) * stp}" step="${stp}" value="${sv}" oninput="document.getElementById('swv').textContent=fmt(+this.value)"><div class="btns"><button onclick="withdrawAmt(+document.getElementById('swr').value)">Kivét</button><button class="alt" onclick="withdraw()">Mindet kiveszem</button></div></div>` : `<div class="btns"><button onclick="withdraw()">🏧 Mindet kiveszem</button></div>`) : '';
+  return put + out;
+}
 function bankPanel() {
   if (p.age < 18) return '<p class="empty">18 évesen mehetsz a bankba.</p>';
   const d = p.debt || 0, max = Math.max(0, Math.floor((1e7 - d) / 1.1 / 1e5) * 1e5), v = Math.min(max, 5e5);
@@ -992,13 +1048,13 @@ function bankPanel() {
     : max < 1e5 ? '<h3>Hitel</h3><p class="empty">Elérted a hitelkeretedet.</p>'
     : `<h3>Hitel</h3><div class="card"><div class="top"><b>💸 Mennyit vennél fel?</b><small id="loanv">${fmt(v)}</small></div><input type="range" class="sl" id="loanr" min="100000" max="${max}" step="100000" value="${v}" oninput="document.getElementById('loanv').textContent=fmt(+this.value)"><small>Évi 12% kamat és 10% kezelési díj. Legfeljebb ${fmt(max)}.</small><div class="btns"><button onclick="loanTake(+document.getElementById('loanr').value)">Hitelt veszek fel</button></div></div>`;
   return info + loan + '<div class="grid" style="margin-top:8px">' + abtn({ i: '💳', n: 'Törlesztés', off: !(d > 0 && p.money > 0), r: ['hap'], fn: 'repayAll()' }) + '</div>'
-    + '<h3>Megtakarítás</h3><div class="grid">' + [1e5, 1e6].map(m => abtn({ i: '💰', n: 'Betét ' + fmt(m), off: !can(m), fn: `deposit(${m})` })).join('') + abtn({ i: '🏧', n: 'Kivét', off: !(p.sav > 0), fn: 'withdraw()' }) + '</div>';
+    + '<h3>Megtakarítás</h3>' + savSliders() + charityBlock();
 }
 const SHOP = {
-  'shop:style': ['Ruházat és szépség', [{ id: 'cl1', i: '👕', n: 'Divatos ruha', c: 6e4, fx: { loo: 3, hap: 2 } }, { id: 'cl2', i: '👟', n: 'Márkás cipő', c: 9e4, fx: { loo: 2, hap: 3 } }, { id: 'cl3', i: '💇', n: 'Fodrász', c: 4e4, fx: { loo: 4 } }, { id: 'cl4', i: '💄', n: 'Szépségápolás', c: 8e4, fx: { loo: 5, hap: 1 } }, { id: 'cl5', i: '🕶️', n: 'Designer napszemüveg', c: 2.5e5, fx: { loo: 5, hap: 3 } }, { id: 'cl6', i: '🤵', n: 'Öltöny, estélyi', c: 4e5, fx: { loo: 7, hap: 3 } }]],
-  'shop:fun': ['Élmények', [{ id: 'f1', i: '🍽️', n: 'Étterem', c: 5e4, fx: { hap: 4 } }, { id: 'f2', i: '🎟️', n: 'Koncertjegy', c: 8e4, fx: { hap: 6 } }, { id: 'f3', i: '🎬', n: 'Mozi és popcorn', c: 2e4, fx: { hap: 3 } }, { id: 'f4', i: '🎢', n: 'Vidámpark', c: 6e4, fx: { hap: 5 } }, { id: 'f5', i: '🍾', n: 'Luxusvacsora', c: 3e5, fx: { hap: 8 } }]],
-  'shop:edu': ['Tanulás', [{ id: 'e1', i: '📚', n: 'Könyvek', c: 3e4, fx: { sma: 3 } }, { id: 'e2', i: '🎓', n: 'Online tanfolyam', c: 1.2e5, fx: { sma: 5 } }, { id: 'e3', i: '🧑‍🏫', n: 'Magántanár', c: 2.5e5, fx: { sma: 6, hap: 1 } }]],
-  'shop:care': ['Egészség', [{ id: 'h1', i: '💊', n: 'Vitaminok', c: 3e4, fx: { hea: 3 } }, { id: 'h2', i: '🏋️', n: 'Edzőterem-bérlet', c: 1.5e5, fx: { hea: 4, hap: 2 } }, { id: 'h3', i: '💆', n: 'Masszázs, wellness', c: 1e5, fx: { hea: 2, hap: 5 } }, { id: 'h4', i: '🩺', n: 'Magán-szűrővizsgálat', c: 2e5, fx: { hea: 6 } }]]
+  'shop:style': ['Ruházat és szépség', [{ id: 'cl2', i: '👟', n: 'Márkás cipő', c: 9e4, fx: { loo: 2, hap: 3 } }, { id: 'cl5', i: '🕶️', n: 'Designer napszemüveg', c: 2.5e5, fx: { loo: 5, hap: 3 } }, { id: 'cl6', i: '🤵', n: 'Öltöny, estélyi', c: 4e5, fx: { loo: 7, hap: 3 } }]],
+  'shop:fun': ['Élmények', [{ id: 'f5', i: '🍾', n: 'Luxusvacsora', c: 3e5, fx: { hap: 8 } }]],
+  'shop:edu': ['Tanulás', [{ id: 'e1', i: '📚', n: 'Könyvek', c: 3e4, fx: { sma: 3 } }, { id: 'e3', i: '🧑‍🏫', n: 'Magántanár', c: 2.5e5, fx: { sma: 6, hap: 1 } }]],
+  'shop:care': ['Egészség', [{ id: 'h1', i: '💊', n: 'Vitaminok', c: 3e4, fx: { hea: 3 } }, ]]
 };
 function shopBuy(id) {
   let x = null; Object.values(SHOP).forEach(g => g[1].forEach(q => { if (q.id == id) x = q; })); if (!x || p.done['sh' + id] || p.done['shn' + id] || p.age < 6) return;
@@ -1093,7 +1149,7 @@ function doJobAct(id) {
 }
 function jobList() {
   return JOBS.map(j => {
-    const ok = p.edu >= j.e && p.loo >= (j.l || 0) && !p.done.job && !(j.c && p.crim) && (!j.lic || p.lic) && j.n != p.job;
+    const ok = p.edu >= j.e && p.loo >= (j.l || 0) && (p.done.jobN || 0) < 3 && !(j.c && p.crim) && (!j.lic || p.lic) && j.n != p.job;
     return row(j.n, fmt(j.pay) + ' / év' + (p.job ? ` (${j.pay >= p.pay ? '+' : ''}${fmt(j.pay - p.pay)})` : ''), `<small>${T(EDU[j.e])}${j.s ? `, okosság ${j.s}+` : ''}${j.l ? `, kinézet ${j.l}+` : ''}${j.c ? ', tiszta előélet' : ''}${j.lic ? ', jogosítvány' : ''}</small><div class="btns"><button ${ok ? '' : 'disabled'} onclick="applyJob('${j.n}')">Jelentkezés</button></div>`);
   }).join('');
 }
@@ -1130,7 +1186,7 @@ const SCH = [
   { id: 'test', i: '📝', n: 'Dolgozat', a: [6, 17], r: ['perf'], run: () => exam('Dolgozat') },
   { id: 'brk', i: '🤝', n: 'Barátkozás szünetben', a: [6, 17], r: ['bond', 'hap'], run: () => mate('Szünetben együtt lógtatok.') },
   { id: 'pe', i: '🏃', n: 'Testnevelés', a: [6, 17], r: ['fit', 'hea'], run: () => { p.fit = cl((p.fit == null ? 30 : p.fit) + R(2, 5)); fxlog('Sokat mozogtál testnevelésen.', { hea: 2, hap: 2 }); } },
-  { id: 'skip', i: '🏃‍♂️', n: 'Lógás', a: [10, 17], risk: 1, run: () => { if (roll(.4)) { gg(-6); fxlog('Lógáson kaptak, igazgatói intőt kaptál.', { hap: -6 }); } else { gg(-3); fxlog('Ellógtad a napot, jó volt, de lemaradtál.', { hap: 6 }); } } },
+  { id: 'skip', i: '🏃‍♂️', n: 'Lógás', a: [10, 17], risk: 1, run: () => { if (roll(.4)) { gg(-6); fxlog('Lógás közben elkaptak, igazgatói intőt kaptál.', { hap: -6 }); } else { gg(-3); fxlog('Ellógtad a napot, jó volt, de lemaradtál.', { hap: 6 }); } } },
   { id: 'ustudy', i: '📚', n: 'Tanulás vizsgára', a: [18, 30], u: 1, r: ['sma', 'perf'], run: () => { gg(R(4, 8)); fxlog('Nyomtad a tananyagot a vizsgára.', { sma: R(2, 5), hap: -3 }); } },
   { id: 'uexam', i: '📝', n: 'Vizsga', a: [18, 30], u: 1, r: ['perf'], run: () => exam('Vizsga') },
   { id: 'ugrp', i: '👥', n: 'Tanulócsoport', a: [18, 30], u: 1, r: ['bond', 'sma'], run: () => { mate('Együtt tanultatok a csoporttal.'); gg(2); } },
@@ -1153,22 +1209,33 @@ function jobsScreen() {
   else b = a < 16 ? '<p class="empty">16 éves kortól vállalhatsz állást.</p>' : p.uni ? '<p class="empty">Az egyetem mellett most nem dolgozol.</p>' : jobList();
   return `<div class="seg"><button class="${sp ? '' : 'on'}" onclick="setJt('n')">💼 Sima munkák</button><button class="${sp ? 'on' : ''}" onclick="setJt('s')">⭐ Különleges</button></div>` + b;
 }
+function curPanel() {
+  const a = p.age;
+  if (p.prison > 0) return '<p class="empty">Börtönben nem dolgozhatsz.</p>';
+  if (p.car) return carPanel();
+  if (p.job) return row(p.job, `${JR[p.jr || 0]} · ${p.yrs}. éve`, `<p>Fizetés: ${fmt(p.pay)} / év</p><div class="btns"><button class="alt" onclick="quit()">Felmondok</button></div>`);
+  if (inSchool()) return schoolPanel();
+  if (a >= 65) return `<p class="empty">Nyugdíjas vagy: ${fmt(p.pension)} / év.</p>`;
+  if (a >= 18) return '<div class="card"><div class="top"><b>🔍 Munkanélküli vagy</b></div><small>Nézz szét az állások között, vagy indíts különleges karriert.</small></div>';
+  if (a < 3) return '<p class="empty">Még csecsemő vagy, a család gondoskodik rólad.</p>';
+  return '';
+}
 function jobPanel() {
   const a = p.age;
-  const h = row('Végzettség', T(EDU[p.edu]) + (p.uni ? ' (egyetemista)' : ''), '') + (a >= 17 ? row('Jogosítvány', p.lic ? 'Van' : 'Nincs', '') : '') + (p.crim ? row('Büntetett előélet', p.crim + ' ügy', '') : '') + (p.lang ? row('Nyelvtudás', p.lang + '/5', '') : '');
-  const hob = a >= 4 && p.prison <= 0 ? mcard('🎨', 'Hobbik', `${hobN()}/3 hobbi`, "go('hobs')") : '';
-  const sch = inSchool() && (p.job || p.car) ? mcard(a < 6 ? '🧸' : p.uni ? '🎓' : '🏫', sName(), 'Tanulmányok, barátok', "go('school')") : '';
+  const licBtn = !p.lic && a >= 18 ? `<div class="btns"><button ${can(15e4) && !p.done.lic ? '' : 'disabled'} onclick="doAct('lic')">🪪 Jogosítvány vizsga (${fmt(15e4)})</button></div>` : '';
+  const h = row('Végzettség', T(EDU[p.edu]) + (p.uni ? ' (egyetemista)' : ''), '') + (a >= 17 ? row('Jogosítvány', p.lic ? 'Van' : 'Nincs', licBtn) : '') + (p.crim ? row('Büntetett előélet', p.crim + ' ügy', '') : '') + (p.lang ? row('Nyelvtudás', p.lang + '/5', '') : '');
   const G = x => x ? '<h3>Menü</h3><div class="grid">' + x + '</div>' : '';
   if (p.prison > 0) return h + '<p class="empty">Börtönben nem dolgozhatsz.</p>';
-  if (p.car) return h + carPanel() + G(sch + hob);
-  let top = '';
-  if (p.job) top = row(p.job, `${JR[p.jr || 0]} · ${p.yrs}. éve`, `<p>Fizetés: ${fmt(p.pay)} / év</p><div class="btns"><button class="alt" onclick="quit()">Felmondok</button></div>`);
-  else if (inSchool()) top = schoolPanel();
-  else if (a >= 65) top = `<p class="empty">Nyugdíjas vagy: ${fmt(p.pension)} / év.</p>`;
-  else if (a >= 18) top = '<div class="card"><div class="top"><b>🔍 Munkanélküli vagy</b></div><small>Nézz szét az állások között, vagy indíts különleges karriert.</small></div>';
-  else if (a < 3) top = '<p class="empty">Még csecsemő vagy, a család gondoskodik rólad.</p>';
-  const menu = (a >= 14 && (a < 65 || p.job) ? mcard('💼', 'Állások', 'Sima és különleges munkák', "go('jobs')") : '') + (p.job ? mcard('📋', 'Munkahelyi tevékenységek', 'Megítélés, túlóra, emelés', "go('jwork')") : '') + sch + hob;
-  return h + top + G(menu);
+  const C = p.car ? CAR_BY[p.car.id] : null;
+  const curSub = C ? `${C.ranks[p.car.rank][0]} · ${p.car.yrs}. éve` : p.job ? `${p.job} · ${fmt(p.pay)} / év` : a >= 65 ? `Nyugdíj: ${fmt(p.pension || 0)} / év` : a >= 18 && !inSchool() ? 'Munkanélküli vagy' : inSchool() ? sName() : '';
+  const cur = (p.car || p.job || (a >= 18 && !inSchool()) || a >= 65) ? mcard(C ? C.i : '💼', C ? C.n : p.job ? 'Munkahely' : 'Munkahely', curSub, "go('cur')") : '';
+  const jobs = !p.car && a >= 14 && (a < 65 || p.job) ? mcard('🔎', 'Állások', 'Sima és különleges munkák', "go('jobs')") : '';
+  const jw = p.job ? mcard('📋', 'Munkahelyi tevékenységek', 'Megítélés, túlóra, emelés', "go('jwork')") : '';
+  const side = window.sideMenu ? sideMenu() : '';
+  const hob = a >= 4 && p.prison <= 0 ? mcard('🎨', 'Hobbik', `${hobN()}/3 hobbi`, "go('hobs')") : '';
+  const sch = inSchool() && (p.job || p.car) ? mcard(a < 6 ? '🧸' : p.uni ? '🎓' : '🏫', sName(), 'Tanulmányok, barátok', "go('school')") : '';
+  const sc = inSchool() && !p.job && !p.car ? curPanel() : '';
+  return h + sc + G(cur + jobs + jw + side + sch + hob);
 }
 
 // --- karrier: fejlesztések ---
@@ -1181,8 +1248,8 @@ const PERKS = {
 };
 ['cafe', 'shop', 'startup'].forEach(k => PERKS[k] = [{ id: 'mkt', i: '📈', n: 'Marketingcsapat', c: 6e5, e: 'inc' }, { id: 'acc', i: '🧾', n: 'Könyvelő', c: 3e5, e: 'dec' }]);
 const pkn = (c, e) => (c.perks || []).filter(id => { const K = (PERKS[c.id] || []).find(q => q.id == id); return K && K.e == e; }).length;
-function buyPerk(id) {
-  const c = p.car; if (!c) return; const K = PERKS[c.id].find(q => q.id == id), cost = K.c * (1 + c.rank); c.perks = c.perks || [];
+function buyPerk(id, inf) {
+  const c = inf ? p.inf : p.car; if (!c) return; const K = PERKS[c.id].find(q => q.id == id), cost = K.c * (1 + c.rank); c.perks = c.perks || [];
   if (c.perks.includes(id) || !can(cost)) return; p.money -= cost; c.perks.push(id); fxlog(`${K.i} ${K.n}: új fejlesztés a karrieredben.`, { hap: 4, perf: 5 }); render();
 }
 function carPanel() {
@@ -1198,7 +1265,9 @@ function carPanel() {
 
 // ===== alkotók: videósok és influenszerek, platformonként külön fiókkal =====
 const cNum = n => n >= 1e6 ? (n / 1e6).toFixed(n >= 1e7 ? 0 : 1).replace('.0', '') + ' M' : n >= 1e4 ? Math.round(n / 1e3) + ' e' : n >= 1e3 ? (n / 1e3).toFixed(1).replace('.0', '') + ' e' : String(n);
-const isCr = () => !!(p.car && CAR_BY[p.car.id] && CAR_BY[p.car.id].cr);
+const crO = () => (p.car && CAR_BY[p.car.id] && CAR_BY[p.car.id].cr ? p.car : p.inf || null);
+const isCr = () => !!crO();
+let crNicheSel = null, crPend = null;
 const ac = (id, i, n, w, b, g, o = {}) => ({ id, i, n, w, b, g: [g[0] * 1.6, g[1] * 1.6], ...o });
 const PLAT = {
   yt: { n: 'YouTube', i: '▶️', fu: 'feliratkozó', pn: 'videó', d: 'videók, Shorts, élő adás', k: 30, mon: 1000, ver: 1e5, acts: [
@@ -1229,7 +1298,7 @@ const PLAT = {
     ac('po', '👍', 'Poszt', .9, [20, 90], [2, 5]), ac('gr', '👥', 'Csoport építése', .8, [20, 100], [3, 8]), ac('live', '🔴', 'Élő videó', .8, [10, 60], [2, 6], { min: 100 }),
     ac('ad', '📣', 'Hirdetés', .9, [100, 400], [5, 10], { c: 1e5 }), ac('re', '🎞️', 'Reel', .8, [30, 200], [3, 10]), ac('sp', '💰', 'Márkaegyüttműködés', .6, [0, 0], [1, 3], { m: [60, 140], min: 1000 })] }
 };
-const newAcc = () => ({ f: R(30, 120) + Math.round(p.loo / 3), n: 0, vw: 0, ver: false, ban: 0, act: 0 });
+const newAcc = () => ({ f: R(30, 120) + Math.round(p.loo / 3), n: 0, vw: 0, ver: false, ban: 0, act: 0, niche: crNicheSel });
 const crTot = c => Object.values(c.acc || {}).reduce((q, a) => q + a.f, 0);
 const crTier = t => t >= 1e6 ? 4 : t >= 1e5 ? 3 : t >= 1e4 ? 2 : t >= 1e3 ? 1 : 0;
 function crSync(c) {
@@ -1241,7 +1310,7 @@ function crSync(c) {
 }
 function crIncome(c, real, assume) {
   let inc = 0;
-  Object.entries(c.acc).forEach(([k, a]) => { const P2 = PLAT[k]; if (a.ban || a.f < P2.mon) return; inc += a.f * P2.k * (a.ver ? 1.3 : 1) * (real ? R(60, 150) / 100 : 1) * (a.act || assume ? 1 : .5); });
+  Object.entries(c.acc).forEach(([k, a]) => { const P2 = PLAT[k]; if (a.ban || a.f < P2.mon) return; inc += a.f * P2.k * (a.ver ? 1.3 : 1) * nicheIm(a, k) * (real ? R(60, 150) / 100 : 1) * (a.act || assume ? 1 : .5); });
   return rk(inc * (1 + .15 * pkn(c, 'inc')));
 }
 function crYear(c, C) {
@@ -1254,14 +1323,14 @@ function crYear(c, C) {
   });
   crSync(c); lg(`${C.i} Idei bevétel: ${fmt(inc)} · összes követő: ${cNum(crTot(c))}.`, inc > 0 ? 'good' : '');
 }
-function crSel(k) { if (p.car && p.car.acc && p.car.acc[k]) { p.car.sel = k; render(); } }
+function crSel(k) { const c = crO(); if (c && c.acc && c.acc[k]) { c.sel = k; render(); } }
 function crAct(k, id) {
-  const c = p.car; if (!c || !c.acc || !c.acc[k]) return; const a = c.acc[k], P2 = PLAT[k], x = P2.acts.find(q => q.id == id); if (!x) return;
+  const c = crO(); if (!c || !c.acc || !c.acc[k]) return; const a = c.acc[k], P2 = PLAT[k], x = P2.acts.find(q => q.id == id); if (!x) return;
   const dk = 'cr' + k + id, cost = p.age < 18 ? 0 : x.c || 0;
   if (p.done[dk] || a.ban || (x.min && a.f < x.min) || !can(cost)) return;
   p.done[dk] = 1; if (!parentGate(x.c || 0, x.n)) return render(); p.money -= cost; a.act = (a.act || 0) + 1; a.n = (a.n || 0) + 1;
   if (Math.random() < (x.w == null ? 1 : x.w)) {
-    const gain = Math.round((R(x.b[0], x.b[1]) + a.f * R(Math.round(x.g[0] * 10), Math.round(x.g[1] * 10)) / 1000) * (a.ver ? 1.25 : 1)); a.f += gain; a.vw = (a.vw || 0) + Math.round(gain * R(8, 40));
+    const gain = Math.round((R(x.b[0], x.b[1]) + a.f * R(Math.round(x.g[0] * 10), Math.round(x.g[1] * 10)) / 1000) * (a.ver ? 1.25 : 1) * nicheGm(a, k)); a.f += gain; a.vw = (a.vw || 0) + Math.round(gain * R(8, 40));
     const f = { hap: 2 }; if (x.m && a.f >= 500) f.money = rk(a.f * R(x.m[0], x.m[1]) / 10 * (1 + .15 * pkn(c, 'inc')));
     fxlog(`${P2.i} ${x.n}: jól sikerült! +${cNum(gain)} ${P2.fu}.`, f);
   } else {
@@ -1271,33 +1340,36 @@ function crAct(k, id) {
   crSync(c); render();
 }
 function crVerify(k) {
-  const c = p.car; if (!c || !c.acc || !c.acc[k]) return; const a = c.acc[k], P2 = PLAT[k], dk = 'crv' + k;
+  const c = crO(); if (!c || !c.acc || !c.acc[k]) return; const a = c.acc[k], P2 = PLAT[k], dk = 'crv' + k;
   if (a.ver || a.ban || a.f < P2.ver || p.done[dk]) return; p.done[dk] = 1;
   if (Math.random() < .55 + .2 * pkn(c, 'inc')) { a.ver = true; fxlog(`✅ Hitelesítették a ${P2.n} fiókodat! Több bevétel és gyorsabb növekedés.`, { hap: 12 }); }
   else fxlog(`${P2.i} A ${P2.n} elutasította a hitelesítési kérelmedet. Jövőre újra próbálhatod.`, { hap: -4 });
   render();
 }
-function crOpen(k) { const c = p.car; if (!c || !c.acc || c.acc[k] || !CAR_BY[c.id].pl.includes(k)) return; c.acc[k] = newAcc(); c.sel = k; fxlog(`${PLAT[k].i} Új fiókot nyitottál itt: ${PLAT[k].n}.`, { hap: 4 }); crSync(c); render(); }
-function startCr(id, k) { const C = CAR_BY[id]; if (!C || !C.cr || !C.pl.includes(k)) return; sub = null; crPl = k; try { startCar(id); } finally { crPl = null; } }
+function crOpen(k, n) { const c = crO(); if (!c || !c.acc || c.acc[k] || !CAR_BY[c.id].pl.includes(k)) return; crNicheSel = n || null; c.acc[k] = newAcc(); crNicheSel = null; crPend = null; c.sel = k; fxlog(`${PLAT[k].i} Új fiókot nyitottál itt: ${PLAT[k].n}.`, { hap: 4 }); crSync(c); render(); }
+function startCr(id, k, n) { const C = CAR_BY[id]; if (!C || !C.cr || !C.pl.includes(k)) return; sub = null; crPl = k; crNicheSel = n || null; try { startCar(id); } finally { crPl = null; crNicheSel = null; crPend = null; } }
+function crPickP(id, k) { crPend = { mode: 'start', id, k }; render(); }
+function crPickO(k) { crPend = { mode: 'open', k }; render(); }
 function crStart(id) {
   const C = CAR_BY[id]; if (!C || !C.cr) return '';
-  return `<div class="card"><div class="top"><b>${C.i} ${C.n}</b></div><small>Válaszd ki, melyik platformon kezdesz. Később további fiókokat is nyithatsz, és mindegyiket külön építheted.</small></div><h3>Platform</h3><div class="grid">`
-    + C.pl.map(k => abtn({ i: PLAT[k].i, n: PLAT[k].n, note: PLAT[k].d, fn: `startCr('${id}','${k}')` })).join('') + '</div>';
+  const intro = `<div class="card"><div class="top"><b>${C.i} ${C.n}</b></div><small>${T(['Válaszd ki, melyik platformon kezdesz, majd azt is, milyen irányú csatornát viszel. Később további fiókokat is nyithatsz, platformonként más-más iránnyal.', 'Pick the platform you start on, then the direction of your channel. Later you can open more accounts, each with its own direction.'])}</small></div>`;
+  if (crPend && crPend.mode == 'start' && crPend.id == id) return intro + nicheStep('start', id, crPend.k);
+  return intro + `<h3>Platform</h3><div class="grid">` + C.pl.map(k => abtn({ i: PLAT[k].i, n: PLAT[k].n, note: PLAT[k].d, fn: `crPickP('${id}','${k}')` })).join('') + '</div>';
 }
 function crPanel() {
-  const c = p.car, C = CAR_BY[c.id], a0 = p.age; crSync(c);
+  const c = crO(), C = CAR_BY[c.id], a0 = p.age; crSync(c);
   const keys = Object.keys(c.acc), k = c.sel, a = c.acc[k], P2 = PLAT[k], tot = crTot(c), veri = keys.filter(q => c.acc[q].ver).length, est = crIncome(c, false, true);
   const head = row(`${C.i} ${C.ranks[c.rank][0]}`, `${c.yrs}. éve · ${C.n}`, `<p>Összes követő: ${cNum(tot)} · várható bevétel: ${fmt(est)} / év</p><small>${keys.length} fiók · ✅ ${veri} hitelesített</small>`);
-  const tabs = '<div class="seg pl">' + keys.map(q => `<button class="${q == k ? 'on' : ''}" onclick="crSel('${q}')">${PLAT[q].i} ${PLAT[q].n}${c.acc[q].ver ? ' ✅' : ''}</button>`).join('') + '</div>';
+  const tabs = '<div class="seg pl">' + keys.map(q => `<button class="${q == k ? 'on' : ''}" onclick="crSel('${q}')">${PLAT[q].i}${nicheIcon(c.acc[q])} ${PLAT[q].n}${c.acc[q].ver ? ' ✅' : ''}</button>`).join('') + '</div>';
   const goal = a.ver ? P2.ver * 10 : P2.ver, pct = Math.min(100, Math.round(a.f / goal * 100));
-  const card = `<div class="card"><div class="top"><b>${P2.i} ${P2.n}${a.ver ? ' ✅' : ''}</b><small>${cNum(a.f)} ${P2.fu}</small></div><div class="tr"><i style="width:${pct}%"></i></div><small>${a.n || 0} ${P2.pn} · ${cNum(a.vw || 0)} megtekintés · ${a.f >= P2.mon ? 'monetizálva' : `monetizáláshoz ${cNum(P2.mon)} ${P2.fu} kell`}${a.ver ? '' : ` · hitelesítéshez ${cNum(P2.ver)} kell`}${a.ban ? ` · ⛔ felfüggesztve (${a.ban} év)` : ''}</small></div>`;
+  const card = `<div class="card"><div class="top"><b>${P2.i} ${P2.n}${a.ver ? ' ✅' : ''}${nicheLabel(a)}</b><small>${cNum(a.f)} ${P2.fu}</small></div><div class="tr"><i style="width:${pct}%"></i></div><small>${a.n || 0} ${P2.pn} · ${cNum(a.vw || 0)} megtekintés · ${a.f >= P2.mon ? 'monetizálva' : `monetizáláshoz ${cNum(P2.mon)} ${P2.fu} kell`}${a.ver ? '' : ` · hitelesítéshez ${cNum(P2.ver)} kell`}${a.ban ? ` · ⛔ felfüggesztve (${a.ban} év)` : ''}</small></div>`;
   const acts = P2.acts.map(x => abtn({ i: x.i, n: x.n, c: a0 < 18 ? 0 : x.c || 0, r: x.m ? ['money'] : ['fol'], risk: x.risk, off: a.ban || (x.min && a.f < x.min), note: x.min && a.f < x.min ? cNum(x.min) + ' kell' : '', done: p.done['cr' + k + x.id], fn: `crAct('${k}','${x.id}')` })).join('')
     + abtn({ i: '✅', n: a.ver ? 'Hitelesített fiók' : 'Hitelesítés kérése', off: a.ver || a.ban || a.f < P2.ver, note: a.ver ? '' : a.f < P2.ver ? cNum(P2.ver) + ' kell' : '', done: p.done['crv' + k], fn: `crVerify('${k}')` });
-  const more = C.pl.filter(q => !c.acc[q]).map(q => abtn({ i: PLAT[q].i, n: PLAT[q].n + ' fiók nyitása', note: PLAT[q].d, fn: `crOpen('${q}')` })).join('');
+  const more = C.pl.filter(q => !c.acc[q]).map(q => abtn({ i: PLAT[q].i, n: PLAT[q].n + ' fiók nyitása', note: PLAT[q].d, fn: `crPickO('${q}')` })).join('');
   const perks = (PERKS[c.id] || []).map(K => (c.perks || []).includes(K.id)
     ? `<button class="act dn" disabled><b>${K.i} ${K.n}</b><small>✓ megvan · ${K.e == 'inc' ? '+15% bevétel' : 'lassabb elfáradás'}</small></button>`
-    : abtn({ i: K.i, n: K.n, c: K.c * (1 + c.rank), r: [K.e == 'inc' ? 'money' : 'perf'], fn: `buyPerk('${K.id}')` })).join('');
-  return head + tabs + card + `<h3>${P2.n} tevékenységek</h3><div class="grid">${acts}</div>` + (more ? `<h3>Új platform</h3><div class="grid">${more}</div>` : '') + `<h3>Fejlesztések</h3><div class="grid">${perks}</div><div class="btns"><button class="alt" onclick="quitCar()">Felhagyok vele</button></div>`;
+    : abtn({ i: K.i, n: K.n, c: K.c * (1 + c.rank), r: [K.e == 'inc' ? 'money' : 'perf'], fn: `buyPerk('${K.id}',${c === p.inf && c !== p.car ? 1 : 0})` })).join('');
+  return head + tabs + card + `<h3>${P2.n} tevékenységek</h3><div class="grid">${acts}</div>` + (crPend && crPend.mode == 'open' ? nicheStep('open', c.id, crPend.k) : more ? `<h3>Új platform</h3><div class="grid">${more}</div>` : '') + `<h3>Fejlesztések</h3><div class="grid">${perks}</div><div class="btns"><button class="alt" onclick="quitCr()">Felhagyok vele</button></div>`;
 }
 PERKS.inf = PERKS.vid;
 CH.push(
@@ -1428,12 +1500,12 @@ function baby(i) {
 
 // ----- munka -----
 function applyJob(n) {
-  const j = JOBS.find(q => q.n == n); if ((j.c && p.crim) || (j.lic && !p.lic) || p.car) return; p.done.job = 1;
-  if (Math.random() < Math.min(.95, Math.max(.15, .6 + (p.sma - j.s) / 100 + (p.lang || 0) * .03))) { p.jr = p.job ? Math.max(0, (p.jr || 0) - 1) : 0; p.job = j.n; p.pay = j.pay; p.yrs = 0; p.jp = 30; fxlog(`Felvettek: ${j.n}.`, { hap: 10 }); }
+  const j = JOBS.find(q => q.n == n); if ((j.c && p.crim) || (j.lic && !p.lic) || p.car) return; p.done.jobN = (p.done.jobN || 0) + 1;
+  if (Math.random() < Math.min(.95, Math.max(.15, .6 + (p.sma - j.s) / 100 + (p.lang || 0) * .03))) { if (p.job && window.leaveJob) leaveJob(); p.side = null; p.jr = p.job ? Math.max(0, (p.jr || 0) - 1) : 0; p.job = j.n; p.pay = j.pay; p.yrs = 0; p.jp = 30; fxlog(`Felvettek: ${j.n}.`, { hap: 10 }); }
   else lg(`Elutasítottak (${j.n}).`, 'bad');
   render();
 }
-function quit() { if (confirm(T(['Biztosan felmondasz?', 'Really quit your job?']))) { lg(`Felmondtál (${p.job}).`); p.job = null; p.pay = 0; render(); } }
+function quit() { if (confirm(T(['Biztosan felmondasz?', 'Really quit your job?']))) { if (window.leaveJob) leaveJob(); lg(`Felmondtál (${p.job}).`); p.job = null; p.pay = 0; render(); } }
 
 // ----- megjelenítés -----
 const TT = { job: ['Foglalkozás', 'Occupation'], assets: ['Pénzügy', 'Finance'], rel: ['Kapcsolatok', 'Relationships'], act: ['Tevékenységek', 'Activities'] };
@@ -1447,6 +1519,7 @@ function panel(t) {
   if (t == 'job' && sub && sub.startsWith('h:')) return bk() + hobbyDetail(sub.slice(2));
   if (t == 'rel' && sub && sub.startsWith('kin:')) return bk() + kinPanel(+sub.slice(4));
   if (t == 'job' && sub && sub.startsWith('crstart:')) return bk() + crStart(sub.slice(8));
+  if (t == 'job' && sub == 'cur') return bk() + curPanel();
   if (t == 'job' && sub == 'jobs') return bk() + jobsScreen();
   if (t == 'job' && sub == 'hobs') return bk() + hobbyPanel();
   if (t == 'job' && sub == 'jwork') return bk() + jobActs();
@@ -1502,14 +1575,14 @@ function confetti(n = 70) {
 // ----- megjelenítés -----
 const SKIN = ['', '\u{1F3FB}', '\u{1F3FC}', '\u{1F3FD}', '\u{1F3FE}', '\u{1F3FF}'], SKINC = ['', '#f8dcc6', '#e9bd96', '#c98f62', '#9a6240', '#5e3a24'];
 
-const HC = ['#24180f', '#6b4226', '#e0b24a', '#b5381f', '#8a8f9a', '#d96a9f'], OC = ['#e4572e', '#1f8a83', '#3a6fd8', '#f0b429', '#7a5cc7', '#3b3b46', '#e86a9a', '#4a9d4a'], XC = ['#e4572e', '#1f8a83', '#3a6fd8', '#f0b429', '#7a5cc7', '#3b3b46', '#e86a9a', '#f4f4f4'], SW = { skin: SKINC, hc: HC, oc: OC, xc: XC };
+const HC = ['#24180f', '#6b4226', '#e0b24a', '#b5381f', '#8a8f9a', '#d96a9f', '#3b2616', '#9a6b3e', '#efe3b8', '#8c3b1f', '#c2a878', '#3a6fd8', '#7a5cc7', '#1f8a83'], OC = ['#e4572e', '#1f8a83', '#3a6fd8', '#f0b429', '#7a5cc7', '#3b3b46', '#e86a9a', '#4a9d4a', '#8c1d2f', '#0f3d6e', '#2f5d3a', '#9aa3ad', '#f4f4f0', '#c9a27a', '#f48a3c', '#7fc4e8', '#b6e08a', '#f2a6c0', '#6e4a2f', '#a8d5c2', '#c9b6ea', '#e8d05a', '#1c1c24', '#d94f4f'], XC = ['#e4572e', '#1f8a83', '#3a6fd8', '#f0b429', '#7a5cc7', '#3b3b46', '#e86a9a', '#f4f4f4', '#8c1d2f', '#0f3d6e', '#2f5d3a', '#f48a3c', '#7fc4e8', '#f2a6c0', '#c9a27a', '#1c1c24'], SW = { skin: SKINC, hc: HC, oc: OC, xc: XC };
 const HSN = [['rövid', 'short'], ['hosszú', 'long'], ['feltűzött', 'tied-up'], ['nagyon rövid', 'buzzed'], ['göndör', 'curly'], ['félhosszú', 'bob'], ['lófarkas', 'ponytail'], ['tüskés', 'spiky'], ['copfos', 'pigtail'], ['kopasz', 'bald'],
   ['afro', 'afro'], ['frufrus bubi', 'bob with bangs'], ['oldalra fésült', 'side-swept'], ['feltupírozott', 'quiff'], ['magas konty', 'top bun'], ['két konty', 'space buns'], ['magas lófarok', 'high ponytail'], ['két fonat', 'twin braids'], ['oldalfonat', 'side braid'], ['hullámos hosszú', 'long wavy'], ['hosszú frufruval', 'long with bangs'], ['tarajos', 'mohawk'], ['kopaszodó', 'receding'], ['középen elválasztott', 'curtains'], ['pixie', 'pixie']];
 const TALL = [2, 4, 7, 10, 13, 14, 15, 16, 21], FULLHAT = [1, 2, 3, 4, 5, 9];
 const BDN = [['átlagos', 'average'], ['karcsú', 'slim'], ['nyurga', 'lanky'], ['izmos', 'muscular'], ['atletikus', 'athletic'], ['telt', 'curvy'], ['nagydarab', 'heavyset'], ['zömök', 'stocky'], ['körte formájú', 'pear-shaped'], ['apró', 'petite']];
-const HCN = [['fekete', 'black'], ['barna', 'brown'], ['szőke', 'blond'], ['vörös', 'red'], ['ősz', 'gray'], ['rózsaszín', 'pink']];
-const OCN = [['piros', 'red'], ['kékeszöld', 'teal'], ['kék', 'blue'], ['sárga', 'yellow'], ['lila', 'purple'], ['sötét', 'dark'], ['rózsaszín', 'pink'], ['zöld', 'green']];
-const OTN = [['póló', 't-shirt'], ['pulcsi', 'sweater'], ['kapucnis pulcsi', 'hoodie'], ['márkás polo', 'branded polo'], ['garbó', 'turtleneck'], ['kardigán', 'cardigan'], ['trikó', 'tank top'], ['csíkos póló', 'striped tee'], ['ing', 'shirt'], ['blézer', 'blazer'], ['melegítőfelső', 'track jacket'], ['sportmez', 'jersey'], ['kantáros nadrág', 'dungarees'], ['farmerdzseki', 'denim jacket'], ['bőrdzseki', 'leather jacket'], ['mellény', 'puffer vest']];
+const HCN = [['fekete', 'black'], ['barna', 'brown'], ['szőke', 'blond'], ['vörös', 'red'], ['ősz', 'gray'], ['rózsaszín', 'pink'], ['sötétbarna', 'dark brown'], ['világosbarna', 'light brown'], ['platinaszőke', 'platinum'], ['gesztenye', 'auburn'], ['hamvasszőke', 'ash blond'], ['kék', 'blue'], ['lila', 'purple'], ['türkiz', 'teal']];
+const OCN = [['piros', 'red'], ['kékeszöld', 'teal'], ['kék', 'blue'], ['sárga', 'yellow'], ['lila', 'purple'], ['sötét', 'dark'], ['rózsaszín', 'pink'], ['zöld', 'green'], ['bordó', 'burgundy'], ['tengerészkék', 'navy'], ['erdőzöld', 'forest green'], ['szürke', 'gray'], ['fehér', 'white'], ['bézs', 'beige'], ['narancs', 'orange'], ['égkék', 'sky blue'], ['lime', 'lime'], ['pasztellrózsaszín', 'pastel pink'], ['barna', 'brown'], ['menta', 'mint'], ['levendula', 'lavender'], ['mustár', 'mustard'], ['fekete', 'black'], ['korall', 'coral']];
+const OTN = [['póló', 't-shirt'], ['pulcsi', 'sweater'], ['kapucnis pulcsi', 'hoodie'], ['márkás polo', 'branded polo'], ['garbó', 'turtleneck'], ['kardigán', 'cardigan'], ['trikó', 'tank top'], ['csíkos póló', 'striped tee'], ['ing', 'shirt'], ['blézer', 'blazer'], ['melegítőfelső', 'track jacket'], ['sportmez', 'jersey'], ['kantáros nadrág', 'dungarees'], ['farmerdzseki', 'denim jacket'], ['bőrdzseki', 'leather jacket'], ['mellény', 'puffer vest'], ['henley felső', 'henley'], ['virágos póló', 'floral tee'], ['kockás flanelling', 'plaid flannel'], ['steppelt kabát', 'puffer jacket'], ['egyetemi dzseki', 'varsity jacket'], ['hawaii ing', 'hawaiian shirt'], ['pöttyös felső', 'polka-dot top'], ['pántos nyári ruha', 'sundress'], ['kabát', 'coat'], ['színblokkos pulcsi', 'color-block sweater']];
 const HTN = [['nincs', 'none'], ['baseball sapka', 'cap'], ['kötött sapka', 'beanie'], ['halászsapka', 'bucket hat'], ['kalap', 'fedora'], ['szalmakalap', 'straw hat'], ['fejpánt', 'headband'], ['masni', 'hair bow'], ['virágkoszorú', 'flower crown'], ['bandana', 'bandana'], ['macskafül', 'cat ears'], ['korona', 'crown']];
 const EAN = [['nincs', 'none'], ['fejhallgató', 'headphones'], ['fülhallgató', 'earbuds'], ['headset', 'headset'], ['fülbevaló', 'earrings']];
 const GLN = [['nincs', 'none'], ['kerek szemüveg', 'round glasses'], ['szögletes szemüveg', 'square glasses'], ['napszemüveg', 'sunglasses']];
@@ -1518,9 +1591,10 @@ const pk = (v, f) => v != null && v !== 'r' ? +v : f();
 const chance = (p, n) => () => Math.random() < p ? R(1, n) : 0;
 const rndHs = g => P(g == 'f' ? [1, 2, 0, 4, 5, 6, 8, 5, 6, 10, 11, 14, 15, 16, 17, 18, 19, 20, 23, 24, 11, 19] : [0, 3, 4, 7, 0, 3, 7, 9, 10, 12, 13, 21, 22, 23, 12, 13]);
 const rndBd = () => P([0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
-const rndOt = () => P([0, 0, 0, 1, 1, 2, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]);
-const rndHt = chance(.22, 11), rndEa = chance(.15, 4), rndGl = chance(.2, 3), rndNc = chance(.18, 4);
-const mkLook = (g, sk) => ({ g, sk: sk || R(1, 5), hs: rndHs(g), hc: R(0, 4), oc: R(0, 7), bd: rndBd(), ot: rndOt(), ht: rndHt(), ea: rndEa(), gl: rndGl(), nc: rndNc(), xc: R(0, 7) });
+const BASIC_OT = [0, 1, 2, 8, 7], rndOt = () => Math.random() < .9 ? P(BASIC_OT) : P([3, 4, 5, 6, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]);
+const rndHc = () => Math.random() < .03 ? P([5, 11, 12, 13]) : P([0, 0, 0, 1, 1, 1, 6, 7, 7, 2, 2, 10, 8, 3, 9, 4]), rndOc = () => R(0, OC.length - 1), rndXc = () => R(0, XC.length - 1);
+const rndHt = chance(.03, 11), rndEa = chance(.02, 4), rndGl = chance(.05, 3), rndNc = chance(.02, 4);
+const mkLook = (g, sk) => ({ g, sk: sk || R(1, 5), hs: rndHs(g), hc: rndHc(), oc: rndOc(), bd: rndBd(), ot: rndOt(), ht: rndHt(), ea: rndEa(), gl: rndGl(), nc: rndNc(), xc: rndXc() });
 const lk = r => r.look || (r.look = mkLook(NF.includes(r.n.split(' ')[1]) || r.role == 'Anya' ? 'f' : 'm'));
 const desc = l => { const h = l.hs == 9 ? T(HSN[9]) : `${T(HCN[l.hc])} ${T(HSN[l.hs])} ${T(['haj', 'hair'])}`, ot = +l.ot || 0;
   const x = [[HTN, l.ht], [EAN, l.ea], [GLN, l.gl], [NCN, l.nc]].filter(([, v]) => +v > 0).map(([A, v]) => T(A[+v]));
@@ -1620,6 +1694,34 @@ function avSvg(l, a, dead, vb) {
       const vc = shade(oc, -.55); O.fill = vc;
       O.pre = sleeves(oc) + `<path d="M${50 - tw} ${sy + 8}Q50 ${sy + 12} ${50 + tw} ${sy + 8}M${50 - tw} ${sy + 19}Q50 ${sy + 23} ${50 + tw} ${sy + 19}M${50 - tw} ${sy + 30}Q50 ${sy + 34} ${50 + tw} ${sy + 30}" ${th(1.3)} opacity=".4"/><path d="M50 ${y0 + 6}V114" ${th(1.5)}/>`;
       O.nk = 'none'; O.post = stand(vc, 1) + `<path d="M50 ${y0 - 12}V${y0 + 7}" ${th(1.4)}/>`; break; }
+    case 16: // henley
+      O.post = `<path d="M50 ${y0 + 9}V${y0 + 27}" ${th(1.4)}/>${btn(50, y0 + 14)}${btn(50, y0 + 20)}${btn(50, y0 + 26)}`; break;
+    case 17: case 21: case 22: { // virágos póló / hawaii ing / pöttyös
+      let d = ''; const pts = []; for (let yy = y0 + 4, r = 0; yy < 114; yy += 11, r++) for (let xx = 8 + (r % 2) * 8; xx < 96; xx += 16) pts.push([xx, yy]);
+      d = ot == 22 ? pts.map(q => `<circle cx="${q[0]}" cy="${q[1]}" r="2.6" fill="#fff" opacity=".88"/>`).join('')
+        : pts.map((q, i) => `<g transform="translate(${q[0]} ${q[1]})"><circle cx="0" cy="-2.6" r="2" fill="${i % 2 ? '#fff' : '#ffd1dc'}"/><circle cx="2.6" cy="0" r="2" fill="${i % 2 ? '#fff' : '#ffd1dc'}"/><circle cx="0" cy="2.6" r="2" fill="${i % 2 ? '#fff' : '#ffd1dc'}"/><circle cx="-2.6" cy="0" r="2" fill="${i % 2 ? '#fff' : '#ffd1dc'}"/><circle r="1.5" fill="#f0b429"/></g>`).join('');
+      O.pre = d;
+      if (ot == 21) { O.nk = 'v'; O.vd = 9; O.post = `<path d="M50 ${y0 + 9}V114" ${th(1.4)}/>${flaps(oL, 11)}${btn(50, y0 + 17)}${btn(50, y0 + 27)}${btn(50, y0 + 37)}`; } break; }
+    case 18: { // kockás flanel
+      let st = ''; for (let x = 4; x < 100; x += 11) st += `<rect x="${x}" y="40" width="4.6" height="80" fill="${oD}" opacity=".5"/>`; for (let y = y0; y < 114; y += 11) st += `<rect x="0" y="${y}" width="100" height="4.6" fill="#fff" opacity=".28"/>`;
+      O.nk = 'v'; O.vd = 9; O.pre = st; O.post = `<path d="M50 ${y0 + 9}V114" ${th(1.4)}/>${flaps(oL, 11)}${btn(50, y0 + 17)}${btn(50, y0 + 27)}${btn(50, y0 + 37)}`; break; }
+    case 19: { // steppelt kabát
+      let q = ''; for (let y = y0 + 8; y < 114; y += 11) q += `M${SL - 4} ${y}Q50 ${y + 4} ${SR + 4} ${y}`;
+      O.nk = 'none'; O.pre = `<path d="${q}" ${th(1.8, oD)} opacity=".65"/><path d="${q}" ${th(1, '#fff')} opacity=".25" transform="translate(0 1.6)"/>`;
+      O.post = stand(oc, 3) + `<path d="M50 ${y0 - 12}V114" ${th(1.6)}/><path d="M${nwl - 2} ${y0 - 6}H${nwr + 2}" ${th(1, oD)} opacity=".5"/>`; break; }
+    case 20: // egyetemi dzseki
+      O.nk = 'none'; O.pre = sleeves(cream) + `<path d="M${50 - tw - 1} ${sy + 24}H${50 + tw + 1}" ${th(0)}/><text x="${50 - 13}" y="${y0 + 33}" font-family="Arial,Helvetica,sans-serif" font-size="17" font-weight="900" fill="#fff" stroke="${OL}" stroke-width=".8" paint-order="stroke">R</text>`;
+      O.post = stand(oD, 1) + `<path d="M50 ${y0 - 12}V114" ${th(1.4)}/>${btn(50, y0 + 6)}${btn(50, y0 + 16)}${btn(50, y0 + 26)}<path d="M${50 - tw} ${sy + 8}H${50 - tw + 5}M${50 + tw - 5} ${sy + 8}H${50 + tw}" ${th(2.4, oc)}/>`; break;
+    case 23: // pántos nyári ruha
+      O.nk = 'scoop'; O.pre = sleeves(sk) + `<path d="M${BL} ${sy + 24}H${BR}" ${th(2.2, oD)} opacity=".7"/><path d="M${BL} ${sy + 24}L${BL - 3} 114M${BR} ${sy + 24}L${BR + 3} 114" ${th(1, oD)} opacity=".35"/>`;
+      O.post = `<path d="M${nwl - 3} ${y0 - 3}V${y0 + 6}M${nwr + 3} ${y0 - 3}V${y0 + 6}" ${th(3, oc)}/>`; break;
+    case 24: { // kabát
+      O.nk = 'v'; O.vd = 9; O.pre = `<path d="M${nwl - 1} ${y0 - 3}L50 ${y0 + 30}L${nwr + 1} ${y0 - 3}Z" fill="${cream}"/>`;
+      const lp = s => `<path d="M${X(s, nw + 10)} ${y0 - 3}L${X(s, nw)} ${y0}L${X(s, 1)} ${y0 + 30}L${X(s, 9)} ${y0 + 36}L${X(s, 17)} ${y0 + 22}L${X(s, 12)} ${y0 + 16}L${X(s, nw + 15)} ${y0 + 8}Z" fill="${oL}" ${kw(1.4)}/>`;
+      O.post = lp(-1) + lp(1) + `<path d="M${BL} ${sy + 24}Q50 ${sy + 28} ${BR} ${sy + 24}" ${th(4, oD)}/><rect x="${50 - 4}" y="${sy + 21.5}" width="8" height="6" rx="1" fill="none" ${kw(1.2)}/>${btn(50 - 3, y0 + 40, oD)}`; break; }
+    case 25: // színblokkos pulcsi
+      O.pre = `<rect x="0" y="${sy + 18}" width="100" height="60" fill="${oD}"/><rect x="0" y="${sy + 18}" width="100" height="2.6" fill="#fff" opacity=".9"/><rect x="0" y="${sy + 22}" width="100" height="1.4" fill="#fff" opacity=".7"/>`;
+      O.post = `<path d="M${nwl - 1} ${y0 - 1}Q50 ${y0 + 10} ${nwr + 1} ${y0 - 1}" ${th(5.4, OL)}/><path d="M${nwl - 1} ${y0 - 1}Q50 ${y0 + 10} ${nwr + 1} ${y0 - 1}" ${th(3.8, '#fff')}/>`; break;
   }
   const nkP = {
     crew: [`M${nwl - 1} ${y0 - 1}L${nwr + 1} ${y0 - 1}Q50 ${y0 + 10} ${nwl - 1} ${y0 - 1}Z`, `M${nwl - 1} ${y0 - 1}Q50 ${y0 + 10} ${nwr + 1} ${y0 - 1}`],
@@ -1633,7 +1735,7 @@ function avSvg(l, a, dead, vb) {
     + `<path d="M${50 - nw} 62H${50 + nw}V74Q50 80 ${50 - nw} 74Z" fill="#000" opacity=".14"/>`
     + `<clipPath id="${id}t"><path d="${torso}"/></clipPath><path d="${torso}" fill="${O.fill}"/><g clip-path="url(#${id}t)">${O.pre}<rect x="50" y="60" width="60" height="60" fill="#000" opacity=".1"/></g>`
     + `<path d="${pL}" ${k} fill="none"/><path d="${pR}" ${k} fill="none"/>`
-    + `<path d="M${50 - ax} ${sy + 12}Q${50 - ax - 1.5} ${sy + 24} ${50 - ax} 112M${50 + ax} ${sy + 12}Q${50 + ax + 1.5} ${sy + 24} ${50 + ax} 112" ${th()} opacity="${ot == 6 || ot == 15 ? 0 : .22}"/>${ot == 0 || ot == 1 || ot == 7 ? musc : ''}${adultF ? bust : ''}`
+    + `<path d="M${50 - ax} ${sy + 12}Q${50 - ax - 1.5} ${sy + 24} ${50 - ax} 112M${50 + ax} ${sy + 12}Q${50 + ax + 1.5} ${sy + 24} ${50 + ax} 112" ${th()} opacity="${ot == 6 || ot == 15 || ot == 23 ? 0 : .22}"/>${ot == 0 || ot == 1 || ot == 7 ? musc : ''}${adultF ? bust : ''}`
     + (nkP[0] ? `<path d="${nkP[0]}" fill="${sk}"/><path d="${nkP[1]}" ${th(1.7)}/>` : '') + O.post;
   // ---- csecsemő: pólya ----
   const sw0 = shade(oc, .62), sw1 = shade(oc, .42);
@@ -1856,14 +1958,14 @@ const cfg = () => [
   { ap: 1, k: 'skin', l: T(['Bőrszín', 'Skin tone']), o: [[1, ''], [2, ''], [3, ''], [4, ''], [5, ''], ['r', '🎲']] },
   { ap: 1, k: 'hs', pv: 'hair', l: T(['Frizura', 'Hairstyle']), o: [...HSN.keys()].map(i => [i, T(HSN[i])]).concat([['r', '🎲']]) },
   { ap: 1, k: 'bd', pv: 'body', l: T(['Testalkat', 'Body shape']), o: [...BDN.keys()].map(i => [i, T(BDN[i])]).concat([['r', '🎲']]) },
-  { ap: 1, k: 'hc', l: T(['Hajszín', 'Hair color']), o: [[0, ''], [1, ''], [2, ''], [3, ''], [4, ''], [5, ''], ['r', '🎲']] },
+  { ap: 1, k: 'hc', l: T(['Hajszín', 'Hair color']), o: [...HC.keys()].map(i => [i, '']).concat([['r', '🎲']]) },
   { ap: 1, k: 'ot', pv: 'body', l: T(['Ruha típusa', 'Outfit']), o: [...OTN.keys()].map(i => [i, T(OTN[i])]).concat([['r', '🎲']]) },
-  { ap: 1, k: 'oc', l: T(['Ruha színe', 'Outfit color']), o: [[0, ''], [1, ''], [2, ''], [3, ''], [4, ''], [5, ''], [6, ''], [7, ''], ['r', '🎲']] },
+  { ap: 1, k: 'oc', l: T(['Ruha színe', 'Outfit color']), o: [...OC.keys()].map(i => [i, '']).concat([['r', '🎲']]) },
   { ap: 1, k: 'ht', pv: 'hair', nv: 1, l: T(['Fejfedő', 'Headwear']), o: [...HTN.keys()].map(i => [i, T(HTN[i])]).concat([['r', '🎲']]) },
   { ap: 1, k: 'ea', pv: 'hair', nv: 1, l: T(['Fejhallgató, fülhallgató', 'Headphones & earbuds']), o: [...EAN.keys()].map(i => [i, T(EAN[i])]).concat([['r', '🎲']]) },
   { ap: 1, k: 'gl', pv: 'hair', nv: 1, l: T(['Szemüveg', 'Glasses']), o: [...GLN.keys()].map(i => [i, T(GLN[i])]).concat([['r', '🎲']]) },
   { ap: 1, k: 'nc', pv: 'neck', nv: 1, l: T(['Nyakra', 'Neckwear']), o: [...NCN.keys()].map(i => [i, T(NCN[i])]).concat([['r', '🎲']]) },
-  { ap: 1, k: 'xc', l: T(['Kiegészítők színe', 'Accessory color']), o: [[0, ''], [1, ''], [2, ''], [3, ''], [4, ''], [5, ''], [6, ''], [7, ''], ['r', '🎲']] },
+  { ap: 1, k: 'xc', l: T(['Kiegészítők színe', 'Accessory color']), o: [...XC.keys()].map(i => [i, '']).concat([['r', '🎲']]) },
   { k: 'city', l: T(['Szülőváros', 'Hometown']), o: CITY.map(c => [c[0], c[0]]).concat([['r', '🎲']]) },
   { k: 'fam', l: T(['Család', 'Family']), o: [[1, T(['Szerény', 'Modest'])], [2, T(['Átlagos', 'Average'])], [3, T(['Tehetős', 'Wealthy'])], ['r', '🎲']] },
   { k: 'gift', l: T(['Tehetség (+15)', 'Talent (+15)']), o: [['hap', '😊 ' + T(['Vidám', 'Cheerful'])], ['hea', '❤️ ' + T(['Egészséges', 'Healthy'])], ['sma', '🧠 ' + T(['Okos', 'Smart'])], ['loo', '✨ ' + T(['Szép', 'Attractive'])], ['r', '🎲']] }
@@ -1895,9 +1997,9 @@ function startLife(rand) {
 
 // ----- indítás -----
 const UI = {
-  menu: ['Menü', 'Menu'], work: ['Foglalkozás', 'Occupation'], assets: ['Pénzügy', 'Finance'], ppl: ['Kapcsolatok', 'Relations'], todo: ['Tevékenységek', 'Activities'], yr: ['év', 'yr'], agebtn: ['Kor', 'Age'],
-  tag: ['Egy élet. Annyi döntés.', 'One life. So many choices.'], start: ['Új élet kezdése', 'Start a new life'], cont: ['Folytatás', 'Continue'], set: ['Beállítások', 'Settings'], next: ['Tovább ›', 'Next ›'],
-  ttl: ['Jellem készítő', 'Personality builder'], tsub: ['Állítsd be, milyen leszel. Ezt csak most, a születésedkor lehet módosítani, később már nem.', 'Shape who you will be. You can only set this now, at birth, never later.'], mode: ['Kihívás-mód', 'Challenge mode'], rj: ['🎲 Véletlen jellem', '🎲 Random'], pick: ['Melyik mentéstől folytatod?', 'Which save do you continue from?'], last: ['Utolsó állapot', 'Latest state'], auto: ['Automatikus mentés', 'Autosave'], lng: ['Nyelv', 'Language'], back: ['‹ Vissza', '‹ Back'],
+  menu: ['Menü', 'Menu'], work: ['Foglalkozás', 'Occupation'], assets: ['Pénzügy', 'Finance'], ppl: ['Kapcsolatok', 'Relationships'], todo: ['Tevékenységek', 'Activities'], yr: ['év', 'yr'], agebtn: ['Kor', 'Age'],
+  tag: ['Egy élet, megannyi döntés!', 'One life, countless choices!'], start: ['Új élet kezdése', 'Start a new life'], cont: ['Folytatás', 'Continue'], set: ['Beállítások', 'Settings'], next: ['Tovább ›', 'Next ›'], back: ['‹ Vissza', '‹ Back'],
+  ttl: ['Jellem készítő', 'Personality builder'], tsub: ['Állítsd be, milyen leszel. Ezt csak most, a születésedkor lehet módosítani, később már nem.', 'Shape who you will be. You can only set this now, at birth, never later.'], mode: ['Kihívásmód', 'Challenge mode'], rj: ['🎲 Véletlen jellem', '🎲 Random'], pick: ['Melyik mentéstől folytatod?', 'Which save do you continue from?'], last: ['Utolsó állapot', 'Latest state'], auto: ['Automatikus mentés', 'Autosave'], lng: ['Nyelv', 'Language'],
   sur: ['Vezetéknév', 'Last name'], giv: ['Keresztnév', 'First name'], ra: ['🎲 Teljesen véletlen', '🎲 Fully random'], go: ['Megszületek', 'Be born'],
   endt: ['Vége az életednek', 'Your life is over'], again: ['Új élet kezdése', 'Start a new life'], lang: ['Nyelv', 'Language'], names: ['Nevek mutatása', 'Show names'],
   nomoney: [' (nincs pénz)', ' (not enough money)'], conf: ['A mostani élet elvész. Biztos vagy benne?', 'Your current life will be lost. Are you sure?'] };

@@ -414,3 +414,50 @@ body[data-th=dark] #traits .chip.on{background:var(--pap)}
 @keyframes achNew{50%{transform:scale(1.15)}}
 body[data-th=dark] .achc small{color:#a9bac4}
 @media (prefers-reduced-motion:reduce){.achb,.achi,.achi i,.achc.on .achg,.achc .new{animation:none}}
+/* ===== extras8: automata munka, jelenetek ===== */
+.aw-btn{width:100%;margin-bottom:10px;outline:2px solid #3fbf5f}
+.awb{position:relative;overflow:hidden}
+.awh{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}.awh span{font-size:12px;opacity:.6}.awh b{font-size:18px}
+.awp{display:flex;flex-direction:column;align-items:center;margin-bottom:8px}
+.scp{width:84px;height:84px;border-radius:50%;overflow:hidden;background:#cfe3d6;border:3px solid #3fbf5f;box-shadow:0 4px 16px #0004;animation:scpIn .5s cubic-bezier(.2,.9,.3,1.3);display:flex;align-items:center;justify-content:center;font-size:44px}
+.scp svg{width:100%;height:100%}
+.awn{font-weight:700;font-size:13px;margin-top:4px}
+@keyframes scpIn{from{transform:scale(.3) rotate(-20deg);opacity:0}to{transform:none;opacity:1}}
+.awc{display:flex;flex-direction:column;gap:6px;min-height:90px;margin-bottom:8px}
+.bub{max-width:82%;padding:8px 12px;border-radius:14px;font-size:14px;animation:bubIn .25s ease-out;white-space:pre-line}
+.bub.th{background:#e3ebe6;color:#1d2b24;align-self:flex-start;border-bottom-left-radius:4px}
+.bub.me{background:#3fbf5f;color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+.bub.sys{align-self:center;max-width:100%;background:#fff3cd;color:#5a4500;font-size:13px;text-align:center}
+.bub.sys.ok{background:#d7f5df;color:#14532d}.bub.sys.ko{background:#fde0e0;color:#7f1d1d}
+@keyframes bubIn{from{transform:translateY(8px) scale(.9);opacity:0}to{transform:none;opacity:1}}
+.awf{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:8px;min-height:6px}
+.awf i{font-style:normal;font-weight:700;font-size:13px;padding:3px 9px;border-radius:99px;animation:chipIn .4s cubic-bezier(.2,.9,.3,1.4)}
+.awf i.p{background:#d7f5df;color:#14532d}.awf i.n{background:#fde0e0;color:#7f1d1d}
+.awf.big i{font-size:16px}
+@keyframes chipIn{from{transform:scale(0)}to{transform:scale(1)}}
+.awbt{display:flex;flex-direction:column;gap:8px}.awbt .dis{opacity:.45;pointer-events:none}
+.bst{position:absolute;bottom:20%;font-size:22px;pointer-events:none;animation:bUp 1.6s ease-out forwards}
+.bst.dn{bottom:auto;top:10%;animation-name:bDn}
+@keyframes bUp{to{transform:translateY(-220px) rotate(25deg);opacity:0}}
+@keyframes bDn{to{transform:translateY(200px);opacity:0}}
+.shk .box{animation:shk .45s}
+@keyframes shk{0%,100%{transform:none}20%{transform:translateX(-9px)}40%{transform:translateX(9px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
+.sdogw{border-radius:14px;overflow:hidden;margin-bottom:12px;position:relative;box-shadow:0 4px 14px #0004}
+.sdogw small{position:absolute;bottom:6px;left:0;right:0;text-align:center;color:#fff;font-style:italic;text-shadow:0 1px 3px #000}
+.sdog{display:block;width:100%;max-height:170px}
+.sdog .rain line{animation:rn .9s linear infinite}
+@keyframes rn{from{transform:translateY(0)}to{transform:translateY(160px)}}
+.sdog .tear{animation:tr 1.8s ease-in infinite}.sdog .t2{animation-delay:.9s}
+@keyframes tr{0%{transform:translateY(0);opacity:1}100%{transform:translateY(26px);opacity:0}}
+#mb.hid{opacity:0;pointer-events:none}#mb{transition:opacity .4s}
+
+/* ===== extras9: stúdió ===== */
+.mood{display:none!important}
+#stu .box{max-width:420px}
+.stp{width:150px;height:165px;margin:0 auto 10px;border-radius:18px;overflow:hidden;background:var(--ink2,#2b3a46);box-shadow:0 4px 14px #0004}
+.stp svg{width:100%;height:100%;display:block}
+.stt{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:8px}
+.stt button{flex:none;font-size:13px;padding:7px 11px;border-radius:99px;border:1px solid #b8c4bc;background:transparent;color:inherit}
+.stt button.on{background:#3fbf5f;color:#fff;border-color:#3fbf5f}
+.stc{max-height:34vh;overflow-y:auto;margin-bottom:12px}
+.stb{display:flex;flex-direction:column;gap:8px}
